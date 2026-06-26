@@ -174,7 +174,15 @@ test("DeerSearch AI answer panel constrains long model text inside the right rai
   assert.match(css, /\.search-ai-answer-shell\s*{[^}]*max-height:\s*260px/s);
   assert.match(css, /\.search-ai-answer-body\s*{[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(css, /\.search-ai-answer-body\s*{[^}]*word-break:\s*break-word/s);
+  assert.match(css, /\.search-ai-card\s*{[^}]*padding:\s*14px/s);
+  assert.match(css, /\.search-ai-card\s*{[^}]*overflow:\s*hidden/s);
   assert.match(css, /\.search-ai-suggestions\s*{[^}]*min-width:\s*0/s);
+  assert.match(css, /\.search-ai-suggestions\s*{[^}]*display:\s*grid/s);
+  assert.match(css, /\.search-ai-suggestions span\s*{[^}]*display:\s*grid/s);
+  assert.match(css, /\.search-ai-suggestions span\s*{[^}]*white-space:\s*normal/s);
+  assert.match(css, /\.search-ai-suggestions span::before/);
+  assert.match(css, /\.search-ai-context-badge\s*{[^}]*max-width:\s*128px/s);
+  assert.match(css, /\.search-ai-history-item span\s*{[^}]*overflow-wrap:\s*anywhere/s);
   assert.match(css, /\.search-ai-history-list\s*{[^}]*max-height:\s*180px/s);
   assert.match(css, /\.search-ai-history-item\s*{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/s);
   assert.match(css, /\.search-ai-history-item strong\s*{[^}]*overflow-wrap:\s*anywhere/s);
