@@ -71,8 +71,45 @@ const candidateResumeTabs = document.querySelectorAll("[data-candidate-resume-ta
 const candidateResumePanels = document.querySelectorAll("[data-candidate-resume-panel]");
 const candidateResumeReturnButtons = document.querySelectorAll("[data-candidate-resume-return]");
 const resumeActionButtons = document.querySelectorAll("[data-resume-action]");
+const searchCapabilityButtons = document.querySelectorAll("[data-search-capability]");
+const searchCapabilityDetail = document.querySelector("[data-search-capability-detail]");
+const searchTipsToggle = document.querySelector("[data-search-tips-toggle]");
+const searchTipsGuide = document.querySelector("#searchTipsGuide");
+const searchFilterBar = document.querySelector("[data-search-filter-bar]");
+const searchFilterAddButton = document.querySelector("[data-search-filter-add]");
+const searchCityToggle = document.querySelector("[data-search-city-toggle]");
+const searchCityLabel = document.querySelector("[data-search-city-label]");
+const searchSortToggle = document.querySelector("[data-search-sort-toggle]");
+const searchSortLabel = document.querySelector("[data-search-sort-label]");
+const searchResultCountLine = document.querySelector("[data-search-result-count]");
+const searchCandidateGrid = document.querySelector(".candidate-grid");
+const searchCandidateCards = Array.from(document.querySelectorAll(".candidate-grid [data-search-score]"));
 
 const defaultQuery = "找做过支付风控的 Java 后端，最好有高并发项目经验。";
+const searchCityOptions = ["城市不限", "上海", "杭州", "深圳", "北京"];
+const searchSortOptions = [
+  { label: "按匹配度排序", key: "score" },
+  { label: "按经验年限排序", key: "years" },
+];
+const searchExtraFilters = [
+  { id: "complete", label: "资料完整" },
+  { id: "recent-import", label: "近 30 天导入" },
+  { id: "exclude-duplicate", label: "排除疑似重复" },
+];
+const searchCapabilityCopy = {
+  natural: {
+    title: "自然语言搜人",
+    text: "直接写岗位、技能、业务场景和限制条件，系统会把一句话拆成可执行的搜索条件。",
+  },
+  semantic: {
+    title: "简历语义匹配",
+    text: "不只匹配关键词，还会读取项目经历、职责描述和行业上下文，找出表达不同但能力相近的人选。",
+  },
+  shortlist: {
+    title: "候选人短名单",
+    text: "把当前认可的人选临时收集起来，后续可统一复制摘要、导出或继续做相似候选人搜索。",
+  },
+};
 const talentFilters = new Set(["all", "recent", "saved", "pending", "duplicate"]);
 const candidateRecords = {
   candidate_chenyu_001: {
@@ -280,6 +317,9 @@ let currentTalentDetailView = null;
 let currentImportAction = "searchImported";
 let currentQueryId = "payment_risk_java_backend";
 let currentExportScope = "candidateList";
+let currentSearchCityIndex = 0;
+let currentSearchSortIndex = 0;
+let searchExtraFilterCursor = 0;
 let p2ReturnContext = { view: "talents", talentFilter: "all", taskId: null, searchQuery: defaultQuery };
 
 function hideCandidateResumeContext() {
@@ -329,6 +369,133 @@ function normalizeQuery(value) {
   return /[。！？.!?]$/.test(query) ? query : `${query}。`;
 }
 
+function showSearchCapabilityDetail(type = "natural") {
+  const copy = searchCapabilityCopy[type] || searchCapabilityCopy.natural;
+  if (!searchCapabilityDetail) return;
+
+  const title = document.createElement("strong");
+  const text = document.createElement("span");
+  title.textContent = copy.title;
+  text.textContent = copy.text;
+  searchCapabilityDetail.replaceChildren(title, text);
+
+  searchCapabilityButtons.forEach((button) => {
+    const isActive = button.dataset.searchCapability === type;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-expanded", String(isActive));
+  });
+}
+
+function toggleSearchTips() {
+  if (!searchTipsToggle || !searchTipsGuide) return;
+  const shouldOpen = searchTipsGuide.classList.contains("state-hidden");
+  searchTipsGuide.classList.toggle("state-hidden", !shouldOpen);
+  searchTipsToggle.setAttribute("aria-expanded", String(shouldOpen));
+}
+
+function getSearchFilterButtons() {
+  if (!searchFilterBar) return [];
+  return Array.from(searchFilterBar.querySelectorAll("[data-search-filter-chip]"));
+}
+
+function createSearchFilterChip(filter) {
+  const button = document.createElement("button");
+  button.className = "filter-chip";
+  button.type = "button";
+  button.dataset.searchFilterChip = filter.id;
+  button.dataset.filterLabel = filter.label;
+  button.setAttribute("aria-label", `移除筛选：${filter.label}`);
+  button.innerHTML = `${filter.label} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>`;
+  return button;
+}
+
+function getNextSearchFilter() {
+  const activeIds = new Set(getSearchFilterButtons().map((button) => button.dataset.searchFilterChip));
+  for (let index = 0; index < searchExtraFilters.length; index += 1) {
+    const filter = searchExtraFilters[(searchExtraFilterCursor + index) % searchExtraFilters.length];
+    if (!activeIds.has(filter.id)) {
+      searchExtraFilterCursor = (searchExtraFilterCursor + index + 1) % searchExtraFilters.length;
+      return filter;
+    }
+  }
+  return null;
+}
+
+function refreshSearchFilterAddState() {
+  if (!searchFilterAddButton) return;
+  const activeIds = new Set(getSearchFilterButtons().map((button) => button.dataset.searchFilterChip));
+  const hasAvailableFilter = searchExtraFilters.some((filter) => !activeIds.has(filter.id));
+  searchFilterAddButton.disabled = !hasAvailableFilter;
+}
+
+function removeSearchFilterChip(button) {
+  const label = button?.dataset.filterLabel || button?.textContent?.trim() || "筛选条件";
+  button?.remove();
+  refreshSearchFilterAddState();
+  showToast(`已移除筛选：${label}`);
+}
+
+function addSearchFilterChip() {
+  const nextFilter = getNextSearchFilter();
+  if (!nextFilter || !searchFilterAddButton) {
+    refreshSearchFilterAddState();
+    showToast("当前可添加的快速筛选已全部启用");
+    return;
+  }
+  searchFilterAddButton.before(createSearchFilterChip(nextFilter));
+  refreshSearchFilterAddState();
+  showToast(`已添加筛选：${nextFilter.label}`);
+}
+
+function updateSearchResultCount(visibleCount) {
+  if (!searchResultCountLine) return;
+  searchResultCountLine.dataset.searchResultCount = String(visibleCount);
+  const countNode = searchResultCountLine.querySelector("strong");
+  if (countNode) countNode.textContent = String(visibleCount);
+}
+
+function applySearchResultFilters() {
+  const city = searchCityOptions[currentSearchCityIndex] || searchCityOptions[0];
+  let visibleCount = 0;
+
+  searchCandidateCards.forEach((card) => {
+    const cityMatched = city === "城市不限" || card.dataset.searchCity === city;
+    card.hidden = !cityMatched;
+    if (cityMatched) visibleCount += 1;
+  });
+
+  updateSearchResultCount(visibleCount);
+}
+
+function cycleSearchCity() {
+  currentSearchCityIndex = (currentSearchCityIndex + 1) % searchCityOptions.length;
+  const city = searchCityOptions[currentSearchCityIndex];
+  if (searchCityLabel) searchCityLabel.textContent = city;
+  applySearchResultFilters();
+  showToast(city === "城市不限" ? "已显示全部城市候选人" : `已筛选城市：${city}`);
+}
+
+function sortSearchCandidates() {
+  if (!searchCandidateGrid) return;
+  const sortConfig = searchSortOptions[currentSearchSortIndex] || searchSortOptions[0];
+  const sortedCards = [...searchCandidateCards].sort((a, b) => {
+    const aValue = Number(a.dataset[`search${sortConfig.key[0].toUpperCase()}${sortConfig.key.slice(1)}`] || 0);
+    const bValue = Number(b.dataset[`search${sortConfig.key[0].toUpperCase()}${sortConfig.key.slice(1)}`] || 0);
+    if (bValue !== aValue) return bValue - aValue;
+    return Number(a.dataset.searchIndex || 0) - Number(b.dataset.searchIndex || 0);
+  });
+  sortedCards.forEach((card) => searchCandidateGrid.append(card));
+}
+
+function cycleSearchSort() {
+  currentSearchSortIndex = (currentSearchSortIndex + 1) % searchSortOptions.length;
+  const sortConfig = searchSortOptions[currentSearchSortIndex];
+  if (searchSortLabel) searchSortLabel.textContent = sortConfig.label;
+  sortSearchCandidates();
+  applySearchResultFilters();
+  showToast(`已切换为${sortConfig.label}`);
+}
+
 function showResults(queryText = defaultQuery) {
   const normalizedQuery = normalizeQuery(queryText);
   currentView = "searchResults";
@@ -354,6 +521,9 @@ function showResults(queryText = defaultQuery) {
   userQuery.textContent = normalizedQuery;
   currentQuery.textContent = normalizedQuery;
   refineSearchInput.value = "只看 5 年以上、近期在金融科技公司的候选人";
+  sortSearchCandidates();
+  applySearchResultFilters();
+  refreshSearchFilterAddState();
 }
 
 function setActiveNav(view) {
@@ -1503,6 +1673,29 @@ document.querySelectorAll("[data-prompt]").forEach((button) => {
   });
 });
 
+searchCapabilityButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    showSearchCapabilityDetail(button.dataset.searchCapability || "natural");
+  });
+});
+
+searchTipsToggle?.addEventListener("click", toggleSearchTips);
+
+searchFilterBar?.addEventListener("click", (event) => {
+  const filterChip = event.target.closest("[data-search-filter-chip]");
+  if (filterChip) {
+    removeSearchFilterChip(filterChip);
+    return;
+  }
+
+  if (event.target.closest("[data-search-filter-add]")) {
+    addSearchFilterChip();
+  }
+});
+
+searchCityToggle?.addEventListener("click", cycleSearchCity);
+searchSortToggle?.addEventListener("click", cycleSearchSort);
+
 document.querySelectorAll(".shortlist-action").forEach((button) => {
   button.addEventListener("click", () => {
     const name = button.dataset.name;
@@ -1908,6 +2101,10 @@ document.querySelectorAll("[data-nav-view-proxy]").forEach((button) => {
 });
 
 updateShortlist();
+showSearchCapabilityDetail("natural");
+refreshSearchFilterAddState();
+sortSearchCandidates();
+applySearchResultFilters();
 setTaskFilter("all");
 setTalentFilter("all");
 showTalentState("all");

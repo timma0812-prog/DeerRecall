@@ -2,6 +2,7 @@
   "name": "deerrecall",
   "version": "0.1.0",
   "private": true,
+  "main": "desktop/main.cjs",
   "description": "Static DeerRecall MVP prototype with Harness-compatible Docker Compose delivery.",
   "scripts": {
     "check": "node --check app.js && npm test",
@@ -9,9 +10,17 @@
     "clean": "rm -rf dist",
     "build": "node scripts/build-static.mjs",
     "verify:dist": "node scripts/verify-dist.mjs",
-    "serve": "npx --yes http-server dist -p 8080"
+    "serve": "npx --yes http-server dist -p 8080",
+    "desktop:dev": "npm run build && electron desktop/main.cjs",
+    "desktop:build": "npm run build && electron-builder --config electron-builder.json --mac dir",
+    "desktop:build:tauri": "tauri build"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.3",
+    "electron": "^42.5.0",
+    "electron-builder": "^26.15.3"
   }
 }

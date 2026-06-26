@@ -564,6 +564,14 @@ svg {
   border-bottom: 0;
 }
 
+.cap-row.is-active {
+  color: #fff;
+}
+
+.cap-row:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
 .cap-row svg:first-child {
   width: 36px;
   height: 36px;
@@ -587,6 +595,35 @@ svg {
 
 .cap-row svg:last-child {
   color: rgba(255, 255, 255, 0.8);
+  transition: transform 0.16s ease, color 0.16s ease;
+}
+
+.cap-row.is-active svg:last-child {
+  color: var(--pink-2);
+  transform: rotate(90deg);
+}
+
+.cap-detail {
+  margin-top: 14px;
+  padding: 14px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.cap-detail strong {
+  display: block;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.cap-detail span {
+  display: block;
+  margin-top: 7px;
+  color: rgba(236, 226, 255, 0.68);
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .tips-card {
@@ -642,6 +679,52 @@ svg {
   width: 24px;
   height: 24px;
   color: rgba(255, 255, 255, 0.88);
+}
+
+.more-tips svg:last-child {
+  transition: transform 0.16s ease;
+}
+
+.more-tips[aria-expanded="true"] svg:last-child {
+  transform: rotate(90deg);
+}
+
+.tips-guide {
+  display: grid;
+  gap: 11px;
+  margin-top: 15px;
+  padding: 15px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.tips-guide h3,
+.tips-guide p {
+  margin: 0;
+}
+
+.tips-guide h3 {
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.tips-guide p,
+.tips-guide li {
+  color: rgba(236, 226, 255, 0.7);
+  font-size: 13px;
+  line-height: 1.58;
+}
+
+.tips-guide ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.tips-guide strong {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .results-main {
@@ -781,15 +864,18 @@ svg {
 .filter-bar {
   min-height: 65px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  align-content: center;
   gap: 9px;
-  padding: 0 14px;
+  padding: 10px 14px;
   border: 1px solid rgba(124, 96, 216, 0.5);
   border-radius: 13px;
   background: rgba(18, 12, 62, 0.75);
 }
 
 .filter-chip,
+.filter-add,
 .filter-action {
   height: 38px;
   display: inline-flex;
@@ -805,10 +891,34 @@ svg {
   white-space: nowrap;
 }
 
+.filter-chip:hover,
+.filter-add:hover,
+.filter-action:hover,
+.filter-select:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(148, 75, 211, 0.62);
+}
+
 .filter-chip svg {
   width: 17px;
   height: 17px;
   color: rgba(255, 255, 255, 0.74);
+}
+
+.filter-chip:disabled {
+  color: rgba(255, 255, 255, 0.54);
+  background: rgba(127, 57, 188, 0.28);
+}
+
+.filter-add {
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.filter-add svg {
+  width: 17px;
+  height: 17px;
 }
 
 .filter-select {
@@ -827,9 +937,10 @@ svg {
 }
 
 .filter-spacer {
-  width: 1px;
+  flex: 1 1 18px;
+  min-width: 1px;
   height: 38px;
-  margin-left: 10px;
+  margin-left: 0;
   background: rgba(255, 255, 255, 0.13);
 }
 
@@ -839,13 +950,17 @@ svg {
 }
 
 .filter-action.sort {
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .filter-action svg,
 .filter-select svg {
   width: 18px;
   height: 18px;
+}
+
+.candidate-card[hidden] {
+  display: none;
 }
 
 .candidate-grid {
@@ -6491,6 +6606,7 @@ svg {
   }
 
   .filter-chip,
+  .filter-add,
   .filter-select,
   .filter-action {
     min-width: 0;

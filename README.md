@@ -34,6 +34,28 @@ Serve the built artifact locally:
 npm run serve
 ```
 
+## Local macOS Desktop Client
+
+Build an unsigned local macOS app for acceptance testing:
+
+```bash
+npm run desktop:build
+```
+
+Open the generated app:
+
+```bash
+open release/electron/mac-arm64/DeerRecall.app
+```
+
+The generated app is an unsigned local macOS app at `release/electron/mac-arm64/DeerRecall.app`. It is intended for local review only. macOS may show a security warning because the app is not signed or notarized.
+
+Tauri packaging is scaffolded as a future smaller-runtime option, but it requires Rust/Cargo to be installed locally:
+
+```bash
+npm run desktop:build:tauri
+```
+
 ## Docker Compose Deployment
 
 Build the static artifact and image:

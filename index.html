@@ -183,13 +183,20 @@
               <div class="bubble">我先按 Java、支付风控、高并发 3 个条件筛选，以下是当前匹配度最高的候选人。</div>
             </div>
 
-            <p class="found-line">共找到 <strong>4</strong> 位候选人（匹配度 ≥ 75%）</p>
+            <p class="found-line" data-search-result-count="4">共找到 <strong>4</strong> 位候选人（匹配度 ≥ 75%）</p>
 
-            <div class="filter-bar" aria-label="筛选条件">
-              <span class="filter-chip">只看 5 年以上 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></span>
-              <span class="filter-chip">最近在金融科技公司 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></span>
-              <span class="filter-chip">有高并发经验 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></span>
-              <span class="filter-select">城市不限 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+            <div class="filter-bar" aria-label="筛选条件" data-search-filter-bar>
+              <button class="filter-chip" type="button" data-search-filter-chip="experience" data-filter-label="只看 5 年以上" aria-label="移除筛选：只看 5 年以上">只看 5 年以上 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+              <button class="filter-chip" type="button" data-search-filter-chip="industry" data-filter-label="最近在金融科技公司" aria-label="移除筛选：最近在金融科技公司">最近在金融科技公司 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+              <button class="filter-chip" type="button" data-search-filter-chip="concurrency" data-filter-label="有高并发经验" aria-label="移除筛选：有高并发经验">有高并发经验 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+              <button class="filter-add" type="button" data-search-filter-add>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
+                添加筛选
+              </button>
+              <button class="filter-select" type="button" data-search-city-toggle aria-label="切换城市筛选">
+                <span data-search-city-label>城市不限</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+              </button>
               <span class="filter-spacer"></span>
               <button class="filter-action" type="button" data-search-filter-open="advanced">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -197,23 +204,23 @@
                 </svg>
                 更多筛选
               </button>
-              <span class="filter-action sort">
+              <button class="filter-action sort" type="button" data-search-sort-toggle aria-label="切换排序方式">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M8 3v18"></path>
                   <path d="m4 7 4-4 4 4"></path>
                   <path d="M16 21V3"></path>
                   <path d="m20 17-4 4-4-4"></path>
                 </svg>
-                按匹配度排序
+                <span data-search-sort-label>按匹配度排序</span>
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="m6 9 6 6 6-6"></path>
                 </svg>
-              </span>
+              </button>
             </div>
           </section>
 
           <section class="candidate-grid" aria-label="候选人列表">
-            <article class="candidate-card" data-candidate="陈屿" data-candidate-id="chen-yu">
+            <article class="candidate-card" data-candidate="陈屿" data-candidate-id="chen-yu" data-search-score="92" data-search-years="7" data-search-city="上海" data-search-index="0">
               <div class="candidate-top">
                 <div>
                   <h3>陈屿</h3>
@@ -229,7 +236,7 @@
               </div>
             </article>
 
-            <article class="candidate-card" data-candidate="林晓然" data-candidate-id="lin-xiaoran">
+            <article class="candidate-card" data-candidate="林晓然" data-candidate-id="lin-xiaoran" data-search-score="88" data-search-years="6" data-search-city="杭州" data-search-index="1">
               <div class="candidate-top">
                 <div>
                   <h3>林晓然</h3>
@@ -245,7 +252,7 @@
               </div>
             </article>
 
-            <article class="candidate-card" data-candidate="周靖" data-candidate-id="zhou-jing">
+            <article class="candidate-card" data-candidate="周靖" data-candidate-id="zhou-jing" data-search-score="84" data-search-years="9" data-search-city="深圳" data-search-index="2">
               <div class="candidate-top">
                 <div>
                   <h3>周靖</h3>
@@ -261,7 +268,7 @@
               </div>
             </article>
 
-            <article class="candidate-card" data-candidate="许南" data-candidate-id="xu-nan">
+            <article class="candidate-card" data-candidate="许南" data-candidate-id="xu-nan" data-search-score="81" data-search-years="5" data-search-city="北京" data-search-index="3">
               <div class="candidate-top">
                 <div>
                   <h3>许南</h3>
@@ -1799,7 +1806,7 @@
           <p class="side-section-title">可用能力</p>
           <section class="panel-card cap-card">
             <div class="cap-list">
-              <div class="cap-row">
+              <button class="cap-row" type="button" data-search-capability="natural" aria-expanded="true">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path>
                   <path d="M8 9h.01"></path>
@@ -1813,8 +1820,8 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="m9 18 6-6-6-6"></path>
                 </svg>
-              </div>
-              <div class="cap-row">
+              </button>
+              <button class="cap-row" type="button" data-search-capability="semantic" aria-expanded="false">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path>
                   <path d="M14 2v6h6"></path>
@@ -1828,8 +1835,8 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="m9 18 6-6-6-6"></path>
                 </svg>
-              </div>
-              <div class="cap-row">
+              </button>
+              <button class="cap-row" type="button" data-search-capability="shortlist" aria-expanded="false">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                   <circle cx="9" cy="7" r="4"></circle>
@@ -1843,7 +1850,11 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="m9 18 6-6-6-6"></path>
                 </svg>
-              </div>
+              </button>
+            </div>
+            <div class="cap-detail" data-search-capability-detail aria-live="polite">
+              <strong>自然语言搜人</strong>
+              <span>直接写岗位、技能、业务场景和限制条件，系统会把一句话拆成可执行的搜索条件。</span>
             </div>
           </section>
 
@@ -1855,7 +1866,7 @@
               <li>提及项目类型或技术栈会更精准</li>
               <li>示例：风控 / 高并发 / 支付 / Java</li>
             </ul>
-            <button class="more-tips" type="button">
+            <button class="more-tips" type="button" data-search-tips-toggle aria-controls="searchTipsGuide" aria-expanded="false">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M9 18h6"></path>
                 <path d="M10 22h4"></path>
@@ -1866,6 +1877,15 @@
                 <path d="m9 18 6-6-6-6"></path>
               </svg>
             </button>
+            <section class="tips-guide state-hidden" id="searchTipsGuide" aria-label="搜索技巧说明">
+              <h3>搜索公式</h3>
+              <p>岗位方向 + 关键技能 + 业务场景 + 年限 / 城市 / 行业限制。先把必须命中的条件写清楚，再补充加分项。</p>
+              <ul>
+                <li><strong>优先写硬条件</strong>：岗位、年限、技术栈、城市。</li>
+                <li><strong>补充业务语境</strong>：支付风控、跨境电商、B 端 SaaS 等。</li>
+                <li><strong>少用泛词</strong>：把“优秀”改成可验证的项目、规模或职责。</li>
+              </ul>
+            </section>
           </section>
         </section>
 

@@ -84,6 +84,63 @@ test("main script switches from empty state to results state on search", () => {
   assert.match(js, /shortlistCount/);
 });
 
+test("DeerSearch onboarding explains capabilities and search tips inline", () => {
+  const html = read("index.html");
+  const css = read("styles.css");
+  const js = read("app.js");
+
+  assert.match(html, /data-search-capability="natural"/);
+  assert.match(html, /data-search-capability="semantic"/);
+  assert.match(html, /data-search-capability="shortlist"/);
+  assert.match(html, /data-search-capability-detail/);
+  assert.match(html, /data-search-tips-toggle/);
+  assert.match(html, /id="searchTipsGuide"/);
+  assert.match(html, /搜索公式/);
+  assert.match(html, /优先写硬条件/);
+
+  assert.match(css, /\.cap-detail/);
+  assert.match(css, /\.tips-guide/);
+
+  assert.match(js, /const searchCapabilityButtons/);
+  assert.match(js, /function showSearchCapabilityDetail/);
+  assert.match(js, /function toggleSearchTips/);
+});
+
+test("DeerSearch result filters support deletion, additions, city, and sort controls", () => {
+  const html = read("index.html");
+  const css = read("styles.css");
+  const js = read("app.js");
+
+  assert.match(html, /data-search-filter-bar/);
+  assert.match(html, /data-search-filter-chip="experience"/);
+  assert.match(html, /data-search-filter-add/);
+  assert.match(html, /data-search-city-toggle/);
+  assert.match(html, /data-search-city-label/);
+  assert.match(html, /data-search-sort-toggle/);
+  assert.match(html, /data-search-sort-label/);
+  assert.match(html, /data-search-result-count/);
+  assert.match(html, /data-search-score="92"/);
+  assert.match(html, /data-search-years="7"/);
+
+  assert.match(css, /\.filter-add/);
+  assert.match(css, /\.filter-chip:disabled/);
+
+  assert.match(js, /const searchFilterBar/);
+  assert.match(js, /function removeSearchFilterChip/);
+  assert.match(js, /function addSearchFilterChip/);
+  assert.match(js, /function cycleSearchCity/);
+  assert.match(js, /function cycleSearchSort/);
+  assert.match(js, /function sortSearchCandidates/);
+});
+
+test("DeerSearch filter bar wraps before it can overlap the assistant column", () => {
+  const css = read("styles.css");
+
+  assert.match(css, /\.filter-bar\s*{[^}]*flex-wrap:\s*wrap/s);
+  assert.match(css, /\.filter-spacer\s*{[^}]*flex:\s*1 1/s);
+  assert.match(css, /\.filter-action\.sort\s*{[^}]*margin-left:\s*0/s);
+});
+
 test("resume import module exposes default, preview, loading, and finished states", () => {
   const html = read("index.html");
   const css = read("styles.css");
@@ -567,6 +624,50 @@ test("project exposes npm scripts for Harness-compatible static delivery", () =>
   assert.equal(pkg.scripts.serve, "npx --yes http-server dist -p 8080");
 });
 
+test("project exposes desktop packaging scripts for local macOS builds", () => {
+  const pkg = JSON.parse(read("package.json"));
+
+  assert.equal(pkg.main, "desktop/main.cjs");
+  assert.equal(pkg.scripts["desktop:dev"], "npm run build && electron desktop/main.cjs");
+  assert.equal(pkg.scripts["desktop:build"], "npm run build && electron-builder --config electron-builder.json --mac dir");
+  assert.equal(pkg.scripts["desktop:build:tauri"], "tauri build");
+  assert.equal(pkg.devDependencies["@tauri-apps/cli"], "^2.11.3");
+  assert.equal(pkg.devDependencies.electron, "^42.5.0");
+  assert.equal(pkg.devDependencies["electron-builder"], "^26.15.3");
+});
+
+test("electron desktop wrapper reuses the static dist artifact", () => {
+  const main = read("desktop/main.cjs");
+  const builder = JSON.parse(read("electron-builder.json"));
+
+  assert.match(main, /BrowserWindow/);
+  assert.match(main, /loadFile\(path\.join\(__dirname, "\.\.", "dist", "index\.html"\)\)/);
+  assert.match(main, /contextIsolation: true/);
+  assert.match(main, /nodeIntegration: false/);
+  assert.match(main, /sandbox: true/);
+  assert.equal(builder.appId, "com.deerrecall.app");
+  assert.equal(builder.productName, "DeerRecall");
+  assert.deepEqual(builder.mac.target, ["dir"]);
+  assert.match(builder.files.join(","), /dist\/\*\*\//);
+});
+
+test("tauri desktop wrapper is available for a later small-runtime build", () => {
+  const config = JSON.parse(read("src-tauri/tauri.conf.json"));
+  const cargo = read("src-tauri/Cargo.toml");
+  const main = read("src-tauri/src/main.rs");
+
+  assert.equal(config.productName, "DeerRecall");
+  assert.equal(config.identifier, "com.deerrecall.app");
+  assert.equal(config.build.beforeBuildCommand, "npm run build");
+  assert.equal(config.build.frontendDist, "../dist");
+  assert.equal(config.app.windows[0].title, "DeerRecall");
+  assert.equal(config.bundle.active, true);
+  assert.match(config.bundle.targets.join(","), /app/);
+  assert.match(cargo, /name = "deerrecall"/);
+  assert.match(cargo, /tauri = /);
+  assert.match(main, /tauri::Builder::default\(\)/);
+});
+
 test("static build script copies runtime assets and excludes development-only folders", () => {
   const script = read("scripts/build-static.mjs");
 
@@ -685,6 +786,9 @@ test("readme documents local, compose, and Harness workflows", () => {
 
   assert.match(readme, /npm test/);
   assert.match(readme, /npm run build/);
+  assert.match(readme, /npm run desktop:build/);
+  assert.match(readme, /release\/electron\/mac-arm64\/DeerRecall\.app/);
+  assert.match(readme, /unsigned local macOS app/);
   assert.match(readme, /docker build -t deerrecall:local \./);
   assert.match(readme, /docker compose up -d/);
   assert.match(readme, /Harness Open Source/);

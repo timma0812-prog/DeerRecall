@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "DeerRecall",
+  "version": "0.1.0",
+  "identifier": "com.deerrecall.app",
+  "build": {
+    "beforeDevCommand": "npm run serve",
+    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://localhost:8080",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "DeerRecall",
+        "width": 1440,
+        "height": 960,
+        "minWidth": 1100,
+        "minHeight": 760,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app", "dmg"],
+    "copyright": "Copyright DeerRecall",
+    "category": "Business"
+  }
+}

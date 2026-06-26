@@ -4,3 +4,5 @@ dist/
 .DS_Store
 .playwright-cli/
 output/
+release/
+src-tauri/target/
