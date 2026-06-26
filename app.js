@@ -358,7 +358,13 @@ function showResults(queryText = defaultQuery) {
 
 function setActiveNav(view) {
   navButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.navView === view);
+    const isActive = button.dataset.navView === view;
+    button.classList.toggle("active", isActive);
+    if (isActive) {
+      button.setAttribute("aria-current", "page");
+    } else {
+      button.removeAttribute("aria-current");
+    }
   });
 }
 

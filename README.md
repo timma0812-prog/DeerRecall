@@ -10,10 +10,22 @@ Run the structure tests:
 npm test
 ```
 
+Run the local release check used by Harness:
+
+```bash
+npm run check
+```
+
 Build the static artifact:
 
 ```bash
 npm run build
+```
+
+Verify the static artifact only contains runtime files:
+
+```bash
+npm run verify:dist
 ```
 
 Serve the built artifact locally:
@@ -82,7 +94,7 @@ This repository includes a Harness Open Source pipeline at `.harness/deerrecall-
 The pipeline flow is:
 
 ```text
-source -> npm test -> npm run build -> docker build -> docker compose up -d -> release smoke checks
+source -> npm run check -> npm run build -> npm run verify:dist -> docker build -> docker compose up -d -> release smoke checks
 ```
 
 Harness must run with access to the Docker socket for image builds and Docker Compose deployment. When running Harness Open Source locally, mount `/var/run/docker.sock` into the Harness container.
@@ -94,6 +106,7 @@ The pipeline uses Harness Open Source pipeline YAML with a host volume for `/var
 Before deploying outside a demo environment:
 
 - Build artifacts exclude design references: `npm run build` copies only `index.html`, `app.js`, and `styles.css` into `dist`.
+- `npm run verify:dist` fails the release if `dist` is missing runtime files, contains unexpected files, or includes empty assets.
 - JS and CSS use `no-cache, must-revalidate` because filenames are not content-hashed.
 - The SPA shell uses `no-store` so release checks always fetch the current HTML entry.
 - Harness verify checks the deployed HTML for core SPA states and validates cache headers for `app.js`, `styles.css`, and `/`.

@@ -4,9 +4,11 @@
   "private": true,
   "description": "Static DeerRecall MVP prototype with Harness-compatible Docker Compose delivery.",
   "scripts": {
+    "check": "node --check app.js && npm test",
     "test": "node --test tests/homepage-structure.test.js",
     "clean": "rm -rf dist",
     "build": "node scripts/build-static.mjs",
+    "verify:dist": "node scripts/verify-dist.mjs",
     "serve": "npx --yes http-server dist -p 8080"
   },
   "engines": {

@@ -66,6 +66,15 @@ test("interactive controls expose release focus and disabled states", () => {
   assert.match(css, /cursor:\s*not-allowed/);
 });
 
+test("primary navigation exposes the active module to assistive technology", () => {
+  const html = read("index.html");
+  const js = read("app.js");
+
+  assert.match(html, /data-nav-view="talents"\s+aria-current="page"/);
+  assert.match(js, /button\.setAttribute\("aria-current",\s*"page"\)/);
+  assert.match(js, /button\.removeAttribute\("aria-current"\)/);
+});
+
 test("main script switches from empty state to results state on search", () => {
   const js = read("app.js");
 
@@ -537,9 +546,11 @@ test("candidate resume detail stays usable on narrow viewports", () => {
 test("project exposes npm scripts for Harness-compatible static delivery", () => {
   const pkg = JSON.parse(read("package.json"));
 
+  assert.equal(pkg.scripts.check, "node --check app.js && npm test");
   assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js");
   assert.equal(pkg.scripts.clean, "rm -rf dist");
   assert.equal(pkg.scripts.build, "node scripts/build-static.mjs");
+  assert.equal(pkg.scripts["verify:dist"], "node scripts/verify-dist.mjs");
   assert.equal(pkg.scripts.serve, "npx --yes http-server dist -p 8080");
 });
 
@@ -557,6 +568,18 @@ test("static build script copies runtime assets and excludes development-only fo
   assert.doesNotMatch(script, /"docs"/);
   assert.doesNotMatch(script, /"tests"/);
   assert.doesNotMatch(script, /"output"/);
+});
+
+test("static dist verification rejects missing or extra runtime assets", () => {
+  const script = read("scripts/verify-dist.mjs");
+
+  assert.match(script, /const expectedAssets = new Set/);
+  assert.match(script, /"index\.html"/);
+  assert.match(script, /"app\.js"/);
+  assert.match(script, /"styles\.css"/);
+  assert.match(script, /missingAssets/);
+  assert.match(script, /extraAssets/);
+  assert.match(script, /process\.exitCode = 1/);
 });
 
 test("docker runtime serves built dist assets with nginx", () => {
@@ -598,9 +621,10 @@ test("harness pipeline runs test, build, image, deploy, and verify stages", () =
   assert.match(pipeline, /version: 1/);
   assert.match(pipeline, /kind: pipeline/);
   assert.match(pipeline, /name: test/);
-  assert.match(pipeline, /npm test/);
+  assert.match(pipeline, /npm run check/);
   assert.match(pipeline, /name: build_static/);
   assert.match(pipeline, /npm run build/);
+  assert.match(pipeline, /npm run verify:dist/);
   assert.match(pipeline, /name: build_image/);
   assert.match(pipeline, /path: \/var\/run\/docker\.sock/);
   assert.match(pipeline, /mount:/);

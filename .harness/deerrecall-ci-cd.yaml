@@ -16,14 +16,17 @@ spec:
             spec:
               container: node:20-alpine
               script: |-
-                npm test
+                set -eu
+                npm run check
 
           - name: build_static
             type: run
             spec:
               container: node:20-alpine
               script: |-
+                set -eu
                 npm run build
+                npm run verify:dist
 
           - name: build_image
             type: run
