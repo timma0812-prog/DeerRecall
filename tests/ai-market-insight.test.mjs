@@ -104,3 +104,30 @@ test("buildSearchAssistantMessages keeps DeerSearch scoped to recruiting search"
   assert.match(text, /招聘/);
   assert.match(text, /suggestions/);
 });
+
+test("buildSearchAssistantMessages includes recent DeerSearch context without overexposing history", () => {
+  const messages = buildSearchAssistantMessages("继续看上海候选人", [
+    {
+      query: "找支付风控 Java 后端",
+      answer: "优先看支付风控和高并发经验。",
+      suggestions: ["只看上海", "补充年限"],
+    },
+    {
+      query: "市场上做 Java 的人薪资水平",
+      answer: "建议结合城市和年限确认。",
+      suggestions: ["限定城市", "限定年限"],
+    },
+    {
+      query: "只看杭州",
+      answer: "已缩小到杭州候选人。",
+      suggestions: ["看 5 年以上"],
+    },
+  ]);
+  const payload = JSON.parse(messages[1].content);
+
+  assert.equal(payload.user_message, "继续看上海候选人");
+  assert.equal(payload.recent_context.length, 2);
+  assert.equal(payload.recent_context[0].query, "市场上做 Java 的人薪资水平");
+  assert.equal(payload.recent_context[1].query, "只看杭州");
+  assert.doesNotMatch(messages[1].content, /找支付风控 Java 后端/);
+});

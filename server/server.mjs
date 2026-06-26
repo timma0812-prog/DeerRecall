@@ -71,7 +71,7 @@ async function handleSearchAssistant(request, response) {
   }
 
   const body = await readJsonBody(request);
-  const raw = await callLlmJson(buildSearchAssistantMessages(body.message || ""), config);
+  const raw = await callLlmJson(buildSearchAssistantMessages(body.message || "", body.history || []), config);
   sendJson(response, 200, { ok: true, assistant: normalizeSearchAssistant(raw) });
 }
 

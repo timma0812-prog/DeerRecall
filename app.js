@@ -96,11 +96,17 @@ const searchCandidateCards = Array.from(document.querySelectorAll(".candidate-gr
 const searchAiCard = document.querySelector("[data-search-ai-card]");
 const searchAiStatus = document.querySelector("[data-search-ai-status]");
 const searchAiAnswer = document.querySelector("[data-search-ai-answer]");
+const searchAiAnswerBody = document.querySelector("[data-search-ai-answer-body]");
 const searchAiSuggestions = document.querySelector("[data-search-ai-suggestions]");
+const searchAiHistoryList = document.querySelector("[data-search-ai-history]");
+const searchAiHistoryEmpty = document.querySelector("[data-search-ai-history-empty]");
+const searchAiHistoryClear = document.querySelector("[data-search-ai-history-clear]");
 const marketInsightButtons = document.querySelectorAll("[data-market-insight-run]");
 const marketInsightCards = document.querySelectorAll("[data-market-insight-card]");
 
 const defaultQuery = "找做过支付风控的 Java 后端，最好有高并发项目经验。";
+const SEARCH_AI_HISTORY_KEY = "deerrecall:searchAiHistory";
+const SEARCH_AI_HISTORY_LIMIT = 8;
 const searchCityOptions = ["城市不限", "上海", "杭州", "深圳", "北京"];
 const searchSortOptions = [
   { label: "按匹配度排序", key: "score" },
@@ -367,6 +373,9 @@ let currentExportScope = "candidateList";
 let currentSearchCityIndex = 0;
 let currentSearchSortIndex = 0;
 let searchExtraFilterCursor = 0;
+let searchAiHistory = loadSearchAiHistory();
+let activeSearchAiHistoryId = searchAiHistory[0]?.id || null;
+let searchAiServiceStatus = null;
 let p2ReturnContext = { view: "talents", talentFilter: "all", taskId: null, searchQuery: defaultQuery };
 
 function hideCandidateResumeContext() {
@@ -430,39 +439,201 @@ function renderInlineList(target, items) {
   target.innerHTML = (items || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
 }
 
+function createSearchAiHistoryId() {
+  return `search_ai_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function clampText(value = "", maxLength = 600) {
+  const text = String(value || "").trim();
+  return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+}
+
+function normalizeSearchAiHistoryItem(item = {}) {
+  const query = clampText(item.query, 180);
+  if (!query) return null;
+  return {
+    id: item.id || createSearchAiHistoryId(),
+    query,
+    answer: clampText(item.answer, 900),
+    suggestions: Array.isArray(item.suggestions) ? item.suggestions.map((suggestion) => clampText(suggestion, 80)).filter(Boolean).slice(0, 4) : [],
+    status: item.status === "error" || item.status === "loading" ? item.status : "ready",
+    createdAt: Number.isFinite(item.createdAt) ? item.createdAt : Date.now(),
+  };
+}
+
+function loadSearchAiHistory() {
+  try {
+    const raw = window.localStorage?.getItem(SEARCH_AI_HISTORY_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(normalizeSearchAiHistoryItem).filter(Boolean).slice(0, SEARCH_AI_HISTORY_LIMIT);
+  } catch {
+    return [];
+  }
+}
+
+function persistSearchAiHistory() {
+  try {
+    window.localStorage?.setItem(SEARCH_AI_HISTORY_KEY, JSON.stringify(searchAiHistory));
+  } catch {
+    // Local storage can be unavailable in some desktop or privacy contexts.
+  }
+}
+
+function formatSearchAiHistoryTime(timestamp) {
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return "刚刚";
+  return date.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+}
+
+function upsertSearchAiHistory(item) {
+  const normalized = normalizeSearchAiHistoryItem(item);
+  if (!normalized) return null;
+
+  const existingIndex = searchAiHistory.findIndex((entry) => entry.id === normalized.id);
+  if (existingIndex >= 0) {
+    searchAiHistory[existingIndex] = { ...searchAiHistory[existingIndex], ...normalized };
+  } else {
+    searchAiHistory.unshift(normalized);
+  }
+  searchAiHistory = searchAiHistory
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, SEARCH_AI_HISTORY_LIMIT);
+  persistSearchAiHistory();
+  renderSearchAiHistory();
+  return normalized;
+}
+
+function getSearchAiContext(activeId = activeSearchAiHistoryId) {
+  return searchAiHistory
+    .filter((item) => item.id !== activeId && item.status === "ready" && item.answer)
+    .slice(0, 4)
+    .reverse()
+    .map((item) => ({
+      query: item.query,
+      answer: item.answer,
+      suggestions: item.suggestions,
+    }));
+}
+
+function renderSearchAiHistory() {
+  if (!searchAiHistoryList || !searchAiHistoryEmpty) return;
+
+  searchAiHistoryEmpty.hidden = searchAiHistory.length > 0;
+  searchAiHistoryList.innerHTML = searchAiHistory
+    .map((item) => {
+      const statusLabel = item.status === "loading" ? "生成中" : item.status === "error" ? "未生成" : "已保存";
+      const preview = item.answer || "等待 AI 回答生成";
+      const isActive = item.id === activeSearchAiHistoryId ? " is-active" : "";
+      return `
+        <button class="search-ai-history-item${isActive}" type="button" data-search-ai-history-id="${escapeHtml(item.id)}">
+          <strong>${escapeHtml(item.query)}</strong>
+          <span>${escapeHtml(statusLabel)} · ${escapeHtml(formatSearchAiHistoryTime(item.createdAt))} · ${escapeHtml(preview)}</span>
+        </button>
+      `;
+    })
+    .join("");
+}
+
+function restoreSearchAiHistoryItem(historyId) {
+  const item = searchAiHistory.find((entry) => entry.id === historyId);
+  if (!item) return;
+  showResults(item.query, { restoreHistoryItem: item });
+}
+
 function setSearchAiState(state, message) {
+  searchAiCard?.classList.toggle("is-loading", state === "loading");
   searchAiCard?.classList.toggle("is-error", state === "error");
   if (searchAiStatus) searchAiStatus.textContent = message;
   if (searchAiAnswer) searchAiAnswer.hidden = state !== "ready";
   if (searchAiSuggestions) searchAiSuggestions.hidden = state !== "ready";
 }
 
-function renderSearchAssistant(assistant) {
-  if (searchAiAnswer) {
-    searchAiAnswer.textContent = assistant.answer;
+function renderSearchAssistant(assistant, options = {}) {
+  const answer = clampText(assistant.answer || "");
+  const suggestions = Array.isArray(assistant.suggestions) ? assistant.suggestions : [];
+
+  if (searchAiAnswerBody) {
+    searchAiAnswerBody.textContent = answer;
   }
   if (searchAiSuggestions) {
-    searchAiSuggestions.innerHTML = (assistant.suggestions || []).map((item) => `<span>${escapeHtml(item)}</span>`).join("");
+    searchAiSuggestions.innerHTML = suggestions.map((item) => `<span>${escapeHtml(item)}</span>`).join("");
   }
-  setSearchAiState("ready", "已生成搜索建议。");
+  setSearchAiState("ready", options.statusMessage || "已生成搜索建议。");
+
+  if (options.historyId && !options.skipHistoryUpdate) {
+    upsertSearchAiHistory({
+      id: options.historyId,
+      query: options.query || currentQuery?.textContent || defaultQuery,
+      answer,
+      suggestions,
+      status: "ready",
+      createdAt: options.createdAt || Date.now(),
+    });
+  } else {
+    renderSearchAiHistory();
+  }
 }
 
-async function requestSearchAssistant(message) {
-  if (!searchAiCard || window.location.protocol === "file:") return;
+async function getSearchAiServiceStatus() {
+  if (searchAiServiceStatus) return searchAiServiceStatus;
+  try {
+    const response = await fetch("/api/ai/status", { cache: "no-store" });
+    const data = await response.json();
+    searchAiServiceStatus = response.ok && data.ok ? data : { configured: false, reason: "status_unavailable" };
+  } catch {
+    searchAiServiceStatus = { configured: false, reason: "status_unavailable" };
+  }
+  return searchAiServiceStatus;
+}
+
+async function requestSearchAssistant(message, historyId = activeSearchAiHistoryId) {
+  if (!searchAiCard) return;
+  if (window.location.protocol === "file:") {
+    const fallback = {
+      answer: "当前桌面预览未连接 AI 服务，但这条搜索已保存。通过 Node runtime 或 Harness 部署访问时会生成上下文回答。",
+      suggestions: ["继续调整筛选条件", "打开已保存搜索记录", "通过服务端运行 AI 能力"],
+    };
+    if (historyId === activeSearchAiHistoryId) renderSearchAssistant(fallback, { historyId, query: message });
+    else upsertSearchAiHistory({ id: historyId, query: message, ...fallback, status: "ready" });
+    return;
+  }
   setSearchAiState("loading", "正在理解搜索意图...");
+  const status = await getSearchAiServiceStatus();
+  if (status && !status.configured) {
+    const fallback = {
+      answer: "AI 服务尚未配置模型 Key，当前搜索和上下文已保存。配置 DEERRECALL_LLM_API_KEY 与 DEERRECALL_LLM_MODEL 后会生成回答。",
+      suggestions: ["保留当前搜索记录", "配置模型环境变量", "继续查看静态候选人"],
+    };
+    if (historyId === activeSearchAiHistoryId) renderSearchAssistant(fallback, { historyId, query: message });
+    else upsertSearchAiHistory({ id: historyId, query: message, ...fallback, status: "ready" });
+    return;
+  }
   try {
     const response = await fetch("/api/ai/search-assistant", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, history: getSearchAiContext(historyId) }),
     });
     const data = await response.json();
     if (!response.ok || !data.ok) {
       throw new Error(data.message || "AI 服务暂不可用");
     }
-    renderSearchAssistant(data.assistant);
+    if (historyId === activeSearchAiHistoryId) {
+      renderSearchAssistant(data.assistant, { historyId, query: message });
+    } else {
+      upsertSearchAiHistory({ id: historyId, query: message, ...data.assistant, status: "ready" });
+    }
   } catch {
-    setSearchAiState("error", "AI 助手暂不可用，当前搜索结果仍可继续查看。");
+    const fallback = {
+      answer: "AI 助手暂不可用，当前搜索结果仍可继续查看。",
+      suggestions: ["稍后重试", "继续使用筛选条件", "查看已保存搜索记录"],
+      status: "error",
+    };
+    upsertSearchAiHistory({ id: historyId, query: message, ...fallback });
+    if (historyId === activeSearchAiHistoryId) {
+      setSearchAiState("error", fallback.answer);
+    }
   }
 }
 
@@ -1013,8 +1184,9 @@ function openImportTasks() {
   showToast("已打开所有导入任务");
 }
 
-function showResults(queryText = defaultQuery) {
+function showResults(queryText = defaultQuery, options = {}) {
   const normalizedQuery = normalizeQuery(queryText);
+  const restoredHistoryItem = options.restoreHistoryItem || null;
   currentView = "searchResults";
   currentQueryId = "payment_risk_java_backend";
 
@@ -1041,7 +1213,33 @@ function showResults(queryText = defaultQuery) {
   sortSearchCandidates();
   applySearchResultFilters();
   refreshSearchFilterAddState();
-  requestSearchAssistant(normalizedQuery);
+
+  if (restoredHistoryItem) {
+    activeSearchAiHistoryId = restoredHistoryItem.id;
+    if (restoredHistoryItem.status === "error") {
+      if (searchAiAnswerBody) searchAiAnswerBody.textContent = restoredHistoryItem.answer || "";
+      setSearchAiState("error", restoredHistoryItem.answer || "历史记录中的 AI 回答暂不可用。");
+      renderSearchAiHistory();
+      return;
+    }
+    renderSearchAssistant(restoredHistoryItem, {
+      statusMessage: "已恢复历史搜索。",
+      skipHistoryUpdate: true,
+    });
+    return;
+  }
+
+  const historyItem = upsertSearchAiHistory({
+    id: createSearchAiHistoryId(),
+    query: normalizedQuery,
+    answer: "",
+    suggestions: [],
+    status: "loading",
+    createdAt: Date.now(),
+  });
+  activeSearchAiHistoryId = historyItem?.id || null;
+  renderSearchAiHistory();
+  requestSearchAssistant(normalizedQuery, activeSearchAiHistoryId);
 }
 
 function setActiveNav(view) {
@@ -2308,6 +2506,20 @@ searchFilterBar?.addEventListener("click", (event) => {
 searchCityToggle?.addEventListener("click", cycleSearchCity);
 searchSortToggle?.addEventListener("click", cycleSearchSort);
 
+searchAiHistoryList?.addEventListener("click", (event) => {
+  const historyButton = event.target.closest("[data-search-ai-history-id]");
+  if (!historyButton) return;
+  restoreSearchAiHistoryItem(historyButton.dataset.searchAiHistoryId);
+});
+
+searchAiHistoryClear?.addEventListener("click", () => {
+  searchAiHistory = [];
+  activeSearchAiHistoryId = null;
+  persistSearchAiHistory();
+  renderSearchAiHistory();
+  setSearchAiState("idle", "搜索记录已清空。提交搜索后，小鹿会继续保留最近对话。");
+});
+
 document.querySelectorAll(".shortlist-action").forEach((button) => {
   button.addEventListener("click", () => {
     const name = button.dataset.name;
@@ -2763,6 +2975,7 @@ document.querySelectorAll("[data-nav-view-proxy]").forEach((button) => {
 
 updateShortlist();
 showSearchCapabilityDetail("natural");
+renderSearchAiHistory();
 refreshSearchFilterAddState();
 sortSearchCandidates();
 applySearchResultFilters();

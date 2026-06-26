@@ -141,6 +141,45 @@ test("DeerSearch filter bar wraps before it can overlap the assistant column", (
   assert.match(css, /\.filter-action\.sort\s*{[^}]*margin-left:\s*0/s);
 });
 
+test("DeerSearch AI assistant persists and restores search conversation history", () => {
+  const html = read("index.html");
+  const js = read("app.js");
+
+  assert.match(html, /data-search-ai-answer-body/);
+  assert.match(html, /data-search-ai-history/);
+  assert.match(html, /data-search-ai-history-empty/);
+  assert.match(html, /搜索记录/);
+
+  assert.match(js, /const SEARCH_AI_HISTORY_KEY/);
+  assert.match(js, /function loadSearchAiHistory/);
+  assert.match(js, /function persistSearchAiHistory/);
+  assert.match(js, /function upsertSearchAiHistory/);
+  assert.match(js, /function renderSearchAiHistory/);
+  assert.match(js, /function restoreSearchAiHistoryItem/);
+  assert.match(js, /function getSearchAiContext/);
+  assert.match(js, /let searchAiServiceStatus = null/);
+  assert.match(js, /function getSearchAiServiceStatus/);
+  assert.match(js, /\/api\/ai\/status/);
+  assert.match(js, /if \(status && !status\.configured\)/);
+  assert.match(js, /localStorage\?\.getItem\(SEARCH_AI_HISTORY_KEY\)/);
+  assert.match(js, /localStorage\?\.setItem\(SEARCH_AI_HISTORY_KEY/);
+  assert.match(js, /body:\s*JSON\.stringify\(\{\s*message,\s*history:\s*getSearchAiContext/);
+  assert.match(js, /data-search-ai-history-id/);
+});
+
+test("DeerSearch AI answer panel constrains long model text inside the right rail", () => {
+  const css = read("styles.css");
+
+  assert.match(css, /\.search-ai-answer-shell\s*{[^}]*min-width:\s*0/s);
+  assert.match(css, /\.search-ai-answer-shell\s*{[^}]*max-height:\s*260px/s);
+  assert.match(css, /\.search-ai-answer-body\s*{[^}]*overflow-wrap:\s*anywhere/s);
+  assert.match(css, /\.search-ai-answer-body\s*{[^}]*word-break:\s*break-word/s);
+  assert.match(css, /\.search-ai-suggestions\s*{[^}]*min-width:\s*0/s);
+  assert.match(css, /\.search-ai-history-list\s*{[^}]*max-height:\s*180px/s);
+  assert.match(css, /\.search-ai-history-item\s*{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/s);
+  assert.match(css, /\.search-ai-history-item strong\s*{[^}]*overflow-wrap:\s*anywhere/s);
+});
+
 test("resume import module exposes default, preview, loading, and finished states", () => {
   const html = read("index.html");
   const css = read("styles.css");
@@ -939,7 +978,8 @@ test("DeerSearch exposes an AI assistant response area without replacing static 
 
   assert.match(js, /function requestSearchAssistant/);
   assert.match(js, /\/api\/ai\/search-assistant/);
-  assert.match(js, /showResults\(queryText = defaultQuery\)/);
+  assert.match(js, /function showResults\(queryText = defaultQuery,\s*options = \{\}\)/);
+  assert.match(js, /resultsState\.classList\.remove\("state-hidden"\)/);
 });
 
 test("project exposes Node AI gateway runtime scripts", () => {

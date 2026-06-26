@@ -72,12 +72,21 @@ export function buildMarketInsightMessages(candidate) {
   ];
 }
 
-export function buildSearchAssistantMessages(message) {
+function sanitizeSearchContext(history = []) {
+  if (!Array.isArray(history)) return [];
+  return history.slice(-2).map((item) => ({
+    query: asText(item?.query, "").slice(0, 240),
+    answer: asText(item?.answer, "").slice(0, 500),
+    suggestions: asList(item?.suggestions, []).slice(0, 4),
+  })).filter((item) => item.query || item.answer);
+}
+
+export function buildSearchAssistantMessages(message, history = []) {
   return [
     {
       role: "system",
       content:
-        "你是 DeerSearch 招聘搜索助手。你只围绕招聘搜索、候选人筛选、人才库查询和下一步筛选建议回答。输出合法 JSON，不要输出 Markdown。",
+        "你是 DeerSearch 招聘搜索助手。你只围绕招聘搜索、候选人筛选、人才库查询和下一步筛选建议回答。可参考 recent_context 理解连续对话，但不要复述历史。输出合法 JSON，不要输出 Markdown。",
     },
     {
       role: "user",
@@ -85,6 +94,7 @@ export function buildSearchAssistantMessages(message) {
         {
           task: "解释用户搜索意图，并给出可执行的后续筛选建议。",
           user_message: String(message || "").slice(0, 1000),
+          recent_context: sanitizeSearchContext(history),
           output_schema: {
             answer: "一句到两句中文解释",
             suggestions: ["后续筛选建议 1", "后续筛选建议 2", "后续筛选建议 3"],

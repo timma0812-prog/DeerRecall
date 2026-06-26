@@ -1917,10 +1917,25 @@
           </section>
 
           <section class="panel-card search-ai-card" data-search-ai-card>
-            <span class="label">AI 回答</span>
+            <div class="search-ai-head">
+              <span class="label">AI 回答</span>
+              <span>带入最近上下文</span>
+            </div>
             <p class="search-ai-status" data-search-ai-status>提交搜索后，小鹿会解释需求并建议下一步筛选。</p>
-            <p class="search-ai-answer" data-search-ai-answer hidden></p>
+            <div class="search-ai-answer-shell" data-search-ai-answer hidden>
+              <strong>回答摘要</strong>
+              <p class="search-ai-answer-body" data-search-ai-answer-body></p>
+            </div>
             <div class="search-ai-suggestions" data-search-ai-suggestions hidden></div>
+          </section>
+
+          <section class="panel-card search-ai-history-card">
+            <div class="search-ai-history-head">
+              <span class="label">搜索记录</span>
+              <button type="button" data-search-ai-history-clear>清空</button>
+            </div>
+            <p class="search-ai-history-empty" data-search-ai-history-empty>暂无搜索记录。提交搜索后，会在这里保留最近对话。</p>
+            <div class="search-ai-history-list" data-search-ai-history></div>
           </section>
 
           <section class="panel-card condition-card">
