@@ -33,6 +33,15 @@ const importSidePanels = document.querySelectorAll("[data-import-side]");
 const importStateButtons = document.querySelectorAll("[data-target-state]");
 const importOpenButtons = document.querySelectorAll("[data-import-open]");
 const importActionCards = document.querySelectorAll("[data-import-action-card]");
+const importPickButtons = document.querySelectorAll("[data-import-pick]");
+const importSourceButtons = document.querySelectorAll("[data-import-source-action]");
+const importDropZone = document.querySelector("[data-import-drop-zone]");
+const importPickerCard = document.querySelector("[data-import-picker-card]");
+const importPickerStatus = document.querySelector("[data-import-picker-status]");
+const importFolderInput = document.querySelector("[data-import-folder-input]");
+const importFileInput = document.querySelector("[data-import-file-input]");
+const importSettingInputs = document.querySelectorAll("[data-import-setting]");
+const importTaskOpenButtons = document.querySelectorAll("[data-import-task-open]");
 const taskAssistantPanels = document.querySelectorAll("[data-task-panel]");
 const taskFilterButtons = document.querySelectorAll("[data-task-filter]");
 const taskPanelButtons = document.querySelectorAll("[data-task-panel-target]");
@@ -302,7 +311,39 @@ const taskRecords = {
     ],
   },
 };
+const importSupportedExtensions = new Set(["pdf", "doc", "docx", "txt", "md", "markdown"]);
+const importSettings = {
+  scanSubfolders: true,
+  autoDedupe: true,
+  autoTalent: true,
+};
 let currentImportState = "default";
+let currentImportSource = {
+  name: "FinTech_Backend_2026",
+  path: "/Users/deer/Downloads/FinTech_Backend_2026",
+  type: "文件夹",
+  files: [],
+  rawStats: {
+    total: 126,
+    parseable: 108,
+    duplicate: 12,
+    unsupported: 6,
+    newProfiles: 96,
+    updatedProfiles: 18,
+    skippedDuplicates: 9,
+    failed: 3,
+  },
+  stats: {
+    total: 126,
+    parseable: 108,
+    duplicate: 12,
+    unsupported: 6,
+    newProfiles: 96,
+    updatedProfiles: 18,
+    skippedDuplicates: 9,
+    failed: 3,
+  },
+};
 let currentTaskPanel = "overview";
 let currentTaskView = "list";
 let selectedTaskId = null;
@@ -367,6 +408,15 @@ function normalizeQuery(value) {
   const query = value.trim();
   if (!query) return defaultQuery;
   return /[。！？.!?]$/.test(query) ? query : `${query}。`;
+}
+
+function escapeHtml(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function showSearchCapabilityDetail(type = "natural") {
@@ -496,6 +546,426 @@ function cycleSearchSort() {
   showToast(`已切换为${sortConfig.label}`);
 }
 
+function getImportFileName(file) {
+  return file?.name || file?.path?.split("/").pop() || "未命名文件";
+}
+
+function getImportFileExtension(file) {
+  const name = getImportFileName(file);
+  return name.includes(".") ? name.split(".").pop().toLowerCase() : "";
+}
+
+function getImportRelativePath(file) {
+  return file?.webkitRelativePath || file?.relativePath || file?.path || getImportFileName(file);
+}
+
+function getImportSourceName(files, options = {}) {
+  if (options.name) return options.name;
+  const firstPath = getImportRelativePath(files[0] || {});
+  if (firstPath.includes("/")) return firstPath.split("/")[0];
+  if (files.length > 1) return "本地批量文件";
+  return getImportFileName(files[0] || {}) || "本地选择文件";
+}
+
+function deriveImportStats(rawStats) {
+  const total = Number(rawStats.total || 0);
+  const unsupported = Number(rawStats.unsupported || 0);
+  const supported = Math.max(0, total - unsupported);
+  const duplicate = importSettings.autoDedupe ? Number(rawStats.duplicate || 0) : 0;
+  const parseable = importSettings.autoDedupe ? Math.max(0, Number(rawStats.parseable ?? supported - duplicate)) : supported;
+  const failed = Number(rawStats.failed ?? Math.max(0, Math.round(parseable * 0.03)));
+  const successfulProfiles = Math.max(0, parseable - failed);
+  const newProfiles = importSettings.autoTalent ? Number(rawStats.newProfiles ?? Math.max(0, successfulProfiles - Math.round(successfulProfiles * 0.16))) : 0;
+  const updatedProfiles = importSettings.autoTalent ? Number(rawStats.updatedProfiles ?? Math.max(0, successfulProfiles - newProfiles)) : 0;
+
+  return {
+    total,
+    parseable,
+    duplicate,
+    unsupported,
+    newProfiles,
+    updatedProfiles,
+    skippedDuplicates: importSettings.autoDedupe ? Number(rawStats.skippedDuplicates ?? duplicate) : 0,
+    failed,
+  };
+}
+
+function getSeedImportSource(overrides = {}) {
+  const seedRawStats = {
+    total: 126,
+    parseable: 108,
+    duplicate: 12,
+    unsupported: 6,
+    newProfiles: 96,
+    updatedProfiles: 18,
+    skippedDuplicates: 9,
+    failed: 3,
+  };
+  const rawStats = overrides.stats || overrides.rawStats ? { total: 0, parseable: 0, duplicate: 0, unsupported: 0, newProfiles: 0, updatedProfiles: 0, skippedDuplicates: 0, failed: 0, ...(overrides.rawStats || overrides.stats) } : seedRawStats;
+
+  return {
+    name: overrides.name || "FinTech_Backend_2026",
+    path: overrides.path || "/Users/deer/Downloads/FinTech_Backend_2026",
+    type: overrides.type || "文件夹",
+    files: overrides.files || [],
+    rawStats,
+    stats: deriveImportStats(rawStats),
+  };
+}
+
+function openImportPickerCard(mode = "folder") {
+  if (mode === "files") {
+    if (importPickerCard) importPickerCard.classList.add("state-hidden");
+    if (importPickerStatus) importPickerStatus.textContent = "请选择一个或多个简历文件。";
+    importFileInput?.click();
+    return;
+  }
+
+  if (!importPickerCard) return;
+  importPickerCard.classList.remove("state-hidden");
+  if (importPickerStatus) {
+    importPickerStatus.textContent = "请选择 Desktop 文件夹、浏览器文件夹，或使用示例文件夹继续本地测试。";
+  }
+}
+
+async function requestImportSource(action) {
+  if (action === "browserFolder") {
+    if (importPickerStatus) importPickerStatus.textContent = "正在打开浏览器文件夹选择器。";
+    importFolderInput?.click();
+    return;
+  }
+
+  if (action === "demoFolder") {
+    const source = getSeedImportSource({ type: "示例文件夹" });
+    updateImportPreview(source);
+    persistImportTask(source);
+    showImportState("preview");
+    showToast("已载入示例文件夹");
+    return;
+  }
+
+  if (action === "desktopFolder") {
+    if (importPickerStatus) importPickerStatus.textContent = "正在连接 Desktop 文件夹选择器。";
+    const desktopBridge = window.deerRecallDesktop;
+    if (desktopBridge?.selectImportFolder) {
+      try {
+        const selectedFolder = await desktopBridge.selectImportFolder();
+        if (!selectedFolder) {
+          if (importPickerStatus) importPickerStatus.textContent = "已取消文件夹选择。";
+          return;
+        }
+        handleImportFiles(selectedFolder.files || [], {
+          type: selectedFolder.type || "文件夹",
+          name: selectedFolder.name,
+          path: selectedFolder.path,
+          stats: selectedFolder.stats,
+        });
+        return;
+      } catch (error) {
+        if (importPickerStatus) importPickerStatus.textContent = "Desktop 选择器不可用，已切换到浏览器文件夹选择。";
+      }
+    }
+    importFolderInput?.click();
+  }
+}
+
+function scanImportFiles(fileList, options = {}) {
+  const files = Array.from(fileList || []);
+  if (!files.length && (options.stats || options.path || options.useDemo)) {
+    const source = getSeedImportSource({
+      name: options.name,
+      path: options.path,
+      type: options.type,
+      files,
+      stats: options.stats,
+      rawStats: options.rawStats,
+    });
+    return source;
+  }
+
+  const scopedFiles = importSettings.scanSubfolders
+    ? files
+    : files.filter((file) => {
+        const relativePath = getImportRelativePath(file);
+        const pathParts = relativePath.split("/").filter(Boolean);
+        return pathParts.length <= 2;
+      });
+  const seenNames = new Set();
+  let duplicate = 0;
+  let unsupported = 0;
+  let supported = 0;
+
+  scopedFiles.forEach((file) => {
+    const extension = getImportFileExtension(file);
+    const normalizedName = getImportFileName(file).toLowerCase();
+    if (!importSupportedExtensions.has(extension)) {
+      unsupported += 1;
+      return;
+    }
+    if (seenNames.has(normalizedName)) duplicate += 1;
+    seenNames.add(normalizedName);
+    supported += 1;
+  });
+
+  const rawParseable = Math.max(0, supported - duplicate);
+  const failed = Math.min(rawParseable, Math.max(0, Math.round(rawParseable * 0.03)));
+  const successfulProfiles = Math.max(0, rawParseable - failed);
+  const updatedProfiles = Math.round(successfulProfiles * 0.16);
+  const newProfiles = Math.max(0, successfulProfiles - updatedProfiles);
+
+  const rawStats = {
+    total: scopedFiles.length,
+    parseable: rawParseable,
+    duplicate,
+    unsupported,
+    newProfiles,
+    updatedProfiles,
+    skippedDuplicates: duplicate,
+    failed,
+  };
+
+  return {
+    name: getImportSourceName(scopedFiles, options),
+    path: options.path || (options.type === "文件" ? "浏览器本地文件选择" : `浏览器本地文件夹 / ${getImportSourceName(scopedFiles, options)}`),
+    type: options.type || (scopedFiles.length > 1 ? "文件夹" : "文件"),
+    files: scopedFiles,
+    rawStats,
+    stats: deriveImportStats(rawStats),
+  };
+}
+
+function updateImportLegend(stats) {
+  const labels = {
+    newProfiles: "新增简历",
+    updatedProfiles: "更新已有",
+    skippedDuplicates: "重复跳过",
+    failed: "解析失败",
+  };
+  const total = Math.max(1, Number(stats.total || 0));
+  document.querySelectorAll("[data-import-legend]").forEach((node) => {
+    const key = node.dataset.importLegend;
+    const value = Number(stats[key] || 0);
+    const percent = Math.round((value / total) * 100);
+    node.textContent = `${value} ${labels[key] || "文件"}（${percent}%）`;
+  });
+}
+
+function updateImportPreview(source = currentImportSource) {
+  currentImportSource = source;
+  const stats = source.stats || {};
+  document.querySelectorAll("[data-import-source-type]").forEach((node) => {
+    node.textContent = source.type || "文件夹";
+  });
+  document.querySelectorAll("[data-import-source-name]").forEach((node) => {
+    node.textContent = source.name || "本地选择文件";
+  });
+  document.querySelectorAll("[data-import-source-path]").forEach((node) => {
+    node.textContent = source.path || "浏览器本地选择";
+  });
+  document.querySelectorAll("[data-import-stat]").forEach((node) => {
+    const key = node.dataset.importStat;
+    if (Object.prototype.hasOwnProperty.call(stats, key)) {
+      node.textContent = String(stats[key]);
+    }
+  });
+  document.querySelectorAll("[data-import-finished-copy]").forEach((node) => {
+    const destination = importSettings.autoTalent ? "已加入人才库" : "已解析，暂未自动入库";
+    node.textContent = `本次导入已处理 ${stats.total || 0} 个文件，${destination}。`;
+  });
+  updateImportLegend(stats);
+}
+
+function buildTaskFilesFromImport(source) {
+  const files = source.files?.length ? source.files.slice(0, 12) : getTaskRecord("fintech_backend_2026").files;
+  return files.map((file, index) => {
+    const extension = getImportFileExtension(file).toUpperCase() || "PDF";
+    const name = getImportFileName(file);
+    const supported = importSupportedExtensions.has(extension.toLowerCase());
+    const status = supported ? "success" : "unsupported";
+    return {
+      id: `local-${index + 1}`,
+      name,
+      info: `${file.size ? `${Math.max(1, Math.round(file.size / 1024))} KB` : "本地文件"} · ${extension}`,
+      ext: extension,
+      status,
+      result: supported ? `已入库：${name.replace(/\.[^.]+$/, "")}` : undefined,
+      reason: supported ? undefined : "格式不支持",
+      suggestion: supported ? undefined : "转为 PDF 或 DOCX 后重新导入",
+      retryable: false,
+      selected: !supported,
+    };
+  });
+}
+
+function getTaskKindFromRecord(task) {
+  if ((task.failed || 0) + (task.unsupported || 0) > 0) return "needs";
+  if (task.status === "processing") return "processing";
+  return "completed";
+}
+
+function updateTaskAssistantCounts(counts) {
+  document.querySelectorAll("[data-task-summary]").forEach((node) => {
+    const key = node.dataset.taskSummary;
+    if (Number.isFinite(counts[key])) node.textContent = String(counts[key]);
+  });
+}
+
+function updateTaskFilterCounts() {
+  const rows = Array.from(taskRows);
+  const counts = {
+    all: rows.length,
+    processing: rows.filter((row) => row.dataset.taskKind === "processing").length,
+    completed: rows.filter((row) => row.dataset.taskKind === "completed").length,
+    needs: rows.filter((row) => row.dataset.taskKind === "needs").length,
+    waiting: 0,
+  };
+  taskFilterButtons.forEach((button) => {
+    const count = counts[button.dataset.taskFilter];
+    const countNode = button.querySelector("span");
+    if (countNode && Number.isFinite(count)) countNode.textContent = String(count);
+  });
+  updateTaskAssistantCounts(counts);
+}
+
+function updateImportTaskRow(task) {
+  const row = document.querySelector(`[data-task-item][data-task-id="${task.id}"]`);
+  if (!row) return;
+
+  const taskKind = getTaskKindFromRecord(task);
+  const pendingIssues = (task.failed || 0) + (task.unsupported || 0);
+  const taskSource = escapeHtml(task.source);
+  const taskImportType = escapeHtml(task.importType);
+  const taskTime = escapeHtml(task.time);
+  row.dataset.taskKind = taskKind;
+  row.dataset.taskPanelTarget = pendingIssues ? "issue" : "detail";
+  row.classList.remove("task-needs", "task-processing", "task-completed");
+  row.classList.add(`task-${taskKind}`);
+
+  const statusMarkup =
+    pendingIssues > 0
+      ? '<div class="task-status-icon alert"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v6"></path><path d="M12 17h.01"></path></svg></div>'
+      : '<div class="task-status-icon success"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg></div>';
+  row.firstElementChild.outerHTML = statusMarkup;
+
+  const titleMeta = pendingIssues > 0 ? '<span class="task-badge">需处理</span>' : '<span class="task-badge">已完成</span>';
+  const main = row.querySelector(".task-main");
+  if (main) {
+    main.innerHTML = `
+      <div class="task-title-line"><h3>${taskSource}</h3>${titleMeta}</div>
+      <p>${taskImportType} · ${task.total} 个文件 · ${taskTime}</p>
+      <div class="task-stats">
+        <span>成功 <strong class="green">${task.success}</strong></span>
+        <span>失败 <strong class="red">${task.failed}</strong></span>
+        <span>格式不支持 <strong>${task.unsupported}</strong></span>
+        <span>跳过 <strong>${task.skipped}</strong></span>
+      </div>
+    `;
+  }
+
+  const actions = row.querySelector(".task-actions");
+  if (actions) {
+    actions.innerHTML = pendingIssues
+      ? `<button class="task-action primary-lite" type="button" data-task-open="issue" data-task-id="${task.id}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-3-3Z"></path></svg>处理问题</button><button class="task-action" type="button" data-task-open="detail" data-task-id="${task.id}">查看详情 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>`
+      : `<button class="task-action" type="button" data-task-open="detail" data-task-id="${task.id}">查看详情 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>`;
+  }
+
+  const targetGroup = document.querySelector(`[data-task-group="${taskKind}"]`);
+  if (targetGroup && row.parentElement !== targetGroup) targetGroup.append(row);
+  updateTaskFilterCounts();
+}
+
+function persistImportTask(source = currentImportSource) {
+  const stats = source.stats || {};
+  const task = taskRecords.fintech_backend_2026;
+  task.source = source.name || task.source;
+  task.importType = source.type === "文件" ? "批量文件导入" : "文件夹导入";
+  task.time = "刚刚";
+  task.status = stats.failed || stats.unsupported ? "partial_failed" : "completed";
+  task.total = stats.total || 0;
+  task.success = Math.max(0, (stats.parseable || 0) - (stats.failed || 0));
+  task.failed = stats.failed || 0;
+  task.unsupported = stats.unsupported || 0;
+  task.skipped = stats.skippedDuplicates || 0;
+  task.retryable = stats.failed || 0;
+  task.newProfiles = stats.newProfiles || 0;
+  task.updatedProfiles = stats.updatedProfiles || 0;
+  task.files = buildTaskFilesFromImport(source);
+  updateImportTaskRow(task);
+  selectedTaskId = task.id;
+  try {
+    window.localStorage?.setItem("deerrecall:lastImportTask", JSON.stringify({ ...task, files: task.files.slice(0, 20) }));
+  } catch (error) {
+    // Local storage is optional in packaged desktop contexts.
+  }
+}
+
+function handleImportFiles(fileList, options = {}) {
+  const files = Array.from(fileList || []);
+  if (!files.length && !options.stats && !options.path && !options.useDemo) {
+    if (importPickerStatus) importPickerStatus.textContent = "没有读取到文件，请重新选择文件夹。";
+    showToast("没有读取到可导入文件");
+    return;
+  }
+
+  const source = scanImportFiles(files, options);
+  updateImportPreview(source);
+  persistImportTask(source);
+  if (importPickerStatus) {
+    importPickerStatus.textContent = `已读取 ${source.stats.total} 个文件，${source.stats.parseable} 个可解析。`;
+  }
+  showImportState("preview");
+}
+
+function handleImportDrop(event) {
+  event.preventDefault();
+  importDropZone?.classList.remove("is-dragging");
+  const files = event.dataTransfer?.files || [];
+  handleImportFiles(files, { type: "拖拽文件夹" });
+}
+
+function updateImportSettingsUi() {
+  importSettingInputs.forEach((input) => {
+    const key = input.dataset.importSetting;
+    input.checked = Boolean(importSettings[key]);
+  });
+  document.querySelectorAll("[data-import-setting-status]").forEach((node) => {
+    const key = node.dataset.importSettingStatus;
+    node.textContent = importSettings[key] ? "已开启" : "已关闭";
+  });
+}
+
+function toggleImportSetting(input) {
+  const key = input?.dataset.importSetting;
+  if (!key) return;
+  importSettings[key] = input.checked;
+  updateImportSettingsUi();
+  if (currentImportState === "preview" || currentImportState === "finished") {
+    const source = scanImportFiles(currentImportSource.files || [], {
+      name: currentImportSource.name,
+      path: currentImportSource.path,
+      type: currentImportSource.type,
+      stats: currentImportSource.rawStats || currentImportSource.stats,
+    });
+    updateImportPreview(source);
+    persistImportTask(source);
+  }
+  const labels = {
+    scanSubfolders: "扫描子文件夹",
+    autoDedupe: "自动去重",
+    autoTalent: "解析后加入人才库",
+  };
+  showToast(`${labels[key] || "导入设置"}已${importSettings[key] ? "开启" : "关闭"}`);
+}
+
+function openImportTasks() {
+  selectedTaskId = null;
+  currentTaskView = "list";
+  currentTaskPanel = "overview";
+  showTaskState("overview");
+  setTaskFilter("all");
+  showToast("已打开所有导入任务");
+}
+
 function showResults(queryText = defaultQuery) {
   const normalizedQuery = normalizeQuery(queryText);
   currentView = "searchResults";
@@ -561,6 +1031,8 @@ function showSearch() {
 function showImportState(nextState = currentImportState) {
   currentView = "import";
   currentImportState = nextState;
+  updateImportPreview();
+  updateImportSettingsUi();
   emptyState.classList.add("state-hidden");
   resultsState.classList.add("state-hidden");
   taskState.classList.add("state-hidden");
@@ -582,6 +1054,9 @@ function showImportState(nextState = currentImportState) {
   importSidePanels.forEach((panel) => {
     panel.classList.toggle("state-hidden", panel.dataset.importSide !== nextState);
   });
+  if (nextState !== "default") {
+    importPickerCard?.classList.add("state-hidden");
+  }
   setActiveNav("import");
 }
 
@@ -661,13 +1136,18 @@ function renderTaskIssueList(task) {
   if (!taskIssueList) return;
   const issueFiles = task.files.filter((file) => file.status === "failed" || file.status === "unsupported");
   taskIssueList.innerHTML = issueFiles
-    .map(
-      (file) => `
+    .map((file) => {
+      const fileName = escapeHtml(file.name);
+      const fileInfo = escapeHtml(file.info || "");
+      const fileExt = escapeHtml(file.ext || "");
+      const fileReason = escapeHtml(file.reason || "");
+      const fileSuggestion = escapeHtml(file.suggestion || "");
+      return `
         <article class="task-file-row" data-task-file-id="${file.id}">
-          <span><input type="checkbox" ${file.selected ? "checked" : ""} aria-label="选择 ${file.name}" /></span>
-          <span class="task-file-name"><em>${file.ext}</em><strong>${file.name}</strong><small>${file.info}</small></span>
-          <span><mark class="${file.status === "unsupported" ? "warning" : "danger"}">${file.reason}</mark></span>
-          <span>${file.suggestion}</span>
+          <span><input type="checkbox" ${file.selected ? "checked" : ""} aria-label="选择 ${fileName}" /></span>
+          <span class="task-file-name"><em>${fileExt}</em><strong>${fileName}</strong><small>${fileInfo}</small></span>
+          <span><mark class="${file.status === "unsupported" ? "warning" : "danger"}">${fileReason}</mark></span>
+          <span>${fileSuggestion}</span>
           <span class="task-row-actions">
             <button type="button">定位文件</button>
             <button type="button" data-task-failure-open="file" data-task-file-id="${file.id}">详情</button>
@@ -675,21 +1155,25 @@ function renderTaskIssueList(task) {
             <button type="button" data-task-file-resolve="ignore" data-task-file-id="${file.id}">忽略</button>
           </span>
         </article>
-      `
-    )
+      `;
+    })
     .join("");
 }
 
 function renderTaskDetailList(task) {
   if (!taskDetailList) return;
   taskDetailList.innerHTML = task.files
-    .map(
-      (file) => `
+    .map((file) => {
+      const fileName = escapeHtml(file.name);
+      const fileInfo = escapeHtml(file.info || "");
+      const fileExt = escapeHtml(file.ext || "");
+      const fileResult = escapeHtml(file.result || file.reason || "等待解析");
+      return `
         <article class="task-file-row" data-task-file-id="${file.id}">
-          <span class="task-file-name"><em>${file.ext}</em><strong>${file.name}</strong></span>
-          <span>${file.info}</span>
+          <span class="task-file-name"><em>${fileExt}</em><strong>${fileName}</strong></span>
+          <span>${fileInfo}</span>
           <span><mark class="${file.status}">${getStatusLabel(file.status)}</mark></span>
-          <span>${file.result || file.reason || "等待解析"}</span>
+          <span>${fileResult}</span>
           <span class="task-row-actions">
             ${
               file.status === "success"
@@ -698,8 +1182,8 @@ function renderTaskDetailList(task) {
             }
           </span>
         </article>
-      `
-    )
+      `;
+    })
     .join("");
 }
 
@@ -1745,6 +2229,51 @@ importStateButtons.forEach((button) => {
     showImportState(button.dataset.targetState);
   });
 });
+
+importPickButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    openImportPickerCard(button.dataset.importPick);
+  });
+});
+
+importSourceButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    requestImportSource(button.dataset.importSourceAction);
+  });
+});
+
+importFolderInput?.addEventListener("change", () => {
+  handleImportFiles(importFolderInput.files, { type: "文件夹" });
+  importFolderInput.value = "";
+});
+
+importFileInput?.addEventListener("change", () => {
+  handleImportFiles(importFileInput.files, { type: "文件" });
+  importFileInput.value = "";
+});
+
+importSettingInputs.forEach((input) => {
+  input.addEventListener("change", () => {
+    toggleImportSetting(input);
+  });
+});
+
+importTaskOpenButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    openImportTasks(button.dataset.importTaskOpen);
+  });
+});
+
+importDropZone?.addEventListener("dragover", (event) => {
+  event.preventDefault();
+  importDropZone.classList.add("is-dragging");
+});
+
+importDropZone?.addEventListener("dragleave", () => {
+  importDropZone.classList.remove("is-dragging");
+});
+
+importDropZone?.addEventListener("drop", handleImportDrop);
 
 importOpenButtons.forEach((button) => {
   button.addEventListener("click", (event) => {

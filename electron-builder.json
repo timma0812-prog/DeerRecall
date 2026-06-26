@@ -6,6 +6,7 @@
   },
   "files": [
     "desktop/main.cjs",
+    "desktop/preload.cjs",
     "dist/**/*"
   ],
   "mac": {

@@ -163,6 +163,86 @@ test("resume import module exposes default, preview, loading, and finished state
   assert.match(js, /importStateButtons/);
 });
 
+test("resume import supports local folder selection before preview", () => {
+  const html = read("index.html");
+  const css = read("styles.css");
+  const js = read("app.js");
+
+  assert.match(html, /data-import-drop-zone/);
+  assert.match(html, /data-import-pick="folder"/);
+  assert.match(html, /data-import-pick="files"/);
+  assert.match(html, /data-import-picker-card/);
+  assert.match(html, /连接 Desktop 选择文件夹/);
+  assert.match(html, /data-import-source-action="desktopFolder"/);
+  assert.match(html, /data-import-source-action="browserFolder"/);
+  assert.match(html, /data-import-source-action="demoFolder"/);
+  assert.match(html, /data-import-folder-input/);
+  assert.match(html, /webkitdirectory/);
+  assert.match(html, /data-import-file-input/);
+
+  assert.match(css, /\.import-panel\.is-dragging/);
+  assert.match(css, /\.import-source-picker/);
+
+  assert.match(js, /const importFolderInput/);
+  assert.match(js, /function openImportPickerCard/);
+  assert.match(js, /function requestImportSource/);
+  assert.match(js, /function handleImportFiles/);
+  assert.match(js, /function handleImportDrop/);
+});
+
+test("resume import settings are stateful and affect import preview", () => {
+  const html = read("index.html");
+  const js = read("app.js");
+
+  assert.match(html, /data-import-setting="scanSubfolders"/);
+  assert.match(html, /data-import-setting="autoDedupe"/);
+  assert.match(html, /data-import-setting="autoTalent"/);
+  assert.match(html, /data-import-setting-status="scanSubfolders"/);
+  assert.match(html, /data-import-stat="total"/);
+  assert.match(html, /data-import-stat="parseable"/);
+  assert.match(html, /data-import-source-name/);
+  assert.match(html, /data-import-source-path/);
+  assert.match(html, /data-import-legend="newProfiles"/);
+  assert.match(html, /data-import-legend="updatedProfiles"/);
+  assert.match(html, /data-import-legend="skippedDuplicates"/);
+  assert.match(html, /data-import-legend="failed"/);
+
+  assert.match(js, /const importSettings/);
+  assert.match(js, /function updateImportSettingsUi/);
+  assert.match(js, /function toggleImportSetting/);
+  assert.match(js, /function scanImportFiles/);
+  assert.match(js, /function updateImportPreview/);
+  assert.match(js, /function updateImportLegend/);
+  assert.match(js, /function persistImportTask/);
+});
+
+test("resume import history links open the parse task list", () => {
+  const html = read("index.html");
+  const js = read("app.js");
+
+  assert.match(html, /data-import-task-open="all"/);
+  assert.match(html, /data-task-summary="processing"/);
+  assert.match(html, /data-task-summary="needs"/);
+  assert.match(html, /查看所有导入任务/);
+  assert.match(js, /const importTaskOpenButtons/);
+  assert.match(js, /function openImportTasks/);
+  assert.match(js, /function updateImportTaskRow/);
+  assert.match(js, /function updateTaskAssistantCounts/);
+  assert.match(js, /updateTaskAssistantCounts\(counts\)/);
+  assert.match(js, /updateImportTaskRow\(task\)/);
+  assert.match(js, /showTaskState\("overview"\)/);
+  assert.match(js, /setTaskFilter\("all"\)/);
+});
+
+test("resume import escapes local file names before rendering task rows", () => {
+  const js = read("app.js");
+
+  assert.match(js, /function escapeHtml/);
+  assert.match(js, /escapeHtml\(file\.name\)/);
+  assert.match(js, /escapeHtml\(file\.info/);
+  assert.match(js, /escapeHtml\(task\.source\)/);
+});
+
 test("parse task module exposes task filters, grouped list, and assistant states", () => {
   const html = read("index.html");
   const css = read("styles.css");
@@ -638,6 +718,7 @@ test("project exposes desktop packaging scripts for local macOS builds", () => {
 
 test("electron desktop wrapper reuses the static dist artifact", () => {
   const main = read("desktop/main.cjs");
+  const preload = read("desktop/preload.cjs");
   const builder = JSON.parse(read("electron-builder.json"));
 
   assert.match(main, /BrowserWindow/);
@@ -645,9 +726,16 @@ test("electron desktop wrapper reuses the static dist artifact", () => {
   assert.match(main, /contextIsolation: true/);
   assert.match(main, /nodeIntegration: false/);
   assert.match(main, /sandbox: true/);
+  assert.match(main, /preload: path\.join\(__dirname, "preload\.cjs"\)/);
+  assert.match(main, /ipcMain\.handle\("import:select-folder"/);
+  assert.match(main, /dialog\.showOpenDialog/);
+  assert.match(preload, /contextBridge\.exposeInMainWorld\("deerRecallDesktop"/);
+  assert.match(preload, /selectImportFolder/);
+  assert.match(preload, /ipcRenderer\.invoke\("import:select-folder"\)/);
   assert.equal(builder.appId, "com.deerrecall.app");
   assert.equal(builder.productName, "DeerRecall");
   assert.deepEqual(builder.mac.target, ["dir"]);
+  assert.match(builder.files.join(","), /desktop\/preload\.cjs/);
   assert.match(builder.files.join(","), /dist\/\*\*\//);
 });
 
