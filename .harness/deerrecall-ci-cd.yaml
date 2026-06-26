@@ -1,0 +1,67 @@
+version: 1
+kind: pipeline
+spec:
+  stages:
+    - name: deerrecall_delivery
+      type: ci
+      spec:
+        volumes:
+          - name: docker_sock
+            type: host
+            spec:
+              path: /var/run/docker.sock
+        steps:
+          - name: test
+            type: run
+            spec:
+              container: node:20-alpine
+              script: |-
+                npm test
+
+          - name: build_static
+            type: run
+            spec:
+              container: node:20-alpine
+              script: |-
+                npm run build
+
+          - name: build_image
+            type: run
+            spec:
+              container: docker:27-cli
+              mount:
+                - name: docker_sock
+                  path: /var/run/docker.sock
+              script: |-
+                docker build -t ${DEERRECALL_IMAGE:-deerrecall:local} .
+
+          - name: deploy_compose
+            type: run
+            spec:
+              container: docker:27-cli
+              mount:
+                - name: docker_sock
+                  path: /var/run/docker.sock
+              script: |-
+                docker compose up -d
+
+          - name: verify_deploy
+            type: run
+            spec:
+              container: docker:27-cli
+              mount:
+                - name: docker_sock
+                  path: /var/run/docker.sock
+              script: |-
+                set -eu
+                APP_CONTAINER="${DEERRECALL_CONTAINER:-deerrecall}"
+
+                docker exec "${APP_CONTAINER}" wget -qO- http://127.0.0.1/ > /tmp/deerrecall-index.html
+                grep -q "id=\"resultsState\"" /tmp/deerrecall-index.html
+                grep -q "id=\"candidateResumeState\"" /tmp/deerrecall-index.html
+                grep -q "id=\"exportCenterState\"" /tmp/deerrecall-index.html
+                grep -q "id=\"searchFilterState\"" /tmp/deerrecall-index.html
+
+                docker exec "${APP_CONTAINER}" wget -qS --spider http://127.0.0.1/app.js 2>&1 | grep -qi "cache-control: no-cache, must-revalidate"
+                docker exec "${APP_CONTAINER}" wget -qS --spider http://127.0.0.1/styles.css 2>&1 | grep -qi "cache-control: no-cache, must-revalidate"
+                docker exec "${APP_CONTAINER}" wget -qS --spider http://127.0.0.1/ 2>&1 | grep -qi "cache-control: no-store"

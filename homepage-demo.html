@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DeerSearch 首页排布 Demo</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --page: #090018;
+        --surface: rgba(45, 5, 92, 0.74);
+        --surface-strong: rgba(91, 25, 142, 0.5);
+        --ink: #fff8ff;
+        --muted: rgba(255, 240, 255, 0.66);
+        --soft: rgba(255, 255, 255, 0.1);
+        --line: rgba(255, 255, 255, 0.18);
+        --accent: #ff22c8;
+        --accent-2: #9f36ff;
+        --accent-ink: #ffffff;
+        --warm: #b54cff;
+        --shadow: 0 30px 90px rgba(5, 0, 26, 0.46);
+        --radius: 8px;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 18% 12%, rgba(255, 47, 210, 0.42), transparent 30%),
+          radial-gradient(circle at 78% 88%, rgba(118, 45, 255, 0.46), transparent 34%),
+          linear-gradient(135deg, rgba(88, 0, 126, 0.95), rgba(24, 0, 74, 0.96) 44%, rgba(5, 0, 31, 1)),
+          var(--page);
+      }
+
+      button,
+      textarea,
+      input {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .demo-page {
+        width: min(1360px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 34px 0 46px;
+      }
+
+      .demo-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 24px;
+        margin-bottom: 22px;
+      }
+
+      .demo-head h1 {
+        margin: 0;
+        font-size: clamp(28px, 3vw, 44px);
+        line-height: 1.06;
+        letter-spacing: 0;
+      }
+
+      .demo-head p {
+        max-width: 460px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.7;
+        text-align: right;
+      }
+
+      .state-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+        gap: 22px;
+        align-items: stretch;
+      }
+
+      .state-block {
+        min-width: 0;
+      }
+
+      .state-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0 0 10px;
+        color: rgba(255, 240, 255, 0.62);
+        font-size: 13px;
+      }
+
+      .state-label strong {
+        color: #ffd9f7;
+        font-size: 15px;
+      }
+
+      .mock-app {
+        min-height: 760px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background:
+          radial-gradient(circle at 24% 12%, rgba(255, 47, 210, 0.26), transparent 34%),
+          radial-gradient(circle at 88% 84%, rgba(120, 48, 255, 0.33), transparent 36%),
+          linear-gradient(135deg, rgba(117, 18, 167, 0.9), rgba(42, 0, 106, 0.94) 48%, rgba(12, 0, 57, 0.96));
+        box-shadow: var(--shadow);
+      }
+
+      .initial-app {
+        display: grid;
+        place-items: center;
+        padding: 48px;
+      }
+
+      .initial-center {
+        width: min(680px, 100%);
+        display: grid;
+        gap: 22px;
+        transform: translateY(-3vh);
+      }
+
+      .initial-title {
+        margin: 0;
+        font-size: clamp(31px, 4vw, 50px);
+        line-height: 1.14;
+        letter-spacing: 0;
+        text-align: center;
+      }
+
+      .chatbox {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 12px;
+        min-height: 70px;
+        padding: 13px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(36, 0, 80, 0.62);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      }
+
+      .chatbox textarea,
+      .chatbox input {
+        width: 100%;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        resize: none;
+        color: var(--ink);
+        background: transparent;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      .chatbox textarea::placeholder,
+      .chatbox input::placeholder {
+        color: rgba(255, 240, 255, 0.48);
+      }
+
+      .send-button {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        border-radius: var(--radius);
+        color: #fff;
+        background: linear-gradient(135deg, #ff8be9, var(--accent) 54%, var(--accent-2));
+        box-shadow: 0 16px 34px rgba(255, 34, 200, 0.28);
+      }
+
+      .send-button svg {
+        width: 20px;
+        height: 20px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .result-app {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        padding: 28px;
+        background:
+          radial-gradient(circle at 32% 4%, rgba(255, 56, 221, 0.22), transparent 28%),
+          linear-gradient(180deg, rgba(127, 30, 187, 0.3), transparent 38%),
+          linear-gradient(135deg, rgba(40, 0, 93, 0.9), rgba(16, 0, 64, 0.94));
+      }
+
+      .result-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--soft);
+      }
+
+      .brand-word {
+        margin: 0;
+        color: var(--accent-ink);
+        font-size: 25px;
+        font-weight: 780;
+        letter-spacing: 0;
+      }
+
+      .status-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #36e672;
+        box-shadow: 0 0 0 5px rgba(54, 230, 114, 0.12), 0 0 24px rgba(54, 230, 114, 0.5);
+      }
+
+      .conversation {
+        min-height: 0;
+        overflow: auto;
+        padding: 22px 2px 20px;
+        scrollbar-width: thin;
+      }
+
+      .messages {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .message {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .message.ai {
+        max-width: 78%;
+      }
+
+      .message.user {
+        max-width: 72%;
+        margin-left: auto;
+        justify-content: flex-end;
+      }
+
+      .avatar {
+        width: 30px;
+        height: 30px;
+        flex: 0 0 auto;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: #fff;
+        background: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+        box-shadow: 0 10px 24px rgba(255, 34, 200, 0.2);
+      }
+
+      .user .avatar {
+        background: rgba(255, 255, 255, 0.14);
+      }
+
+      .bubble {
+        margin: 0;
+        padding: 11px 13px;
+        border: 1px solid var(--soft);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.09);
+        color: rgba(255, 248, 255, 0.92);
+        font-size: 14px;
+        line-height: 1.58;
+      }
+
+      .user .bubble {
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.16);
+        background: linear-gradient(135deg, rgba(255, 47, 210, 0.72), rgba(139, 48, 255, 0.66));
+      }
+
+      .candidate-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .candidate-card {
+        min-width: 0;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.09);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+
+      .candidate-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: start;
+        margin-bottom: 14px;
+      }
+
+      .candidate-name {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.2;
+        letter-spacing: 0;
+      }
+
+      .candidate-role {
+        margin: 5px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .score {
+        min-width: 48px;
+        color: #ff9cea;
+        font-weight: 760;
+        text-align: right;
+      }
+
+      .score span {
+        display: block;
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .match-copy {
+        margin: 0 0 14px;
+        color: rgba(255, 248, 255, 0.84);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+
+      .tag-row span {
+        padding: 5px 8px;
+        border-radius: 999px;
+        color: rgba(255, 248, 255, 0.9);
+        background: rgba(255, 255, 255, 0.12);
+        font-size: 12px;
+        line-height: 1;
+      }
+
+      .result-chat {
+        border-top: 1px solid var(--soft);
+        padding-top: 18px;
+      }
+
+      @media (max-width: 1120px) {
+        .state-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .mock-app {
+          min-height: 680px;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .demo-page {
+          width: min(100vw - 22px, 560px);
+          padding-top: 18px;
+        }
+
+        .demo-head {
+          display: grid;
+          gap: 10px;
+        }
+
+        .demo-head p {
+          text-align: left;
+        }
+
+        .mock-app {
+          min-height: 640px;
+          border-radius: 14px;
+        }
+
+        .initial-app {
+          padding: 28px 18px;
+        }
+
+        .result-app {
+          padding: 20px 16px;
+        }
+
+        .candidate-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .message.ai,
+        .message.user {
+          max-width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="demo-page">
+      <header class="demo-head">
+        <h1>DeerSearch 首页排布 Demo</h1>
+        <p>两个状态使用同一套简约结构：初始态聚焦提问，搜索后态聚焦对话和候选人。</p>
+      </header>
+
+      <section class="state-grid" aria-label="主页两种状态">
+        <article class="state-block" aria-labelledby="initial-title">
+          <p class="state-label">
+            <strong id="initial-title">初始排布</strong>
+            <span>标题 + 对话框</span>
+          </p>
+
+          <div class="mock-app initial-app">
+            <div class="initial-center">
+              <h2 class="initial-title">你想要小鹿给你搜寻什么类型人才？</h2>
+              <form class="chatbox" aria-label="输入人才搜索需求">
+                <textarea rows="1" placeholder="例如：找做过支付风控的 Java 后端"></textarea>
+                <button class="send-button" type="button" aria-label="开始搜寻">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12h14"></path>
+                    <path d="m13 6 6 6-6 6"></path>
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </div>
+        </article>
+
+        <article class="state-block" aria-labelledby="result-title">
+          <p class="state-label">
+            <strong id="result-title">搜寻候选人后的排布</strong>
+            <span>DeerSearch + 对话 + 2 列候选人 + ChatBox</span>
+          </p>
+
+          <div class="mock-app result-app">
+            <header class="result-top">
+              <p class="brand-word">DeerSearch</p>
+              <span class="status-dot" aria-hidden="true"></span>
+            </header>
+
+            <section class="conversation" aria-label="当前对话记录与候选人">
+              <div class="messages">
+                <article class="message user">
+                  <p class="bubble">找做过支付风控的 Java 后端，最好有高并发项目经验。</p>
+                  <div class="avatar">你</div>
+                </article>
+
+                <article class="message ai">
+                  <div class="avatar">鹿</div>
+                  <p class="bubble">我先按 Java、支付风控、高并发三个条件筛选，下面是当前匹配度最高的候选人。</p>
+                </article>
+              </div>
+
+              <section class="candidate-grid" aria-label="候选人卡片">
+                <article class="candidate-card">
+                  <div class="candidate-head">
+                    <div>
+                      <h3 class="candidate-name">陈屿</h3>
+                      <p class="candidate-role">Java 后端 · 上海 · 7 年</p>
+                    </div>
+                    <div class="score">92<span>匹配</span></div>
+                  </div>
+                  <p class="match-copy">支付风控经历完整，做过规则引擎、交易链路和高并发治理。</p>
+                  <div class="tag-row">
+                    <span>Java</span>
+                    <span>支付</span>
+                    <span>风控</span>
+                  </div>
+                </article>
+
+                <article class="candidate-card">
+                  <div class="candidate-head">
+                    <div>
+                      <h3 class="candidate-name">林晓然</h3>
+                      <p class="candidate-role">高级后端 · 杭州 · 6 年</p>
+                    </div>
+                    <div class="score">88<span>匹配</span></div>
+                  </div>
+                  <p class="match-copy">风控服务拆分和性能压测经验清晰，技术栈与岗位需求贴合。</p>
+                  <div class="tag-row">
+                    <span>微服务</span>
+                    <span>风控</span>
+                    <span>性能</span>
+                  </div>
+                </article>
+
+                <article class="candidate-card">
+                  <div class="candidate-head">
+                    <div>
+                      <h3 class="candidate-name">周靖</h3>
+                      <p class="candidate-role">后端架构师 · 深圳 · 9 年</p>
+                    </div>
+                    <div class="score">84<span>匹配</span></div>
+                  </div>
+                  <p class="match-copy">支付核心链路和稳定性治理经验突出，适合资深后端方向。</p>
+                  <div class="tag-row">
+                    <span>架构</span>
+                    <span>支付通道</span>
+                    <span>稳定性</span>
+                  </div>
+                </article>
+
+                <article class="candidate-card">
+                  <div class="candidate-head">
+                    <div>
+                      <h3 class="candidate-name">许南</h3>
+                      <p class="candidate-role">后端工程师 · 北京 · 5 年</p>
+                    </div>
+                    <div class="score">81<span>匹配</span></div>
+                  </div>
+                  <p class="match-copy">有反欺诈模块和消息队列经验，候选证据相对简洁。</p>
+                  <div class="tag-row">
+                    <span>反欺诈</span>
+                    <span>Kafka</span>
+                    <span>Redis</span>
+                  </div>
+                </article>
+              </section>
+            </section>
+
+            <form class="result-chat chatbox" aria-label="继续对话">
+              <input value="只看 5 年以上、近期在金融科技公司的候选人" />
+              <button class="send-button" type="button" aria-label="继续搜寻">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12h14"></path>
+                  <path d="m13 6 6 6-6 6"></path>
+                </svg>
+              </button>
+            </form>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

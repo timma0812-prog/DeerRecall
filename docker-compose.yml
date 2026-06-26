@@ -1,0 +1,7 @@
+services:
+  deerrecall:
+    image: ${DEERRECALL_IMAGE:-deerrecall:local}
+    container_name: ${DEERRECALL_CONTAINER:-deerrecall}
+    ports:
+      - "${DEERRECALL_PORT:-8080}:80"
+    restart: unless-stopped

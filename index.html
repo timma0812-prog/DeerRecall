@@ -1,0 +1,2715 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DeerRecall - AI 人才库</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%238b2ff0'/%3E%3Cpath d='M22 42c-4-8-1.5-19 7-25 6-4 14-4 20 0-6 2-10 6-12 12 4-1 8 0 11 2-3 7-9 12-17 13-4 1-7 0-9-2Z' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-window" aria-label="DeerRecall AI 招聘工作台">
+      <div class="traffic" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <aside class="sidebar" aria-label="DeerRecall 导航">
+        <div class="brand">
+          <div class="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48">
+              <path d="M17 31c-2.7-5.7-1.3-12.7 3.7-17.2 4.2-3.8 10.2-4.8 15.5-2.7-4.2 1.4-7.5 4.5-9.3 9.1 2.9-.2 5.5.4 7.6 1.9-1.8 4.5-5.3 7.9-10.2 9.8-2.8 1-5.2.7-7.3-.9Z" />
+              <path d="M20 14 16 7" />
+              <path d="M28.5 11.5 30 5" />
+              <path d="M34 14.2 40 9" />
+              <path d="M24.5 22.5c-1.8 1.3-2 3.8-.4 5.4 1.5 1.5 4.3 1.5 6.4-.2" />
+            </svg>
+          </div>
+          <div>
+            <strong>DeerRecall</strong>
+            <span>AI 人才库</span>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="主导航">
+          <a class="nav-item" href="#deersearch" data-nav-view="search">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="m16 16 5 5"></path>
+            </svg>
+            <span>DeerSearch</span>
+          </a>
+          <a class="nav-item" href="#import" data-nav-view="import">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12"></path>
+              <path d="m7 8 5-5 5 5"></path>
+              <path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path>
+            </svg>
+            <span>简历导入</span>
+          </a>
+          <a class="nav-item" href="#tasks" data-nav-view="tasks">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 6h16"></path>
+              <path d="M4 12h16"></path>
+              <path d="M4 18h10"></path>
+              <path d="m17 16 2 2 4-4"></path>
+            </svg>
+            <span>解析任务</span>
+          </a>
+          <a class="nav-item active" href="#talents" data-nav-view="talents">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9.5" cy="7" r="4"></circle>
+              <path d="M19 8v6"></path>
+              <path d="M22 11h-6"></path>
+            </svg>
+            <span>人才库</span>
+          </a>
+        </nav>
+
+        <div class="side-bottom">
+          <a class="nav-item" href="#settings" data-nav-view="settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="3.5"></circle>
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.3 7A2 2 0 1 1 7.1 4.2l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"></path>
+            </svg>
+            <span>设置</span>
+          </a>
+        </div>
+
+        <div class="sync">云端 AI 解析就绪</div>
+      </aside>
+
+      <section class="main" id="workspace" aria-label="DeerRecall 工作区">
+        <section class="main-state empty-main state-hidden" id="emptyState" aria-label="等待搜索">
+          <div class="empty-content">
+            <h1 class="empty-title">你想让<span class="hot">小鹿</span>帮你找到什么样的人？</h1>
+            <p class="empty-subtitle">用自然语言描述岗位、技能、行业与经验要求，小鹿会在本地简历库中帮你快速筛选。</p>
+
+            <form class="search-compose" id="emptySearchForm" aria-label="自然语言搜索">
+              <div class="prompt-row">
+                <label class="sr-only" for="emptySearchInput">描述你想找的人</label>
+                <input
+                  id="emptySearchInput"
+                  name="search"
+                  autocomplete="off"
+                  placeholder="例如：找做过支付风控的 Java 后端，最好有高并发项目经验"
+                />
+                <button class="send-button" type="submit" aria-label="搜索">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12h14"></path>
+                    <path d="m13 6 6 6-6 6"></path>
+                  </svg>
+                </button>
+              </div>
+              <div class="suggestion-box">
+                <p class="suggestion-title">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 3 14.2 8.8 20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2Z"></path>
+                  </svg>
+                  热门搜索
+                </p>
+                <div class="chips">
+                  <button class="chip" type="button" data-prompt="找 5 年以上后端工程师">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m16 18 6-6-6-6"></path>
+                      <path d="m8 6-6 6 6 6"></path>
+                      <path d="m14 4-4 16"></path>
+                    </svg>
+                    5年以上后端工程师
+                  </button>
+                  <button class="chip" type="button" data-prompt="找有 AI 产品经验的产品经理">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+                      <path d="m7.5 8.5 4.5 2.6 4.5-2.6"></path>
+                      <path d="M12 22V11"></path>
+                    </svg>
+                    有AI产品经验的产品经理
+                  </button>
+                  <button class="chip" type="button" data-prompt="找跨境电商运营">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M2 12h20"></path>
+                      <path d="M12 2a15.3 15.3 0 0 1 0 20"></path>
+                      <path d="M12 2a15.3 15.3 0 0 0 0 20"></path>
+                    </svg>
+                    跨境电商运营
+                  </button>
+                  <button class="chip" type="button" data-prompt="找金融科技 Java 后端">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 21h18"></path>
+                      <path d="M5 21V8l7-4 7 4v13"></path>
+                      <path d="M9 21v-6h6v6"></path>
+                      <path d="M9 10h.01"></path>
+                      <path d="M15 10h.01"></path>
+                    </svg>
+                    金融科技Java
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section class="main-state results-main state-hidden" id="resultsState" aria-label="搜索结果">
+          <header class="results-header">
+            <h1>DeerSearch</h1>
+            <div class="indexed">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <ellipse cx="12" cy="5" rx="7" ry="3"></ellipse>
+                <path d="M5 5v6c0 1.7 3.1 3 7 3s7-1.3 7-3V5"></path>
+                <path d="M5 11v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"></path>
+              </svg>
+              已索引 <strong>12,486</strong> 份简历
+            </div>
+          </header>
+
+          <section class="conversation" aria-label="搜索对话">
+            <div class="bubble-row user">
+              <div class="bubble" id="userQuery">找做过支付风控的 Java 后端，最好有高并发项目经验。</div>
+              <div class="user-avatar">你</div>
+            </div>
+
+            <div class="bubble-row ai">
+              <div class="deer-avatar" aria-hidden="true">
+                <svg viewBox="0 0 48 48">
+                  <path d="M17 31c-2.7-5.7-1.3-12.7 3.7-17.2 4.2-3.8 10.2-4.8 15.5-2.7-4.2 1.4-7.5 4.5-9.3 9.1 2.9-.2 5.5.4 7.6 1.9-1.8 4.5-5.3 7.9-10.2 9.8-2.8 1-5.2.7-7.3-.9Z" />
+                  <path d="M20 14 16 7" />
+                  <path d="M28.5 11.5 30 5" />
+                  <path d="M34 14.2 40 9" />
+                </svg>
+              </div>
+              <div class="bubble">我先按 Java、支付风控、高并发 3 个条件筛选，以下是当前匹配度最高的候选人。</div>
+            </div>
+
+            <p class="found-line">共找到 <strong>4</strong> 位候选人（匹配度 ≥ 75%）</p>
+
+            <div class="filter-bar" aria-label="筛选条件">
+              <span class="filter-chip">只看 5 年以上 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></span>
+              <span class="filter-chip">最近在金融科技公司 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></span>
+              <span class="filter-chip">有高并发经验 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></span>
+              <span class="filter-select">城市不限 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+              <span class="filter-spacer"></span>
+              <button class="filter-action" type="button" data-search-filter-open="advanced">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M22 3H2l8 9.5V20l4-2v-5.5Z"></path>
+                </svg>
+                更多筛选
+              </button>
+              <span class="filter-action sort">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 3v18"></path>
+                  <path d="m4 7 4-4 4 4"></path>
+                  <path d="M16 21V3"></path>
+                  <path d="m20 17-4 4-4-4"></path>
+                </svg>
+                按匹配度排序
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6"></path>
+                </svg>
+              </span>
+            </div>
+          </section>
+
+          <section class="candidate-grid" aria-label="候选人列表">
+            <article class="candidate-card" data-candidate="陈屿" data-candidate-id="chen-yu">
+              <div class="candidate-top">
+                <div>
+                  <h3>陈屿</h3>
+                  <p class="candidate-role">Java 后端工程师 · 上海 · 7 年</p>
+                </div>
+                <div class="score"><strong>92</strong><span>匹配</span></div>
+              </div>
+              <p class="candidate-desc">支付风控相关经验完整，参与搭建核心规则引擎与交易链路，实现毫秒级风控拦截与高并发处理。</p>
+              <div class="tag-row"><span>Java</span><span>支付风控</span><span>高并发</span><span>分布式架构</span></div>
+              <div class="candidate-actions">
+                <button class="resume-btn candidate-resume-open" type="button" data-candidate-id="candidate_chenyu_001" data-candidate-resume-entry="search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path><path d="M9 15h6"></path><path d="M9 18h4"></path></svg> 查看简历</button>
+                <button class="bookmark-btn shortlist-action" type="button" aria-label="加入短名单" data-name="陈屿"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"></path></svg></button>
+              </div>
+            </article>
+
+            <article class="candidate-card" data-candidate="林晓然" data-candidate-id="lin-xiaoran">
+              <div class="candidate-top">
+                <div>
+                  <h3>林晓然</h3>
+                  <p class="candidate-role">高级后端工程师 · 杭州 · 6 年</p>
+                </div>
+                <div class="score"><strong>88</strong><span>匹配</span></div>
+              </div>
+              <p class="candidate-desc">负责风控服务拆分与性能优化，支撑亿级日交易风控场景，在高并发与链路稳定性方面表现突出。</p>
+              <div class="tag-row"><span>Java</span><span>支付</span><span>高并发</span><span>微服务</span></div>
+              <div class="candidate-actions">
+                <button class="resume-btn candidate-resume-open" type="button" data-candidate-id="lin-xiaoran" data-candidate-resume-entry="search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path><path d="M9 15h6"></path><path d="M9 18h4"></path></svg> 查看简历</button>
+                <button class="bookmark-btn shortlist-action" type="button" aria-label="加入短名单" data-name="林晓然"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"></path></svg></button>
+              </div>
+            </article>
+
+            <article class="candidate-card" data-candidate="周靖" data-candidate-id="zhou-jing">
+              <div class="candidate-top">
+                <div>
+                  <h3>周靖</h3>
+                  <p class="candidate-role">后端架构师 · 深圳 · 9 年</p>
+                </div>
+                <div class="score"><strong>84</strong><span>匹配</span></div>
+              </div>
+              <p class="candidate-desc">主导支付风控平台架构与技术选型，保障风控链路的稳定性与可扩展性，适合深层架构与技术治理方向。</p>
+              <div class="tag-row"><span>Java</span><span>风控平台</span><span>高并发</span><span>架构设计</span></div>
+              <div class="candidate-actions">
+                <button class="resume-btn candidate-resume-open" type="button" data-candidate-id="zhou-jing" data-candidate-resume-entry="search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path><path d="M9 15h6"></path><path d="M9 18h4"></path></svg> 查看简历</button>
+                <button class="bookmark-btn shortlist-action" type="button" aria-label="加入短名单" data-name="周靖"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"></path></svg></button>
+              </div>
+            </article>
+
+            <article class="candidate-card" data-candidate="许南" data-candidate-id="xu-nan">
+              <div class="candidate-top">
+                <div>
+                  <h3>许南</h3>
+                  <p class="candidate-role">后端工程师 · 北京 · 5 年</p>
+                </div>
+                <div class="score"><strong>81</strong><span>匹配</span></div>
+              </div>
+              <p class="candidate-desc">有反欺诈模块和消息队列经验，参与高并发规则与风控规则优化，候选证据相对简洁。</p>
+              <div class="tag-row"><span>Java</span><span>支付 / 风控</span><span>高并发</span><span>Kafka</span></div>
+              <div class="candidate-actions">
+                <button class="resume-btn candidate-resume-open" type="button" data-candidate-id="xu-nan" data-candidate-resume-entry="search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path><path d="M9 15h6"></path><path d="M9 18h4"></path></svg> 查看简历</button>
+                <button class="bookmark-btn shortlist-action" type="button" aria-label="加入短名单" data-name="许南"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"></path></svg></button>
+              </div>
+            </article>
+          </section>
+
+          <form class="bottom-search" id="refineSearchForm" aria-label="继续优化搜索">
+            <div>
+              <label for="refineSearchInput">继续优化搜索条件，或提出新的需求...</label>
+              <input
+                id="refineSearchInput"
+                name="search"
+                autocomplete="off"
+                value="只看 5 年以上、近期在金融科技公司的候选人"
+              />
+            </div>
+            <button class="send-button" type="submit" aria-label="继续搜索">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 12h14"></path>
+                <path d="m13 6 6 6-6 6"></path>
+              </svg>
+            </button>
+          </form>
+        </section>
+
+        <section class="main-state import-workspace state-hidden" id="importState" aria-label="简历导入工作区">
+          <header class="import-header">
+            <h1>简历导入</h1>
+            <p>将本地简历文件或文件夹导入这里，小鹿会自动解析、去重并加入人才库。</p>
+          </header>
+
+          <section class="import-panel" data-import-state="default" aria-label="选择导入文件">
+            <div class="import-hero-icon folder-file-icon" aria-hidden="true">
+              <svg viewBox="0 0 96 96">
+                <path class="folder-back" d="M18 34h22l8 9h30c5 0 9 4 9 9v23c0 5-4 9-9 9H18c-5 0-9-4-9-9V43c0-5 4-9 9-9Z"></path>
+                <path class="doc-page" d="M41 14h28l12 12v40H41Z"></path>
+                <path d="M69 14v12h12"></path>
+                <path d="M53 44h18"></path>
+                <path d="M53 54h13"></path>
+                <path class="folder-front" d="M15 47h62c5.5 0 9.3 5.2 7.9 10.5L78 84H18c-4.2 0-7.7-3-8.4-7.1L6.3 58.1C5.3 52.3 9.7 47 15 47Z"></path>
+              </svg>
+            </div>
+            <h2>拖拽简历文件或文件夹到这里</h2>
+            <p class="import-muted">或选择一种导入方式</p>
+            <div class="import-actions">
+              <button class="primary-action import-state-button" type="button" data-target-state="preview">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>
+                </svg>
+                上传文件夹
+              </button>
+              <button class="secondary-action import-state-button" type="button" data-target-state="preview">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path>
+                  <path d="M14 2v5h5"></path>
+                </svg>
+                选择文件
+              </button>
+            </div>
+            <p class="format-note">支持 PDF / Word / TXT / Markdown，支持批量导入与子文件夹扫描</p>
+          </section>
+
+          <section class="import-panel state-hidden" data-import-state="preview" aria-label="导入预检">
+            <div class="import-hero-icon folder-ok-icon" aria-hidden="true">
+              <svg viewBox="0 0 96 96">
+                <path class="folder-back" d="M18 34h22l8 9h30c5 0 9 4 9 9v23c0 5-4 9-9 9H18c-5 0-9-4-9-9V43c0-5 4-9 9-9Z"></path>
+                <path class="folder-front" d="M15 47h62c5.5 0 9.3 5.2 7.9 10.5L78 84H18c-4.2 0-7.7-3-8.4-7.1L6.3 58.1C5.3 52.3 9.7 47 15 47Z"></path>
+                <circle cx="77" cy="63" r="15"></circle>
+                <path class="check-line" d="m69.5 63.5 5 5 10-12"></path>
+              </svg>
+            </div>
+            <h2>已选择文件夹：FinTech_Backend_2026</h2>
+            <p class="folder-path">/Users/deer/Downloads/FinTech_Backend_2026</p>
+            <div class="import-metric-row">
+              <div class="import-metric blue">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path>
+                  <path d="M14 2v5h5"></path>
+                </svg>
+                <span>已选文件</span>
+                <strong>126</strong>
+              </div>
+              <div class="import-metric green">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m20 6-11 11-5-5"></path>
+                </svg>
+                <span>可解析</span>
+                <strong>108</strong>
+              </div>
+              <div class="import-metric yellow">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path>
+                  <path d="M12 9v4"></path>
+                  <path d="M12 17h.01"></path>
+                </svg>
+                <span>可能重复</span>
+                <strong>12</strong>
+              </div>
+              <div class="import-metric purple">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M12 16v-4"></path>
+                  <path d="M12 8h.01"></path>
+                </svg>
+                <span>格式不支持</span>
+                <strong>6</strong>
+              </div>
+            </div>
+            <div class="import-actions">
+              <button class="primary-action import-state-button" type="button" data-target-state="loading">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 3 19 12 5 21Z"></path>
+                </svg>
+                开始导入
+              </button>
+              <button class="secondary-action import-state-button" type="button" data-target-state="default">重新选择</button>
+            </div>
+            <p class="format-note">支持 PDF / Word / TXT / Markdown，支持批量导入与子文件夹扫描</p>
+          </section>
+
+          <section class="import-panel state-hidden" data-import-state="loading" aria-label="导入进行中">
+            <div class="import-hero-icon folder-file-icon active" aria-hidden="true">
+              <svg viewBox="0 0 96 96">
+                <path class="folder-back" d="M18 34h22l8 9h30c5 0 9 4 9 9v23c0 5-4 9-9 9H18c-5 0-9-4-9-9V43c0-5 4-9 9-9Z"></path>
+                <path class="doc-page" d="M41 14h28l12 12v40H41Z"></path>
+                <path d="M69 14v12h12"></path>
+                <path d="M53 44h18"></path>
+                <path d="M53 54h13"></path>
+                <path class="folder-front" d="M15 47h62c5.5 0 9.3 5.2 7.9 10.5L78 84H18c-4.2 0-7.7-3-8.4-7.1L6.3 58.1C5.3 52.3 9.7 47 15 47Z"></path>
+              </svg>
+            </div>
+            <h2>正在导入简历... <span>68%</span></h2>
+            <div class="progress-track large" aria-hidden="true"><span style="width: 68%"></span></div>
+            <div class="processing-summary">
+              <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path></svg><span>总文件</span><strong>126</strong></div>
+              <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg><span>已完成</span><strong>86</strong></div>
+              <div><span class="spinner"></span><span>解析中</span><strong>4</strong></div>
+              <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>失败</span><strong>2</strong></div>
+            </div>
+            <div class="processing-list">
+              <span class="processing-title">正在处理</span>
+              <div class="file-row">
+                <span class="file-type pdf">PDF</span>
+                <strong>张明_高级Java开发工程师.pdf</strong>
+                <em>正在解析</em>
+                <small>30 秒前</small>
+              </div>
+              <div class="file-row">
+                <span class="file-type docx">DOCX</span>
+                <strong>李想_后端开发工程师.docx</strong>
+                <em class="done">已完成</em>
+                <small>1 分钟前</small>
+              </div>
+              <div class="file-row">
+                <span class="file-type pdf">PDF</span>
+                <strong>王磊_Spring高级开发工程师.pdf</strong>
+                <em class="done">已完成</em>
+                <small>2 分钟前</small>
+              </div>
+            </div>
+            <div class="import-actions compact">
+              <button class="primary-action import-state-button" type="button" data-target-state="finished">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path>
+                  <path d="M14 2v5h5"></path>
+                </svg>
+                查看导入结果
+              </button>
+              <button class="secondary-action" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="6" y="4" width="4" height="16"></rect>
+                  <rect x="14" y="4" width="4" height="16"></rect>
+                </svg>
+                暂停导入
+              </button>
+            </div>
+          </section>
+
+          <section class="import-panel state-hidden" data-import-state="finished" aria-label="导入完成">
+            <div class="complete-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="m20 6-11 11-5-5"></path>
+              </svg>
+            </div>
+            <h2>导入完成</h2>
+            <p class="import-muted">本次导入已处理 126 个文件，已加入人才库。</p>
+            <div class="result-stat-grid">
+              <div class="result-stat green"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg><strong>96</strong><span>新增简历</span></div>
+              <div class="result-stat blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><strong>18</strong><span>更新已有</span></div>
+              <div class="result-stat yellow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v12"></path><path d="M8 6h8"></path><path d="M8 10h8"></path><rect x="8" y="8" width="12" height="14" rx="2"></rect></svg><strong>9</strong><span>重复跳过</span></div>
+              <div class="result-stat red"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><strong>3</strong><span>解析失败</span></div>
+            </div>
+            <div class="import-actions compact">
+              <button class="primary-action" type="button" data-import-open="searchImported">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="11" cy="11" r="7"></circle>
+                  <path d="m16 16 5 5"></path>
+                </svg>
+                去 DeerSearch 搜索
+              </button>
+              <button class="secondary-action" type="button" data-task-open="issue" data-task-id="fintech_backend_2026">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path>
+                  <path d="M14 2v5h5"></path>
+                </svg>
+                查看失败文件
+              </button>
+            </div>
+            <button class="plain-action import-state-button" type="button" data-target-state="default">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21 12a9 9 0 0 1-9 9 9.8 9.8 0 0 1-6.7-2.7L3 16"></path>
+                <path d="M3 21v-5h5"></path>
+                <path d="M3 12a9 9 0 0 1 9-9 9.8 9.8 0 0 1 6.7 2.7L21 8"></path>
+                <path d="M16 8h5V3"></path>
+              </svg>
+              继续导入
+            </button>
+          </section>
+        </section>
+
+        <section class="main-state talent-workspace" id="talentState" aria-label="人才库工作区" data-filter="all">
+          <header class="talent-header">
+            <div>
+              <h1>人才库</h1>
+              <p>管理已入库的候选人简历、标签、来源与资料状态。</p>
+            </div>
+            <button class="talent-export" type="button" data-export-open="candidateList">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path><path d="M5 21h14"></path></svg>
+              导出列表
+            </button>
+          </header>
+
+          <section class="talent-kpis" aria-label="人才库指标">
+            <article class="talent-kpi purple"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7" r="4"></circle></svg><span>总人才</span><strong>12,486</strong></article>
+            <article class="talent-kpi blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg><span>本周新增</span><strong>326</strong></article>
+            <article class="talent-kpi yellow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path><path d="M9 13h6"></path><path d="M9 17h4"></path></svg><span>待完善</span><strong>41</strong></article>
+            <article class="talent-kpi red"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>疑似重复</span><strong>18</strong></article>
+          </section>
+
+          <section class="talent-controls" aria-label="人才库筛选">
+            <div class="talent-search">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 5 5"></path></svg>
+              <input placeholder="按姓名、职位、公司、技能或城市搜索" />
+            </div>
+            <button class="talent-filter-button" type="button" data-talent-open="advancedFilter"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 3H2l8 9.5V20l4-2v-5.5Z"></path></svg>更多筛选</button>
+          </section>
+
+          <section class="talent-tabs-row" aria-label="人才库视图">
+            <div class="talent-tabs">
+              <button class="talent-tab active" type="button" data-talent-filter="all">全部候选人</button>
+              <button class="talent-tab" type="button" data-talent-filter="recent">本周新增</button>
+              <button class="talent-tab" type="button" data-talent-filter="saved">已收藏</button>
+              <button class="talent-tab" type="button" data-talent-filter="pending">待完善</button>
+              <button class="talent-tab" type="button" data-talent-filter="duplicate">疑似重复</button>
+            </div>
+            <button class="talent-sort" type="button">排序：最近入库时间 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+          </section>
+
+          <section class="talent-list" aria-live="polite">
+            <section class="talent-view" data-talent-view="all" aria-label="全部候选人">
+              <article class="talent-row is-selected" data-talent-item data-candidate-id="chen-yu" data-talent-kind="all" data-talent-panel-target="profile">
+                <div class="talent-avatar">陈</div>
+                <div class="talent-main">
+                  <div class="talent-name-line"><h3>陈屿</h3><button class="talent-star is-on" type="button" aria-label="取消收藏">★</button></div>
+                  <p>Java 后端开发工程师 · 上海 · 7 年</p>
+                  <div class="talent-tags"><span>Java</span><span>Spring Boot</span><span>分布式</span><span>高并发</span><span>MySQL</span></div>
+                </div>
+                <div class="talent-source"><span>来源：FinTech_Backend_2026</span><strong class="green">资料完整</strong><small>今天 10:32 入库</small></div>
+                <div class="talent-actions"><button class="candidate-resume-open" type="button" data-candidate-id="candidate_chenyu_001" data-candidate-resume-entry="talent">查看简历</button><button class="dot-menu" type="button" aria-label="更多操作" data-talent-open="candidateActions">⋮</button></div>
+              </article>
+              <article class="talent-row" data-talent-item data-candidate-id="lin-xiaoran" data-talent-kind="all" data-talent-panel-target="profile">
+                <div class="talent-avatar blue">林</div>
+                <div class="talent-main">
+                  <div class="talent-name-line"><h3>林晓然</h3><button class="talent-star" type="button" aria-label="收藏">☆</button></div>
+                  <p>高级 Java 开发工程师 · 杭州 · 6 年</p>
+                  <div class="talent-tags"><span>Java</span><span>Spring Cloud</span><span>微服务</span><span>Redis</span><span>Kafka</span></div>
+                </div>
+                <div class="talent-source"><span>来源：客户A_后端简历包</span><strong class="yellow">待完善</strong><small>今天 09:48 入库</small></div>
+                <div class="talent-actions"><button class="candidate-resume-open" type="button" data-candidate-id="lin-xiaoran" data-candidate-resume-entry="talent">查看简历</button><button class="dot-menu" type="button" aria-label="更多操作" data-talent-open="candidateActions">⋮</button></div>
+              </article>
+              <article class="talent-row" data-talent-item data-candidate-id="zhou-jing" data-talent-kind="all" data-talent-panel-target="profile">
+                <div class="talent-avatar violet">周</div>
+                <div class="talent-main">
+                  <div class="talent-name-line"><h3>周靖</h3><button class="talent-star" type="button" aria-label="收藏">☆</button></div>
+                  <p>后端架构师 · 深圳 · 9 年</p>
+                  <div class="talent-tags"><span>架构设计</span><span>高并发</span><span>分布式</span><span>性能优化</span><span>MySQL</span></div>
+                </div>
+                <div class="talent-source"><span>来源：Java后端候选人_5月</span><strong class="green">资料完整</strong><small>昨天 16:22 入库</small></div>
+                <div class="talent-actions"><button class="candidate-resume-open" type="button" data-candidate-id="zhou-jing" data-candidate-resume-entry="talent">查看简历</button><button class="dot-menu" type="button" aria-label="更多操作" data-talent-open="candidateActions">⋮</button></div>
+              </article>
+              <article class="talent-row" data-talent-item data-candidate-id="xu-nan" data-talent-kind="all" data-talent-panel-target="profile">
+                <div class="talent-avatar indigo">许</div>
+                <div class="talent-main">
+                  <div class="talent-name-line"><h3>许南</h3><button class="talent-star" type="button" aria-label="收藏">☆</button></div>
+                  <p>后端工程师 · 北京 · 5 年</p>
+                  <div class="talent-tags"><span>Java</span><span>Spring Boot</span><span>MySQL</span><span>Redis</span><span>Linux</span></div>
+                </div>
+                <div class="talent-source"><span>来源：FinTech_Backend_2026</span><strong class="red">疑似重复</strong><small>昨天 11:05 入库</small></div>
+                <div class="talent-actions"><button class="candidate-resume-open" type="button" data-candidate-id="xu-nan" data-candidate-resume-entry="talent">查看简历</button><button class="dot-menu" type="button" aria-label="更多操作" data-talent-open="candidateActions">⋮</button></div>
+              </article>
+              <footer class="talent-pagination"><span>共 12,486 位候选人</span><div><button type="button">‹</button><strong>1</strong><button type="button">2</button><button type="button">3</button><button type="button">4</button><button type="button">5</button><em>...</em><button type="button">625</button><button type="button">›</button></div></footer>
+            </section>
+
+            <section class="talent-view state-hidden" data-talent-view="recent" aria-label="最近导入">
+              <h2>最近导入</h2>
+              <p class="talent-view-note">按导入来源查看本周新增候选人，可快速进入来源批次或继续筛选。</p>
+              <article class="import-source-row is-selected" data-talent-item data-talent-kind="recent" data-talent-panel-target="recent">
+                <div class="source-icon">F</div><div><h3>FinTech_Backend_2026</h3><p>今天 10:32 · 来源累计 248 份 · 后端/金融科技</p></div><strong>96 新增</strong><span>18 更新</span><button type="button" data-talent-open="sourceDetail">查看来源</button>
+              </article>
+              <article class="import-source-row" data-talent-item data-talent-kind="recent" data-talent-panel-target="recent">
+                <div class="source-icon">客</div><div><h3>客户A_后端简历包</h3><p>今天 09:48 · 来源累计 186 份 · Java/中高级</p></div><strong>72 新增</strong><span>11 待完善</span><button type="button" data-talent-open="sourceDetail">查看来源</button>
+              </article>
+              <article class="import-source-row" data-talent-item data-talent-kind="recent" data-talent-panel-target="recent">
+                <div class="source-icon">J</div><div><h3>Java后端候选人_5月</h3><p>昨天 16:22 · 132 份 · 春招补充</p></div><strong>60 新增</strong><span>2 重复</span><button type="button" data-talent-open="sourceDetail">查看来源</button>
+              </article>
+              <article class="import-source-row" data-talent-item data-talent-kind="recent" data-talent-panel-target="recent">
+                <div class="source-icon">支</div><div><h3>支付风控候选人_春招</h3><p>周一 15:20 · 74 份 · 风控/支付</p></div><strong>31 新增</strong><span>7 更新</span><button type="button" data-talent-open="sourceDetail">查看来源</button>
+              </article>
+            </section>
+
+            <section class="talent-view state-hidden" data-talent-view="saved" aria-label="已收藏">
+              <h2>已收藏</h2>
+              <p class="talent-view-note">收藏的候选人会集中在这里，方便后续沟通、导出或生成短名单。</p>
+              <article class="saved-row is-selected" data-talent-item data-candidate-id="chen-yu" data-talent-kind="saved" data-talent-panel-target="saved">
+                <div class="talent-avatar">陈</div><div><h3>陈屿 <span>核心候选</span></h3><p>Java 后端开发工程师 · 上海 · 7 年 · 92 匹配</p><div class="talent-tags"><span>支付风控</span><span>高并发</span><span>金融科技</span></div></div><button class="candidate-resume-open" type="button" data-candidate-id="candidate_chenyu_001" data-candidate-resume-entry="talent">查看简历</button>
+              </article>
+              <article class="saved-row" data-talent-item data-candidate-id="zhou-jing" data-talent-kind="saved" data-talent-panel-target="saved">
+                <div class="talent-avatar violet">周</div><div><h3>周靖 <span>架构方向</span></h3><p>后端架构师 · 深圳 · 9 年 · 84 匹配</p><div class="talent-tags"><span>架构设计</span><span>平台治理</span><span>性能优化</span></div></div><button class="candidate-resume-open" type="button" data-candidate-id="zhou-jing" data-candidate-resume-entry="talent">查看简历</button>
+              </article>
+              <article class="saved-row" data-talent-item data-candidate-id="lin-xiaoran" data-talent-kind="saved" data-talent-panel-target="saved">
+                <div class="talent-avatar blue">林</div><div><h3>林晓然 <span>待补资料</span></h3><p>高级 Java 开发工程师 · 杭州 · 6 年 · 88 匹配</p><div class="talent-tags"><span>微服务</span><span>Kafka</span><span>Redis</span></div></div><button class="candidate-resume-open" type="button" data-candidate-id="lin-xiaoran" data-candidate-resume-entry="talent">查看简历</button>
+              </article>
+            </section>
+
+            <section class="talent-view state-hidden" data-talent-view="pending" aria-label="待完善人才">
+              <h2>待完善人才</h2>
+              <p class="talent-view-note">以下候选人资料不完整，请及时补全关键信息，提升数据质量与搜索准确度。</p>
+              <article class="pending-row is-selected" data-talent-item data-talent-kind="pending" data-talent-panel-target="pending">
+                <div class="talent-avatar">陈</div><div><h3>陈屿 <strong>★</strong></h3><p>Java 后端开发工程师 · 上海 · 7 年</p><div class="missing-tags"><span>缺失手机号</span><span>缺失邮箱</span><span>缺失最近工作经历</span></div></div><em>待完善</em><button type="button" data-talent-open="pendingComplete">补全资料</button><button class="dot-menu" type="button" aria-label="更多操作" data-talent-open="candidateActions">⋮</button>
+              </article>
+              <article class="pending-row" data-talent-item data-talent-kind="pending" data-talent-panel-target="pending">
+                <div class="talent-avatar blue">林</div><div><h3>林晓然</h3><p>高级 Java 开发工程师 · 杭州 · 6 年</p><div class="missing-tags"><span>缺失邮箱</span><span>缺失教育经历</span></div></div><em>待完善</em><button type="button" data-talent-open="pendingComplete">补全资料</button><button class="dot-menu" type="button" aria-label="更多操作" data-talent-open="candidateActions">⋮</button>
+              </article>
+              <article class="pending-row" data-talent-item data-talent-kind="pending" data-talent-panel-target="pending">
+                <div class="talent-avatar violet">周</div><div><h3>周靖</h3><p>后端架构师 · 深圳 · 9 年</p><div class="missing-tags"><span>缺失手机号</span><span>缺失最近工作经历</span><span>缺失教育经历</span></div></div><em>待完善</em><button type="button" data-talent-open="pendingComplete">补全资料</button><button class="dot-menu" type="button" aria-label="更多操作" data-talent-open="candidateActions">⋮</button>
+              </article>
+              <article class="pending-row" data-talent-item data-talent-kind="pending" data-talent-panel-target="pending">
+                <div class="talent-avatar indigo">许</div><div><h3>许南</h3><p>后端工程师 · 北京 · 5 年</p><div class="missing-tags"><span>缺失手机号</span><span>缺失邮箱</span></div></div><em>待完善</em><button type="button" data-talent-open="pendingComplete">补全资料</button><button class="dot-menu" type="button" aria-label="更多操作" data-talent-open="candidateActions">⋮</button>
+              </article>
+            </section>
+
+            <section class="talent-view state-hidden" data-talent-view="duplicate" aria-label="疑似重复">
+              <p class="talent-view-note">共 18 组疑似重复候选人</p>
+              <article class="duplicate-group is-expanded is-selected" data-talent-item data-talent-kind="duplicate" data-talent-panel-target="duplicate">
+                <header><h2>重复组 #20240520-001 <span>高相似度 98%</span></h2><small>入库时间：今天 10:32</small></header>
+                <div class="duplicate-compare">
+                  <section><div class="face-avatar"></div><h3>陈屿</h3><p>高级 Java 开发工程师<br>上海 · 7 年经验</p><div class="talent-tags"><span>Java</span><span>Spring Boot</span><span>分布式</span><span>微服务</span><span>+3</span></div><small>来源：FinTech_Backend_2026<br>入库时间：今天 10:32</small></section>
+                  <div class="merge-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3 21 7 17 11"></path><path d="M3 7h18"></path><path d="M7 21 3 17l4-4"></path><path d="M21 17H3"></path></svg></div>
+                  <section><div class="face-avatar alt"></div><h3>陈屿</h3><p>Java 后端开发工程师<br>上海 · 7 年经验</p><div class="talent-tags"><span>Java</span><span>Spring Boot</span><span>分布式</span><span>微服务</span><span>+3</span></div><small>来源：猎聘网<br>入库时间：昨天 16:22</small></section>
+                </div>
+                <footer><strong>相似度摘要</strong><span>姓名一致</span><span>手机号一致</span><span>工作经历高度重合</span><span>技能标签重合度 92%</span><button type="button" data-talent-open="duplicateDetail">展开差异详情</button></footer>
+              </article>
+              <article class="duplicate-row" data-talent-item data-talent-kind="duplicate" data-talent-panel-target="duplicate"><h3>重复组 #20240520-002 <span>中相似度 84%</span></h3><p>林晓然 · 高级后端工程师 · 杭州 · 6 年经验 · 2 份简历</p><small>入库时间：今天 09:48</small></article>
+              <article class="duplicate-row" data-talent-item data-talent-kind="duplicate" data-talent-panel-target="duplicate"><h3>重复组 #20240519-004 <span>中相似度 79%</span></h3><p>许南 · 后端工程师 · 北京 · 5 年经验 · 2 份简历</p><small>入库时间：昨天 11:05</small></article>
+            </section>
+          </section>
+        </section>
+
+        <section class="main-state talent-detail-workspace state-hidden" id="talentDuplicateDetailState" aria-label="重复候选人差异详情">
+          <header class="talent-detail-topbar">
+            <button class="resume-back-link" type="button" data-talent-detail-return>← 返回疑似重复</button>
+            <p>人才库 / 疑似重复 / <strong>重复组 #20240520-001</strong></p>
+          </header>
+
+          <section class="talent-detail-hero duplicate-hero">
+            <div>
+              <span class="detail-kicker">P0 资料治理</span>
+              <h1>重复候选人差异详情</h1>
+              <p>对比两份高度相似的候选人资料，确认字段来源、冲突项和推荐合并策略。</p>
+            </div>
+            <div class="duplicate-score-card">
+              <strong>98%</strong>
+              <span>高相似度</span>
+            </div>
+          </section>
+
+          <section class="duplicate-diff-grid" aria-label="重复候选人差异">
+            <article class="talent-detail-card duplicate-version is-recommended">
+              <span class="label">版本 A · 推荐主档</span>
+              <div class="version-head">
+                <div class="talent-avatar">陈</div>
+                <div>
+                  <h2>陈屿</h2>
+                  <p>高级 Java 后端工程师 · 上海 · 7 年</p>
+                </div>
+              </div>
+              <div class="detail-chip-row"><span>FinTech_Backend_2026</span><span>今天 10:32</span><span>资料更完整</span></div>
+              <p class="detail-note">包含手机号、邮箱、最近工作经历和支付风控项目细节，建议作为合并后的主档。</p>
+            </article>
+
+            <article class="talent-detail-card duplicate-version">
+              <span class="label">版本 B · 补充来源</span>
+              <div class="version-head">
+                <div class="talent-avatar indigo">陈</div>
+                <div>
+                  <h2>陈屿</h2>
+                  <p>Java 后端开发工程师 · 上海 · 7 年</p>
+                </div>
+              </div>
+              <div class="detail-chip-row"><span>猎聘网</span><span>昨天 16:22</span><span>项目更多</span></div>
+              <p class="detail-note">项目段落多 1 条，但联系方式与工作经历描述不如版本 A 完整。</p>
+            </article>
+
+            <article class="talent-detail-card field-comparison-card">
+              <div class="section-title-line">
+                <h2>字段差异矩阵</h2>
+                <span>5 个关键字段</span>
+              </div>
+              <div class="field-comparison-table" role="table" aria-label="字段差异矩阵">
+                <div role="row"><strong>字段</strong><strong>版本 A</strong><strong>版本 B</strong><strong>建议</strong></div>
+                <div role="row"><span>手机号</span><span>138****5678</span><span>138****5678</span><em class="green">一致保留</em></div>
+                <div role="row"><span>职位</span><span>高级 Java 后端工程师</span><span>Java 后端开发工程师</span><em class="yellow">保留更完整描述</em></div>
+                <div role="row"><span>最近工作经历</span><span>支付风控交易链路</span><span>支付平台后端</span><em class="green">版本 A 为主</em></div>
+                <div role="row"><span>项目经历</span><span>4 段项目</span><span>5 段项目</span><em class="blue">补充 B 的新增项目</em></div>
+                <div role="row"><span>来源</span><span>内部批次</span><span>猎聘网</span><em>保留来源链路</em></div>
+              </div>
+            </article>
+
+            <article class="talent-detail-card merge-decision-card">
+              <div class="section-title-line">
+                <h2>合并决策</h2>
+                <span>推荐：合并为一份主档</span>
+              </div>
+              <div class="decision-stack">
+                <p><span>主档选择</span><strong>版本 A</strong><em>资料完整度 92%</em></p>
+                <p><span>补充字段</span><strong>版本 B 项目经历</strong><em>新增 1 段项目</em></p>
+                <p><span>保留记录</span><strong>两个来源链路</strong><em>便于后续追溯</em></p>
+              </div>
+              <div class="detail-action-row">
+                <button class="primary-action" type="button" data-talent-detail-action="merge">合并简历（推荐）</button>
+                <button class="secondary-action" type="button" data-talent-detail-action="newer">保留较新版本</button>
+                <button class="secondary-action" type="button" data-talent-detail-action="separate">分别保留</button>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section class="main-state talent-detail-workspace state-hidden" id="talentPendingCompleteState" aria-label="待完善资料补全">
+          <header class="talent-detail-topbar">
+            <button class="resume-back-link" type="button" data-talent-detail-return>← 返回待完善</button>
+            <p>人才库 / 待完善 / <strong>陈屿</strong></p>
+          </header>
+
+          <section class="talent-detail-hero pending-hero">
+            <div>
+              <span class="detail-kicker">P0 数据健康</span>
+              <h1>待完善资料补全</h1>
+              <p>集中补齐候选人的关键联系方式、最近经历与教育信息，保存后同步提升人才库搜索质量。</p>
+            </div>
+            <div class="completion-score-card">
+              <strong>62%</strong>
+              <span>当前完整度</span>
+            </div>
+          </section>
+
+          <section class="pending-complete-grid" aria-label="待完善资料补全">
+            <article class="talent-detail-card completion-form-card">
+              <div class="section-title-line">
+                <h2>缺失字段核验</h2>
+                <span>4 个字段待确认</span>
+              </div>
+              <div class="completion-form-grid">
+                <label><span>手机号</span><input value="138****5678" aria-label="手机号" /><em>AI 已识别，需确认</em></label>
+                <label><span>邮箱</span><input value="chenyu@example.com" aria-label="邮箱" /><em>来自简历正文</em></label>
+                <label><span>最近工作经历</span><textarea aria-label="最近工作经历">某金融科技公司 · 高级后端工程师 · 负责支付风控交易链路</textarea><em>建议补充团队规模</em></label>
+                <label><span>教育经历</span><input value="本科 · 计算机科学与技术" aria-label="教育经历" /><em>低置信，需要人工确认</em></label>
+              </div>
+            </article>
+
+            <article class="talent-detail-card ai-completion-card">
+              <div class="section-title-line">
+                <h2>AI 补全建议</h2>
+                <span>按可信度排序</span>
+              </div>
+              <div class="suggestion-stack">
+                <p><strong>联系方式</strong><span>手机号与邮箱均可从原简历正文识别，建议保存为可触达状态。</span><button type="button" data-talent-detail-action="apply">应用</button></p>
+                <p><strong>最近经历</strong><span>工作经历中命中“支付风控交易链路”和“规则引擎”，可补入核心经历摘要。</span><button type="button" data-talent-detail-action="apply">应用</button></p>
+                <p><strong>教育经历</strong><span>教育字段置信度偏低，建议人工确认后保存。</span><button type="button" data-talent-detail-action="check">标记待确认</button></p>
+              </div>
+            </article>
+
+            <article class="talent-detail-card completion-impact-card">
+              <div class="section-title-line">
+                <h2>资料完整度提升</h2>
+                <span>保存后预估</span>
+              </div>
+              <div class="impact-meter"><i style="width: 92%"></i></div>
+              <div class="decision-stack">
+                <p><span>当前完整度</span><strong>62%</strong><em>待完善</em></p>
+                <p><span>保存后完整度</span><strong>92%</strong><em class="green">资料完整</em></p>
+                <p><span>搜索影响</span><strong>联系方式 / 经历标签</strong><em>可被精准召回</em></p>
+              </div>
+              <div class="detail-action-row">
+                <button class="primary-action" type="button" data-talent-detail-action="save">保存补全</button>
+                <button class="secondary-action" type="button" data-talent-detail-action="parse">重新解析原简历</button>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section class="main-state p1-workspace talent-source-workspace state-hidden" id="talentSourceDetailState" aria-label="来源批次详情">
+          <header class="p1-topbar">
+            <button class="resume-back-link" type="button" data-p1-return="talentRecent">← 返回本周新增</button>
+            <p>人才库 / 本周新增 / <strong>FinTech_Backend_2026</strong></p>
+          </header>
+
+          <section class="p1-hero source-hero">
+            <div>
+              <span class="detail-kicker">P1 来源治理</span>
+              <h1>来源批次详情</h1>
+              <p>查看本批导入候选人的入库结果、质量信号和后续处理入口。</p>
+            </div>
+            <div class="p1-score-card">
+              <strong>248</strong>
+              <span>来源累计</span>
+            </div>
+          </section>
+
+          <section class="p1-stat-grid" aria-label="批次入库概览">
+            <article><span>批次入库概览</span><strong>126</strong><em>本次文件</em></article>
+            <article><span>新增候选人</span><strong>96</strong><em class="green">已入库</em></article>
+            <article><span>更新已有</span><strong>18</strong><em class="blue">保留版本</em></article>
+            <article><span>待治理</span><strong>12</strong><em class="yellow">待完善 / 重复</em></article>
+          </section>
+
+          <section class="source-detail-grid">
+            <article class="p1-panel source-candidate-list">
+              <div class="section-title-line">
+                <h2>候选人清单</h2>
+                <span>最近入库 4 位</span>
+              </div>
+              <div class="source-candidate-row">
+                <span class="talent-avatar">陈</span>
+                <p><strong>陈屿</strong><em>Java 后端开发工程师 · 上海 · 7 年</em></p>
+                <mark class="green">资料完整</mark>
+                <button type="button" class="candidate-resume-open" data-candidate-id="candidate_chenyu_001" data-candidate-resume-entry="talent">查看简历</button>
+              </div>
+              <div class="source-candidate-row">
+                <span class="talent-avatar blue">林</span>
+                <p><strong>林晓然</strong><em>高级 Java 开发工程师 · 杭州 · 6 年</em></p>
+                <mark class="yellow">待完善</mark>
+                <button type="button" data-talent-open="pendingComplete">补全资料</button>
+              </div>
+              <div class="source-candidate-row">
+                <span class="talent-avatar violet">周</span>
+                <p><strong>周靖</strong><em>后端架构师 · 深圳 · 9 年</em></p>
+                <mark class="green">资料完整</mark>
+                <button type="button" class="candidate-resume-open" data-candidate-id="zhou-jing" data-candidate-resume-entry="talent">查看简历</button>
+              </div>
+              <div class="source-candidate-row">
+                <span class="talent-avatar indigo">许</span>
+                <p><strong>许南</strong><em>后端工程师 · 北京 · 5 年</em></p>
+                <mark class="red">疑似重复</mark>
+                <button type="button" data-talent-open="duplicateDetail">查看差异</button>
+              </div>
+            </article>
+
+            <article class="p1-panel source-quality-panel">
+              <div class="section-title-line">
+                <h2>质量信号</h2>
+                <span>本批次</span>
+              </div>
+              <div class="source-quality-list">
+                <p><span>联系方式识别率</span><strong>88%</strong><i style="--value: 88%"></i></p>
+                <p><span>工作经历完整率</span><strong>76%</strong><i style="--value: 76%"></i></p>
+                <p><span>重复风险</span><strong>9 组</strong><i style="--value: 42%"></i></p>
+                <p><span>待人工确认</span><strong>12 份</strong><i style="--value: 36%"></i></p>
+              </div>
+              <div class="p1-action-row">
+                <button class="primary-action" type="button" data-talent-open="advancedFilter">按本来源筛选</button>
+                <button class="secondary-action" type="button" data-talent-open="duplicateDetail">处理重复</button>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section class="main-state p1-workspace import-action-workspace state-hidden" id="importActionState" aria-label="导入后续动作">
+          <header class="p1-topbar">
+            <button class="resume-back-link" type="button" data-p1-return="importFinished">← 返回导入结果</button>
+            <p>简历导入 / 导入完成 / <strong data-import-action-title>新导入候选人搜索</strong></p>
+          </header>
+
+          <section class="p1-hero import-followup-hero">
+            <div>
+              <span class="detail-kicker">P1 导入闭环</span>
+              <h1>导入后续动作</h1>
+              <p data-import-action-copy>从新导入批次直接进入搜索、去重、标签分组或解析规则优化。</p>
+            </div>
+            <div class="p1-score-card">
+              <strong>96</strong>
+              <span>新增可检索</span>
+            </div>
+          </section>
+
+          <section class="import-action-grid" aria-label="导入完成后续动作">
+            <article class="p1-panel import-action-card is-active" data-import-action-card="searchImported">
+              <h2>新导入候选人搜索</h2>
+              <p>按本批来源、后端方向和完整资料状态生成 DeerSearch 查询。</p>
+              <button class="primary-action" type="button" data-import-action-run="search">打开搜索</button>
+            </article>
+            <article class="p1-panel import-action-card" data-import-action-card="dedupeImported">
+              <h2>智能去重与合并</h2>
+              <p>优先处理 9 组疑似重复候选人，避免重复统计和重复触达。</p>
+              <button class="secondary-action" type="button" data-talent-open="duplicateDetail">查看重复组</button>
+            </article>
+            <article class="p1-panel import-action-card" data-import-action-card="tagImported">
+              <h2>标签与分组</h2>
+              <p>为新导入候选人补充来源、技能和业务方向标签。</p>
+              <button class="secondary-action" type="button" data-tag-open="imported">生成标签建议</button>
+            </article>
+            <article class="p1-panel import-action-card" data-import-action-card="ruleImported">
+              <h2>更新解析规则</h2>
+              <p>根据失败文件和低置信字段，优化下一次解析策略。</p>
+              <button class="secondary-action" type="button" data-import-action-run="rules">保存规则草稿</button>
+            </article>
+          </section>
+        </section>
+
+        <section class="main-state p1-workspace talent-filter-workspace state-hidden" id="talentAdvancedFilterState" aria-label="高级筛选">
+          <header class="p1-topbar">
+            <button class="resume-back-link" type="button" data-p1-return="talentAll">← 返回人才库</button>
+            <p>人才库 / <strong>高级筛选</strong></p>
+          </header>
+
+          <section class="p1-hero filter-hero">
+            <div>
+              <span class="detail-kicker">P1 检索效率</span>
+              <h1>高级筛选</h1>
+              <p>组合职位、城市、年限、标签、来源和资料状态，形成可复用的人才库筛选条件。</p>
+            </div>
+            <div class="p1-score-card">
+              <strong>428</strong>
+              <span>预估命中</span>
+            </div>
+          </section>
+
+          <section class="filter-builder-grid">
+            <article class="p1-panel filter-group">
+              <h2>职位与经验</h2>
+              <label><span>目标职位</span><input value="Java 后端开发工程师" /></label>
+              <label><span>经验年限</span><input value="5 - 9 年" /></label>
+              <label><span>城市</span><input value="上海 / 杭州 / 深圳" /></label>
+            </article>
+            <article class="p1-panel filter-group">
+              <h2>标签与来源</h2>
+              <div class="filter-token-row"><span>Java</span><span>Spring Boot</span><span>支付风控</span><span>高并发</span></div>
+              <label><span>来源批次</span><input value="FinTech_Backend_2026" /></label>
+              <label><span>入库时间</span><input value="近 30 天" /></label>
+            </article>
+            <article class="p1-panel filter-group">
+              <h2>资料状态</h2>
+              <div class="filter-check-list">
+                <label><input type="checkbox" checked /> 资料完整</label>
+                <label><input type="checkbox" checked /> 待完善</label>
+                <label><input type="checkbox" /> 疑似重复</label>
+                <label><input type="checkbox" checked /> 已收藏</label>
+              </div>
+              <div class="p1-action-row">
+                <button class="primary-action" type="button" data-p1-action="applyFilter">应用筛选</button>
+                <button class="secondary-action" type="button" data-p1-return="talentAll">重置</button>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section class="main-state p1-workspace talent-actions-workspace state-hidden" id="talentCandidateActionsState" aria-label="候选人操作台">
+          <header class="p1-topbar">
+            <button class="resume-back-link" type="button" data-p1-return="talentAll">← 返回人才库</button>
+            <p>人才库 / 候选人 / <strong>陈屿</strong></p>
+          </header>
+
+          <section class="p1-hero actions-hero">
+            <div>
+              <span class="detail-kicker">P1 行级操作</span>
+              <h1>候选人操作台</h1>
+              <p>集中处理标签、收藏、短名单、导出和忽略操作，避免列表行按钮继续堆叠。</p>
+            </div>
+            <div class="p1-score-card">
+              <strong>92</strong>
+              <span>完整度</span>
+            </div>
+          </section>
+
+          <section class="candidate-action-grid">
+            <article class="p1-panel action-command-list">
+              <h2>常用操作</h2>
+              <button type="button" data-tag-open="candidate">编辑标签</button>
+              <button type="button" data-resume-action="shortlist">加入短名单</button>
+              <button type="button" data-resume-action="copySummary">复制候选人摘要</button>
+              <button type="button" data-p1-action="exportCandidate">导出候选人</button>
+            </article>
+            <article class="p1-panel action-audit-panel">
+              <h2>最近动作</h2>
+              <p><span>今天 10:32</span><strong>从 FinTech_Backend_2026 入库</strong></p>
+              <p><span>今天 10:41</span><strong>命中支付风控搜索</strong></p>
+              <p><span>今天 10:44</span><strong>加入核心候选人收藏</strong></p>
+            </article>
+            <article class="p1-panel danger-action-panel">
+              <h2>危险操作</h2>
+              <p>删除或忽略会影响搜索召回和来源统计，第一版只记录操作意图。</p>
+              <button class="secondary-action" type="button" data-p1-action="ignoreCandidate">忽略候选人</button>
+              <button class="secondary-action" type="button" data-p1-action="deleteCandidate">删除候选人</button>
+            </article>
+          </section>
+        </section>
+
+        <section class="main-state p1-workspace settings-workspace state-hidden" id="settingsState" aria-label="设置">
+          <header class="p1-topbar">
+            <p>DeerRecall / <strong>设置</strong></p>
+          </header>
+
+          <section class="p1-hero settings-hero">
+            <div>
+              <span class="detail-kicker">P1 系统配置</span>
+              <h1>设置</h1>
+              <p>管理 AI 解析、数据存储、导入规则、团队偏好和通知策略。</p>
+            </div>
+            <div class="p1-score-card">
+              <strong>5</strong>
+              <span>配置组</span>
+            </div>
+          </section>
+
+          <section class="settings-grid">
+            <article class="p1-panel settings-card">
+              <h2>AI 解析设置</h2>
+              <label><span>解析模型</span><input value="DeerRecall Cloud Parser" /></label>
+              <label><span>低置信字段</span><input value="自动标记待确认" /></label>
+            </article>
+            <article class="p1-panel settings-card">
+              <h2>数据存储</h2>
+              <label><span>本地库路径</span><input value="/DeerRecall/Library" /></label>
+              <label><span>保留原文件</span><input value="开启" /></label>
+            </article>
+            <article class="p1-panel settings-card">
+              <h2>导入规则</h2>
+              <label><span>重复检测阈值</span><input value="85%" /></label>
+              <label><span>失败重试</span><input value="自动重试 1 次" /></label>
+            </article>
+            <article class="p1-panel settings-card">
+              <h2>团队偏好</h2>
+              <label><span>默认城市</span><input value="上海 / 杭州 / 深圳" /></label>
+              <label><span>默认短名单</span><input value="核心候选人" /></label>
+            </article>
+            <article class="p1-panel settings-card">
+              <h2>通知设置</h2>
+              <label><span>导入完成</span><input value="显示桌面通知" /></label>
+              <label><span>异常任务</span><input value="立即提醒" /></label>
+              <button class="primary-action" type="button" data-p1-action="saveSettings">保存设置</button>
+            </article>
+          </section>
+        </section>
+
+        <section class="main-state task-workspace state-hidden" id="taskState" aria-label="解析任务工作区">
+          <section class="task-view" data-task-view="list">
+            <header class="task-header">
+              <h1>解析任务</h1>
+              <p>查看每批简历的解析进度、入库结果与失败项处理。</p>
+              <div class="task-tabs" aria-label="解析任务筛选">
+                <button class="task-tab active" type="button" data-task-filter="all">全部 <span>12</span></button>
+                <button class="task-tab" type="button" data-task-filter="processing">解析中 <span>1</span></button>
+                <button class="task-tab" type="button" data-task-filter="completed">已完成 <span>9</span></button>
+                <button class="task-tab" type="button" data-task-filter="needs">需处理 <span>2</span></button>
+              </div>
+            </header>
+
+            <section class="task-list" aria-label="解析任务列表">
+            <section class="task-group" data-task-group="needs">
+              <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>需处理</h2>
+              <article class="task-row task-needs" data-task-item data-task-id="customer_backend_001" data-task-kind="needs" data-task-panel-target="issue">
+                <div class="task-status-icon alert"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v6"></path><path d="M12 17h.01"></path></svg></div>
+                <div class="task-main">
+                  <div class="task-title-line"><h3>客户A_后端简历包</h3><span class="task-badge">部分失败</span></div>
+                  <p>文件夹导入 · 54 个文件 · 今天 09:40</p>
+                  <div class="task-stats"><span>成功 <strong class="green">42</strong></span><span>失败 <strong class="red">8</strong></span><span>格式不支持 <strong>4</strong></span></div>
+                </div>
+                <div class="task-actions">
+                  <button class="task-action primary-lite" type="button" data-task-open="issue" data-task-id="customer_backend_001"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-3-3Z"></path></svg>处理问题</button>
+                  <button class="task-action" type="button" data-task-open="detail" data-task-id="customer_backend_001">查看详情 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+                </div>
+              </article>
+
+              <article class="task-row task-needs" data-task-item data-task-id="campus_resume_001" data-task-kind="needs" data-task-panel-target="issue">
+                <div class="task-status-icon failed"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 6-12 12"></path><path d="m6 6 12 12"></path></svg></div>
+                <div class="task-main">
+                  <div class="task-title-line"><h3>校招候选人_简历包</h3><span class="task-badge">解析失败</span></div>
+                  <p>批量文件导入 · 27 个文件 · 今天 08:15</p>
+                  <div class="task-stats"><span>成功 <strong class="green">16</strong></span><span>失败 <strong class="red">6</strong></span><span>格式不支持 <strong>5</strong></span></div>
+                </div>
+                <div class="task-actions">
+                  <button class="task-action primary-lite" type="button" data-task-open="issue" data-task-id="campus_resume_001"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-3-3Z"></path></svg>处理问题</button>
+                  <button class="task-action" type="button" data-task-open="detail" data-task-id="campus_resume_001">查看详情 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+                </div>
+              </article>
+            </section>
+
+            <section class="task-group" data-task-group="processing">
+              <h2><span class="mini-ring"></span>正在解析</h2>
+              <article class="task-row task-processing" data-task-item data-task-id="fintech_backend_2026" data-task-kind="processing" data-task-panel-target="detail">
+                <div class="task-progress-ring" aria-hidden="true"></div>
+                <div class="task-main">
+                  <div class="task-title-line"><h3>FinTech_Backend_2026</h3><span class="task-percent">68%</span></div>
+                  <p>文件夹导入 · 126 个文件 · 今天 10:32</p>
+                  <div class="task-progress-track" aria-hidden="true"><span style="width: 68%"></span></div>
+                  <div class="task-stats"><span>已完成 <strong class="blue">86</strong></span><span>解析中 <strong class="blue">4</strong></span><span>失败 <strong class="red">2</strong></span><span>格式不支持 <strong>0</strong></span></div>
+                </div>
+                <div class="task-actions">
+                  <button class="task-action" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>暂停任务</button>
+                  <button class="task-action" type="button" data-task-panel-target="detail">查看详情 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+                </div>
+              </article>
+            </section>
+
+            <section class="task-group" data-task-group="completed">
+              <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg>最近完成</h2>
+              <article class="task-row task-completed" data-task-item data-task-id="java_backend_may" data-task-kind="completed" data-task-panel-target="result">
+                <div class="task-status-icon success"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg></div>
+                <div class="task-main">
+                  <div class="task-title-line"><h3>Java后端候选人_5月</h3></div>
+                  <p>已完成 · 78 个文件 · 昨天 16:48</p>
+                  <div class="task-stats"><span>新增 <strong class="green">60</strong></span><span>更新 <strong class="blue">10</strong></span><span>跳过 <strong>6</strong></span><span>失败 <strong class="red">2</strong></span></div>
+                </div>
+                <div class="task-actions">
+                  <button class="task-action" type="button" data-task-panel-target="result"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"></path><path d="M9 19v-7"></path><path d="M14 19V9"></path><path d="M19 19V3"></path></svg>查看结果 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+                </div>
+              </article>
+
+              <article class="task-row task-completed" data-task-item data-task-id="risk_spring_001" data-task-kind="completed" data-task-panel-target="result">
+                <div class="task-status-icon success"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg></div>
+                <div class="task-main">
+                  <div class="task-title-line"><h3>支付风控候选人_春招</h3></div>
+                  <p>已完成 · 43 个文件 · 2025-05-12</p>
+                  <div class="task-stats"><span>新增 <strong class="green">31</strong></span><span>更新 <strong class="blue">7</strong></span><span>跳过 <strong>3</strong></span><span>失败 <strong class="red">2</strong></span></div>
+                </div>
+                <div class="task-actions">
+                  <button class="task-action" type="button" data-task-panel-target="result"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"></path><path d="M9 19v-7"></path><path d="M14 19V9"></path><path d="M19 19V3"></path></svg>查看结果 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+                </div>
+              </article>
+            </section>
+          </section>
+          </section>
+
+          <section class="task-view task-subview state-hidden" data-task-view="issue" aria-label="处理问题">
+            <header class="task-subview-header">
+              <div>
+                <p class="task-breadcrumb">解析任务 / <span data-task-text="source">客户A_后端简历包</span> / 处理问题</p>
+                <h1>处理问题</h1>
+                <p>集中处理解析失败、格式不支持和内容异常的文件，操作完成后会同步刷新任务统计。</p>
+              </div>
+              <button class="task-return-button" type="button" data-task-return="detail">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                返回任务详情
+              </button>
+            </header>
+
+            <section class="task-metric-grid" aria-label="问题概览">
+              <article><small>待处理</small><strong data-task-metric="pendingIssues">12</strong><span>个文件</span></article>
+              <article><small>解析失败</small><strong class="red" data-task-metric="failed">8</strong><span>个文件</span></article>
+              <article><small>格式不支持</small><strong data-task-metric="unsupported">4</strong><span>个文件</span></article>
+              <article><small>可直接重试</small><strong class="green" data-task-metric="retryable">5</strong><span>个文件</span></article>
+            </section>
+
+            <section class="task-workbar" aria-label="问题筛选">
+              <div class="task-segment">
+                <button class="active" type="button">全部问题 <span data-task-metric="pendingIssues">12</span></button>
+                <button type="button">文件损坏 <span>3</span></button>
+                <button type="button">扫描件不可读 <span>2</span></button>
+                <button type="button">格式不支持 <span data-task-metric="unsupported">4</span></button>
+                <button type="button">内容为空 <span>1</span></button>
+              </div>
+              <label class="task-table-search">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 5 5"></path></svg>
+                <input type="search" placeholder="搜索失败文件名..." />
+              </label>
+              <button class="task-sort-button" type="button">排序：建议处理优先 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+            </section>
+
+            <section class="task-file-table issue-table" aria-label="失败文件列表">
+              <div class="task-table-head">
+                <span><input type="checkbox" checked aria-label="选择全部问题文件" /></span>
+                <span>文件信息</span>
+                <span>失败原因</span>
+                <span>建议处理</span>
+                <span>操作</span>
+              </div>
+              <div data-task-issue-list></div>
+            </section>
+
+            <footer class="task-bulk-actions">
+              <span data-task-text="issueSelection">已选择 3 个文件，其中可直接重试 2 个</span>
+              <button class="task-action primary-lite" type="button" data-task-resolve="retrySelected">重试已选文件</button>
+              <button class="task-action" type="button" data-task-failure-open="file">查看失败文件详情</button>
+              <button class="task-action" type="button" data-export-open="failedList">导出失败列表</button>
+              <button class="task-action" type="button" data-task-resolve="ignoreSelected">标记为忽略</button>
+              <button class="task-action" type="button" data-task-return="detail">返回任务详情</button>
+            </footer>
+          </section>
+
+          <section class="task-view task-subview state-hidden" data-task-view="detail" aria-label="任务详情">
+            <header class="task-subview-header">
+              <div>
+                <p class="task-breadcrumb">解析任务 / <span data-task-text="source">客户A_后端简历包</span> / 任务详情</p>
+                <h1>任务详情</h1>
+                <p>查看当前解析任务的文件记录、入库结果、导入设置和时间信息。</p>
+              </div>
+              <button class="task-return-button" type="button" data-task-return="list">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                返回任务列表
+              </button>
+            </header>
+
+            <section class="task-metric-grid detail-metrics" aria-label="任务概览">
+              <article><small>总文件</small><strong data-task-metric="total">54</strong></article>
+              <article><small>成功入库</small><strong class="green" data-task-metric="success">42</strong></article>
+              <article><small>解析失败</small><strong class="red" data-task-metric="failed">8</strong></article>
+              <article><small>格式不支持</small><strong data-task-metric="unsupported">4</strong></article>
+              <article><small>跳过文件</small><strong data-task-metric="skipped">0</strong></article>
+              <article class="rate-card"><small>成功率</small><strong data-task-metric="successRate">77.8%</strong><div class="mini-donut" aria-hidden="true"></div></article>
+            </section>
+
+            <section class="task-workbar" aria-label="文件筛选">
+              <div class="task-segment">
+                <button class="active" type="button">全部文件 <span data-task-metric="total">54</span></button>
+                <button type="button">成功 <span data-task-metric="success">42</span></button>
+                <button type="button">失败 <span data-task-metric="failed">8</span></button>
+                <button type="button">格式不支持 <span data-task-metric="unsupported">4</span></button>
+                <button type="button">跳过 <span data-task-metric="skipped">0</span></button>
+              </div>
+              <label class="task-table-search">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 5 5"></path></svg>
+                <input type="search" placeholder="搜索文件名..." />
+              </label>
+              <button class="task-sort-button" type="button">排序：文件名 A-Z <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+            </section>
+
+            <section class="task-file-table detail-table" aria-label="文件状态列表">
+              <div class="task-table-head">
+                <span>文件名</span>
+                <span>文件信息</span>
+                <span>状态</span>
+                <span>解析结果</span>
+                <span>操作</span>
+              </div>
+              <div data-task-detail-list></div>
+            </section>
+
+            <footer class="task-pagination">
+              <span>共 <strong data-task-metric="total">54</strong> 条</span>
+              <div><button type="button">‹</button><button class="active" type="button">1</button><button type="button">2</button><button type="button">3</button><span>...</span><button type="button">6</button><button type="button">›</button></div>
+              <button type="button">10 条/页</button>
+            </footer>
+          </section>
+        </section>
+
+        <section class="main-state candidate-resume-workspace state-hidden" id="candidateResumeState" aria-label="候选人完整档案" data-candidate-resume-entry="talent">
+          <div class="resume-topbar">
+            <button class="resume-back-link" type="button" data-candidate-resume-return>
+              <span data-resume-entry-only="search">← 返回搜索结果</span>
+              <span data-resume-entry-only="talent">← 返回人才库</span>
+              <span data-resume-entry-only="task">← 返回任务详情</span>
+            </button>
+            <p class="resume-context-label">候选人完整档案 · <strong>CV_candidate_resume_detail</strong></p>
+          </div>
+
+          <header class="resume-profile-hero">
+            <div class="resume-avatar" data-candidate-initial>陈</div>
+            <div class="resume-profile-main">
+              <div class="resume-name-line">
+                <h1 data-candidate-name>陈屿</h1>
+                <span class="resume-status-pill" data-candidate-status>资料完整</span>
+              </div>
+              <p data-candidate-role>Java 后端开发工程师 · 上海 · 7 年经验</p>
+              <div class="resume-tag-row" data-candidate-tags>
+                <span>Java</span><span>Spring Boot</span><span>支付风控</span><span>高并发</span><span>金融科技</span>
+              </div>
+              <div class="resume-meta-line">
+                <span>来源：<strong data-candidate-source>FinTech_Backend_2026</strong></span>
+                <span><strong data-candidate-created>今天 10:32</strong> 入库</span>
+                <span>资料状态：<strong data-candidate-status>资料完整</strong></span>
+              </div>
+            </div>
+            <div class="resume-score-badge">
+              <strong data-candidate-score>92</strong>
+              <span data-resume-entry-only="search">匹配</span>
+              <span data-resume-entry-only="talent">完整</span>
+              <span data-resume-entry-only="task">完整</span>
+            </div>
+          </header>
+
+          <nav class="resume-tabs" aria-label="候选人档案分区">
+            <button class="active" type="button" data-candidate-resume-tab data-candidate-resume-view="summary">AI 摘要</button>
+            <button type="button" data-candidate-resume-tab data-candidate-resume-view="archive">原始简历</button>
+            <button type="button" data-candidate-resume-tab data-candidate-resume-view="experience">工作经历</button>
+            <button type="button" data-candidate-resume-tab data-candidate-resume-view="projects">项目经历</button>
+            <button type="button" data-candidate-resume-tab data-candidate-resume-view="contact">联系方式</button>
+            <button type="button" data-candidate-resume-tab data-candidate-resume-view="source">标签来源</button>
+          </nav>
+
+          <section class="resume-detail-grid" aria-live="polite">
+            <section class="resume-tab-panel resume-summary-panel is-active" data-candidate-resume-panel="summary">
+              <article class="resume-detail-card resume-summary-card">
+                <h2>AI 摘要</h2>
+                <ul class="resume-bullet-list" data-candidate-summary>
+                  <li>7 年 Java 后端经验，长期负责支付与风控相关系统，业务方向与当前搜索高度贴合。</li>
+                  <li>熟悉规则引擎、交易链路、Redis / Kafka / MySQL 等技术栈，有高并发处理经验。</li>
+                  <li>最近经历集中在金融科技场景，适合支付风控、交易平台、后端服务治理方向。</li>
+                </ul>
+                <section class="resume-evidence-list" aria-label="匹配证据" data-candidate-evidence>
+                  <h3>匹配证据</h3>
+                  <p style="--score: 98%"><span>Java / Spring</span><i></i><strong>强</strong></p>
+                  <p style="--score: 94%"><span>支付风控经验</span><i></i><strong>强</strong></p>
+                  <p style="--score: 88%"><span>高并发项目</span><i></i><strong>强</strong></p>
+                  <p style="--score: 76%"><span>金融科技背景</span><i></i><strong>加分</strong></p>
+                </section>
+              </article>
+              <article class="resume-detail-card resume-mini-card">
+                <h2>最近工作经历</h2>
+                <strong data-candidate-company>某金融科技公司 · 高级后端工程师</strong>
+                <p class="resume-muted" data-candidate-experience>2022.06 - 至今。负责支付风控交易链路、规则引擎与风险命中记录服务。</p>
+              </article>
+              <article class="resume-detail-card resume-mini-card">
+                <h2>核心项目</h2>
+                <strong data-candidate-project>支付风控规则引擎</strong>
+                <p class="resume-muted" data-candidate-project-summary>参与规则配置、实时计算、交易拦截与风控日志模块，支撑高并发交易场景。</p>
+              </article>
+            </section>
+
+            <section class="resume-tab-panel resume-archive-panel state-hidden" data-candidate-resume-panel="archive">
+              <article class="resume-detail-card resume-preview-card">
+                <div class="resume-card-head">
+                  <h2>原始简历预览</h2>
+                </div>
+                <div class="resume-pdf-shell" aria-label="原始简历缩略预览">
+                  <div class="resume-pdf-title">
+                    <strong data-candidate-file>陈屿_Java后端工程师_7年.pdf</strong>
+                    <span>PDF</span>
+                  </div>
+                  <div class="resume-preview-lines" aria-hidden="true">
+                    <i></i><i></i><i></i><i></i><b></b><i></i><i></i><i></i>
+                  </div>
+                </div>
+                <div class="resume-file-actions">
+                  <button type="button" data-resume-action="openFile">打开原文件</button>
+                  <button type="button" data-resume-action="finder">在 Finder 中显示</button>
+                  <button type="button" data-resume-action="copyParse">复制文本</button>
+                </div>
+              </article>
+              <article class="resume-detail-card resume-file-info-card">
+                <h2>原始文件信息</h2>
+                <div class="resume-info-list">
+                  <p><span>文件名</span><strong data-candidate-file>陈屿_Java后端工程师_7年.pdf</strong></p>
+                  <p><span>来源批次</span><strong data-candidate-source>FinTech_Backend_2026</strong></p>
+                  <p><span>入库时间</span><strong data-candidate-created>今天 10:32</strong></p>
+                  <p><span>解析状态</span><strong class="green">已完成</strong></p>
+                </div>
+              </article>
+              <article class="resume-detail-card resume-raw-text-card">
+                <h2>解析文本摘录</h2>
+                <p>Java 后端开发工程师，7 年经验。长期参与支付风控、规则引擎、交易链路与服务治理工作。</p>
+                <p>熟悉 Spring Boot、Redis、Kafka、MySQL，具备高并发业务系统设计和落地经验。</p>
+              </article>
+            </section>
+
+            <section class="resume-tab-panel resume-experience-panel state-hidden" data-candidate-resume-panel="experience">
+              <article class="resume-detail-card">
+                <h2>工作经历时间线</h2>
+                <div class="resume-timeline">
+                  <section>
+                    <time>2022.06 - 至今</time>
+                    <strong data-candidate-company>某金融科技公司 · 高级后端工程师</strong>
+                    <p data-candidate-experience>负责支付风控交易链路、规则引擎与风险命中记录服务。</p>
+                    <div class="resume-tag-row"><span>支付风控</span><span>交易链路</span><span>规则引擎</span></div>
+                  </section>
+                  <section>
+                    <time>2019.03 - 2022.05</time>
+                    <strong>互联网支付平台 · Java 后端工程师</strong>
+                    <p>参与账户、清结算与消息服务建设，负责核心接口性能优化和链路监控。</p>
+                    <div class="resume-tag-row"><span>Spring Boot</span><span>Kafka</span><span>MySQL</span></div>
+                  </section>
+                  <section>
+                    <time>2017.07 - 2019.02</time>
+                    <strong>企业服务公司 · 后端开发工程师</strong>
+                    <p>负责业务中台基础服务开发，沉淀权限、任务调度和报表服务能力。</p>
+                    <div class="resume-tag-row"><span>Java</span><span>Redis</span><span>服务治理</span></div>
+                  </section>
+                </div>
+              </article>
+            </section>
+
+            <section class="resume-tab-panel resume-projects-panel state-hidden" data-candidate-resume-panel="projects">
+              <article class="resume-detail-card">
+                <h2>项目证据</h2>
+                <div class="resume-project-grid">
+                  <section>
+                    <strong data-candidate-project>支付风控规则引擎</strong>
+                    <p data-candidate-project-summary>参与规则配置、实时计算、交易拦截与风控日志模块，支撑高并发交易场景。</p>
+                    <div class="resume-project-meta"><span>角色：核心后端</span><span>证据强度：高</span></div>
+                  </section>
+                  <section>
+                    <strong>交易链路稳定性治理</strong>
+                    <p>优化交易峰值期间的接口耗时、消息堆积与数据库热点问题，建立告警与降级策略。</p>
+                    <div class="resume-project-meta"><span>角色：模块负责人</span><span>证据强度：中高</span></div>
+                  </section>
+                  <section>
+                    <strong>风险命中记录与审计</strong>
+                    <p>沉淀风控命中记录、审计查询和异步补偿能力，支持运营与合规复盘。</p>
+                    <div class="resume-project-meta"><span>角色：后端开发</span><span>证据强度：中</span></div>
+                  </section>
+                </div>
+              </article>
+            </section>
+
+            <section class="resume-tab-panel resume-contact-panel state-hidden" data-candidate-resume-panel="contact">
+              <article class="resume-detail-card resume-contact-card">
+                <h2>联系方式状态</h2>
+                <div class="resume-contact-list">
+                  <p><span>手机号</span><strong data-candidate-phone>138****5678</strong><em>已识别</em></p>
+                  <p><span>邮箱</span><strong data-candidate-email>chenyu@example.com</strong><em>已识别</em></p>
+                  <p><span>微信</span><strong data-candidate-wechat>chenyu_tech</strong><em>已识别</em></p>
+                </div>
+              </article>
+              <article class="resume-detail-card">
+                <h2>触达建议</h2>
+                <div class="resume-info-list">
+                  <p><span>优先方式</span><strong>手机号 / 微信</strong></p>
+                  <p><span>沟通重点</span><strong>支付风控、交易平台、高并发项目</strong></p>
+                  <p><span>需确认</span><strong>到岗时间、薪资预期、团队规模</strong></p>
+                </div>
+              </article>
+            </section>
+
+            <section class="resume-tab-panel resume-source-panel state-hidden" data-candidate-resume-panel="source">
+              <article class="resume-detail-card">
+                <h2>标签来源</h2>
+                <div class="resume-source-grid">
+                  <section><span>Java</span><strong>简历技能段</strong><em>高置信</em></section>
+                  <section><span>Spring Boot</span><strong>项目经历</strong><em>高置信</em></section>
+                  <section><span>支付风控</span><strong>最近工作经历</strong><em>高置信</em></section>
+                  <section><span>高并发</span><strong>项目描述</strong><em>中高置信</em></section>
+                  <section><span>金融科技</span><strong>来源批次 + 公司背景</strong><em>中高置信</em></section>
+                </div>
+              </article>
+              <article class="resume-detail-card">
+                <h2>来源链路</h2>
+                <div class="resume-info-list">
+                  <p><span>来源批次</span><strong data-candidate-source>FinTech_Backend_2026</strong></p>
+                  <p><span>原始文件</span><strong data-candidate-file>陈屿_Java后端工程师_7年.pdf</strong></p>
+                  <p><span>导入时间</span><strong data-candidate-created>今天 10:32</strong></p>
+                  <p><span>解析策略</span><strong>默认简历解析规则 v4</strong></p>
+                </div>
+              </article>
+            </section>
+          </section>
+        </section>
+
+        <section class="main-state p2-workspace export-center-workspace state-hidden" id="exportCenterState" aria-label="导出中心">
+          <header class="p2-topbar">
+            <button class="resume-back-link" type="button" data-p2-return>← 返回上一页</button>
+            <p>DeerRecall / <strong>导出中心</strong></p>
+          </header>
+
+          <section class="p2-hero">
+            <div>
+              <span class="detail-kicker">P2 数据交付</span>
+              <h1>导出中心</h1>
+              <p data-export-description>确认导出范围、字段和文件格式，生成可发给业务方的候选人列表。</p>
+            </div>
+            <div class="p2-score-card">
+              <strong data-export-count>428</strong>
+              <span data-export-title>候选人列表</span>
+            </div>
+          </section>
+
+          <section class="p2-body-grid export-center-grid">
+            <article class="p2-panel p2-scope-panel">
+              <div class="section-title-line">
+                <h2>导出范围</h2>
+                <span>当前选择</span>
+              </div>
+              <div class="p2-scope-list">
+                <button class="is-active" type="button" data-export-scope-option="candidateList">候选人列表 <strong>428</strong></button>
+                <button type="button" data-export-scope-option="sourceList">来源批次 <strong>126</strong></button>
+                <button type="button" data-export-scope-option="savedList">收藏候选人 <strong>18</strong></button>
+                <button type="button" data-export-scope-option="pendingList">待完善资料 <strong>41</strong></button>
+                <button type="button" data-export-scope-option="failedList">失败文件 <strong>12</strong></button>
+              </div>
+            </article>
+
+            <article class="p2-panel p2-field-panel">
+              <div class="section-title-line">
+                <h2>导出字段</h2>
+                <span>默认模板</span>
+              </div>
+              <div class="p2-check-grid">
+                <label><input type="checkbox" checked /> 姓名 / 职位 / 城市</label>
+                <label><input type="checkbox" checked /> 联系方式</label>
+                <label><input type="checkbox" checked /> 匹配摘要</label>
+                <label><input type="checkbox" checked /> 技能标签</label>
+                <label><input type="checkbox" /> 原文件路径</label>
+                <label><input type="checkbox" /> 来源批次</label>
+              </div>
+              <div class="p2-segmented">
+                <button class="active" type="button">XLSX</button>
+                <button type="button">CSV</button>
+                <button type="button">PDF</button>
+              </div>
+            </article>
+
+            <article class="p2-panel p2-preview-panel">
+              <div class="section-title-line">
+                <h2>预览</h2>
+                <span>前 3 条</span>
+              </div>
+              <div class="p2-table">
+                <div class="p2-table-row p2-table-head"><span>姓名</span><span>方向</span><span>状态</span><span>来源</span></div>
+                <div class="p2-table-row"><span>陈屿</span><span>Java 后端</span><span>资料完整</span><span>FinTech_Backend_2026</span></div>
+                <div class="p2-table-row"><span>林晓然</span><span>微服务后端</span><span>待补邮箱</span><span>客户A_后端简历包</span></div>
+                <div class="p2-table-row"><span>周靖</span><span>后端架构</span><span>资料完整</span><span>Java后端候选人_5月</span></div>
+              </div>
+            </article>
+
+            <article class="p2-panel p2-history-panel">
+              <div class="section-title-line">
+                <h2>导出历史</h2>
+                <span>最近 3 次</span>
+              </div>
+              <div class="p2-history-list">
+                <p><strong>今天 10:46</strong><span>候选人列表 · XLSX · 428 条</span></p>
+                <p><strong>昨天 17:12</strong><span>收藏候选人 · PDF · 18 条</span></p>
+                <p><strong>周一 15:40</strong><span>失败文件 · CSV · 12 条</span></p>
+              </div>
+              <p class="p2-action-status" data-p2-action-status="export">等待生成导出文件</p>
+              <div class="p2-action-row">
+                <button class="primary-action" type="button" data-p2-action="exportNow">生成导出文件</button>
+                <button class="secondary-action" type="button" data-p2-return>取消</button>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section class="main-state p2-workspace shortlist-workspace state-hidden" id="shortlistState" aria-label="短名单管理">
+          <header class="p2-topbar">
+            <button class="resume-back-link" type="button" data-p2-return>← 返回上一页</button>
+            <p>人才库 / <strong>短名单管理</strong></p>
+          </header>
+
+          <section class="p2-hero">
+            <div>
+              <span class="detail-kicker">P2 候选交付</span>
+              <h1>短名单管理</h1>
+              <p>集中整理已加入短名单的人选，按岗位分组、补充备注，并复制给业务方。</p>
+            </div>
+            <div class="p2-score-card">
+              <strong data-shortlist-total>3</strong>
+              <span>当前人选</span>
+            </div>
+          </section>
+
+          <section class="p2-body-grid shortlist-grid">
+            <article class="p2-panel shortlist-main-panel">
+              <div class="section-title-line">
+                <h2>候选人分组</h2>
+                <span>支付风控后端</span>
+              </div>
+              <div class="p2-card-list" data-shortlist-list>
+                <section data-shortlist-card data-shortlist-name="陈屿">
+                  <div class="talent-avatar">陈</div>
+                  <p><strong>陈屿</strong><span>Java 后端开发工程师 · 上海 · 7 年 · 92 匹配</span></p>
+                  <em>主推</em>
+                  <button type="button" data-p2-action="removeShortlist">移除</button>
+                </section>
+                <section data-shortlist-card data-shortlist-name="林晓然">
+                  <div class="talent-avatar blue">林</div>
+                  <p><strong>林晓然</strong><span>高级 Java 开发工程师 · 杭州 · 6 年 · 88 匹配</span></p>
+                  <em>备选</em>
+                  <button type="button" data-p2-action="removeShortlist">移除</button>
+                </section>
+                <section data-shortlist-card data-shortlist-name="周靖">
+                  <div class="talent-avatar violet">周</div>
+                  <p><strong>周靖</strong><span>后端架构师 · 深圳 · 9 年 · 84 匹配</span></p>
+                  <em>架构向</em>
+                  <button type="button" data-p2-action="removeShortlist">移除</button>
+                </section>
+              </div>
+            </article>
+
+            <article class="p2-panel shortlist-note-panel">
+              <h2>名单备注</h2>
+              <label><span>名单名称</span><input value="支付风控 Java 后端短名单" /></label>
+              <label><span>推荐说明</span><textarea>优先推荐陈屿，支付风控和高并发证据完整；林晓然作为微服务方向备选；周靖更偏架构治理。</textarea></label>
+              <p class="p2-action-status" data-p2-action-status="shortlist">短名单待复制</p>
+              <div class="p2-action-row">
+                <button class="primary-action" type="button" data-p2-action="copyShortlist">复制名单</button>
+                <button class="secondary-action" type="button" data-export-open="savedList">导出名单</button>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section class="main-state p2-workspace tag-manager-workspace state-hidden" id="tagManagerState" aria-label="标签管理">
+          <header class="p2-topbar">
+            <button class="resume-back-link" type="button" data-p2-return>← 返回上一页</button>
+            <p>人才库 / <strong>标签管理</strong></p>
+          </header>
+
+          <section class="p2-hero">
+            <div>
+              <span class="detail-kicker">P2 标签治理</span>
+              <h1>标签管理</h1>
+              <p>编辑候选人标签、查看来源证据，并将 AI 标签建议批量应用到本批候选人。</p>
+            </div>
+            <div class="p2-score-card">
+              <strong>14</strong>
+              <span>建议标签</span>
+            </div>
+          </section>
+
+          <section class="p2-body-grid tag-manager-grid">
+            <article class="p2-panel tag-current-panel">
+              <div class="section-title-line">
+                <h2>当前标签</h2>
+                <span>陈屿</span>
+              </div>
+              <div class="p2-token-box" data-tag-token-box>
+                <span>Java</span><span>Spring Boot</span><span>支付风控</span><span>高并发</span><span>金融科技</span>
+              </div>
+              <label><span>新增标签</span><input value="交易链路 / 规则引擎" /></label>
+              <p class="p2-action-status" data-tag-action-status>标签待保存</p>
+            </article>
+
+            <article class="p2-panel tag-suggestion-panel">
+              <div class="section-title-line">
+                <h2>AI 标签建议</h2>
+                <span>来源于简历正文</span>
+              </div>
+              <div class="p2-suggestion-list">
+                <p><strong>规则引擎</strong><span>项目经历中多次出现，建议加入技能标签。</span><button type="button" data-p2-action="applyTag" data-tag-value="规则引擎">应用</button></p>
+                <p><strong>交易拦截</strong><span>最近工作经历中明确负责，可加入业务标签。</span><button type="button" data-p2-action="applyTag" data-tag-value="交易拦截">应用</button></p>
+                <p><strong>Kafka</strong><span>技术栈证据完整，可用于搜索召回。</span><button type="button" data-p2-action="applyTag" data-tag-value="Kafka">应用</button></p>
+              </div>
+            </article>
+
+            <article class="p2-panel tag-source-panel">
+              <div class="section-title-line">
+                <h2>标签来源</h2>
+                <span>置信度</span>
+              </div>
+              <div class="p2-table">
+                <div class="p2-table-row p2-table-head"><span>标签</span><span>来源</span><span>置信度</span></div>
+                <div class="p2-table-row"><span>支付风控</span><span>最近工作经历</span><span>高</span></div>
+                <div class="p2-table-row"><span>高并发</span><span>项目经历</span><span>中高</span></div>
+                <div class="p2-table-row"><span>金融科技</span><span>来源批次</span><span>中高</span></div>
+              </div>
+              <div class="p2-action-row">
+                <button class="primary-action" type="button" data-p2-action="saveTags">保存标签</button>
+                <button class="secondary-action" type="button" data-p2-action="batchTags">批量应用</button>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section class="main-state p2-workspace task-failure-workspace state-hidden" id="taskFailureDetailState" aria-label="失败文件处理详情">
+          <header class="p2-topbar">
+            <button class="resume-back-link" type="button" data-p2-return>← 返回问题列表</button>
+            <p>解析任务 / <strong>失败文件处理详情</strong></p>
+          </header>
+
+          <section class="p2-hero">
+            <div>
+              <span class="detail-kicker">P2 异常处理</span>
+              <h1>失败文件处理详情</h1>
+              <p>定位失败文件、解释失败原因，并选择替换、重试、忽略或导出失败列表。</p>
+            </div>
+            <div class="p2-score-card red">
+              <strong>8</strong>
+              <span>解析失败</span>
+            </div>
+          </section>
+
+          <section class="p2-body-grid task-failure-grid">
+            <article class="p2-panel failure-file-panel">
+              <div class="section-title-line">
+                <h2>文件信息</h2>
+                <span>当前选中</span>
+              </div>
+              <div class="p2-file-card">
+                <div class="error-doc-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path></svg><span>!</span></div>
+                <p><strong>张明_高级Java开发.pdf</strong><span>2.4 MB · PDF · 客户A_后端简历包</span></p>
+              </div>
+              <div class="p2-action-row">
+                <button class="primary-action" type="button" data-task-file-resolve="retry" data-task-file-id="cb-03">重新解析</button>
+                <button class="secondary-action" type="button" data-p2-action="replaceFile">替换文件</button>
+                <button class="secondary-action" type="button" data-p2-action="locateFile">定位原文件</button>
+              </div>
+              <p class="p2-action-status" data-failure-action-status>等待选择处理方式</p>
+            </article>
+
+            <article class="p2-panel failure-reason-panel">
+              <div class="section-title-line">
+                <h2>失败原因解释</h2>
+                <span>扫描件不可读</span>
+              </div>
+              <div class="p2-reason-stack">
+                <p><strong>识别结果</strong><span>PDF 页面文字层为空，图像分辨率不足，OCR 置信度低于 42%。</span></p>
+                <p><strong>建议处理</strong><span>请替换为高清 PDF 或重新扫描后导入；如果原文件可读，可直接重试一次。</span></p>
+                <p><strong>影响范围</strong><span>该文件未入库，不影响其他成功候选人的解析结果。</span></p>
+              </div>
+            </article>
+
+            <article class="p2-panel failure-batch-panel">
+              <div class="section-title-line">
+                <h2>批量处理结果</h2>
+                <span>本任务</span>
+              </div>
+              <div class="p2-table">
+                <div class="p2-table-row p2-table-head"><span>类型</span><span>数量</span><span>推荐动作</span></div>
+                <div class="p2-table-row"><span>扫描件不可读</span><span>2</span><span>替换高清文件</span></div>
+                <div class="p2-table-row"><span>文件损坏</span><span>3</span><span>定位原文件</span></div>
+                <div class="p2-table-row"><span>格式不支持</span><span>4</span><span>转为 PDF / DOCX</span></div>
+              </div>
+              <div class="p2-action-row">
+                <button class="primary-action" type="button" data-task-resolve="retrySelected">批量重试</button>
+                <button class="secondary-action" type="button" data-export-open="failedList">导出失败列表</button>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <section class="main-state p2-workspace search-filter-workspace state-hidden" id="searchFilterState" aria-label="搜索条件编辑">
+          <header class="p2-topbar">
+            <button class="resume-back-link" type="button" data-p2-return>← 返回搜索结果</button>
+            <p>DeerSearch / <strong>搜索条件编辑</strong></p>
+          </header>
+
+          <section class="p2-hero">
+            <div>
+              <span class="detail-kicker">P2 搜索控制</span>
+              <h1>搜索条件编辑</h1>
+              <p>拆解自然语言需求，编辑高级筛选条件，并保存为可复用搜索。</p>
+            </div>
+            <div class="p2-score-card">
+              <strong>4</strong>
+              <span>核心条件</span>
+            </div>
+          </section>
+
+          <section class="p2-body-grid search-filter-grid">
+            <article class="p2-panel search-condition-panel">
+              <div class="section-title-line">
+                <h2>条件拆解</h2>
+                <span>当前搜索</span>
+              </div>
+              <div class="p2-condition-editor">
+                <label><span>岗位</span><input value="Java 后端开发工程师" /></label>
+                <label><span>业务方向</span><input value="支付风控 / 金融科技" /></label>
+                <label><span>技术栈</span><input value="Spring Boot / Redis / Kafka / MySQL" /></label>
+                <label><span>经验要求</span><input value="5 年以上，有高并发项目经验" /></label>
+              </div>
+            </article>
+
+            <article class="p2-panel search-filter-panel">
+              <div class="section-title-line">
+                <h2>高级筛选</h2>
+                <span>结果约束</span>
+              </div>
+              <div class="p2-check-grid">
+                <label><input type="checkbox" checked /> 只看资料完整</label>
+                <label><input type="checkbox" checked /> 近 30 天导入</label>
+                <label><input type="checkbox" /> 排除疑似重复</label>
+                <label><input type="checkbox" checked /> 城市：上海 / 杭州 / 深圳</label>
+              </div>
+              <div class="p2-action-row">
+                <button class="primary-action" type="button" data-p2-action="applySearchFilter">应用筛选</button>
+                <button class="secondary-action" type="button" data-p2-action="saveSearch">保存搜索</button>
+              </div>
+              <p class="p2-action-status" data-search-filter-status>筛选条件待应用</p>
+            </article>
+
+            <article class="p2-panel similar-condition-panel">
+              <div class="section-title-line">
+                <h2>相似候选人条件</h2>
+                <span>基于陈屿</span>
+              </div>
+              <div class="p2-token-box">
+                <span>Java</span><span>支付风控</span><span>规则引擎</span><span>高并发</span><span>金融科技</span>
+              </div>
+              <div class="p2-table">
+                <div class="p2-table-row p2-table-head"><span>条件</span><span>权重</span><span>处理</span></div>
+                <div class="p2-table-row"><span>支付风控经验</span><span>必须</span><span>保留</span></div>
+                <div class="p2-table-row"><span>高并发项目</span><span>加权</span><span>提高权重</span></div>
+                <div class="p2-table-row"><span>城市</span><span>可选</span><span>放宽</span></div>
+              </div>
+            </article>
+          </section>
+        </section>
+      </section>
+
+      <aside class="assistant-panel" aria-label="DeerRecall 右侧助手">
+        <section class="side-state empty-side state-hidden" id="emptySide">
+          <h2>让小鹿帮你找人</h2>
+
+          <section class="panel-card status-card">
+            <div class="round-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="m16 16 5 5"></path>
+              </svg>
+            </div>
+            <div>
+              <h3>等待搜索</h3>
+              <p>输入一句话人才需求后，这里会自动进行解析，并给出匹配结果和分析建议。</p>
+            </div>
+          </section>
+
+          <p class="side-section-title">可用能力</p>
+          <section class="panel-card cap-card">
+            <div class="cap-list">
+              <div class="cap-row">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path>
+                  <path d="M8 9h.01"></path>
+                  <path d="M12 9h.01"></path>
+                  <path d="M16 9h.01"></path>
+                </svg>
+                <div>
+                  <strong>自然语言搜人</strong>
+                  <span>用日常语言描述岗位需求</span>
+                </div>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6"></path>
+                </svg>
+              </div>
+              <div class="cap-row">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path>
+                  <path d="M14 2v6h6"></path>
+                  <circle cx="12" cy="15" r="3"></circle>
+                  <path d="m15 18 3 3"></path>
+                </svg>
+                <div>
+                  <strong>简历语义匹配</strong>
+                  <span>理解简历内容，精准匹配人选</span>
+                </div>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6"></path>
+                </svg>
+              </div>
+              <div class="cap-row">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <div>
+                  <strong>候选人短名单</strong>
+                  <span>持续优化，快速锁定优质人选</span>
+                </div>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6"></path>
+                </svg>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-card tips-card">
+            <h3>搜索建议</h3>
+            <ul class="tips-list">
+              <li>尽量描述核心职责与关键技能</li>
+              <li>补充行业、年限、团队规模等信息</li>
+              <li>提及项目类型或技术栈会更精准</li>
+              <li>示例：风控 / 高并发 / 支付 / Java</li>
+            </ul>
+            <button class="more-tips" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 18h6"></path>
+                <path d="M10 22h4"></path>
+                <path d="M12 2a7 7 0 0 0-4 12c.7.7 1 1.5 1 2h6c0-.5.3-1.3 1-2A7 7 0 0 0 12 2Z"></path>
+              </svg>
+              查看更多搜索技巧
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m9 18 6-6-6-6"></path>
+              </svg>
+            </button>
+          </section>
+        </section>
+
+        <section class="side-state results-side state-hidden" id="resultsSide">
+          <p class="eyebrow">DeerSearch</p>
+          <h2>让小鹿帮你找人</h2>
+
+          <section class="panel-card query-card">
+            <span class="label">当前搜索</span>
+            <p id="currentQuery">找做过支付风控的 Java 后端，最好有高并发项目经验。</p>
+          </section>
+
+          <section class="panel-card condition-card">
+            <span class="label">AI 条件拆解</span>
+            <div class="condition-grid">
+              <div class="condition-cell"><small>岗位</small><strong>后端工程师</strong></div>
+              <div class="condition-cell"><small>技术</small><strong>Java / Spring</strong></div>
+              <div class="condition-cell"><small>业务</small><strong>支付 / 风控</strong></div>
+              <div class="condition-cell"><small>经验</small><strong>高并发项目</strong></div>
+            </div>
+          </section>
+
+          <section class="panel-card weight-card">
+            <span class="label">条件权重</span>
+            <div class="weight-row"><strong>必须包含</strong><span>Java</span><span>支付或风控</span></div>
+            <div class="weight-row"><strong>可选加分</strong><span>高并发</span><span>金融科技</span></div>
+            <div class="weight-row"><strong>排除</strong><span>纯测试</span></div>
+          </section>
+
+          <section class="panel-card shortlist-card">
+            <div class="short-head">
+              <span class="label">候选人短名单</span>
+              <span class="short-count" id="shortlistCount">0</span>
+            </div>
+            <p id="shortlistText">点击候选人卡片后，小鹿会把短名单收在这里。</p>
+            <button class="copy-button" type="button" data-shortlist-open="manager">复制名单</button>
+          </section>
+        </section>
+
+        <section class="side-state candidate-resume-assistant state-hidden" data-candidate-resume-entry="search">
+          <h2>候选人助手</h2>
+
+          <section class="panel-card candidate-side-card resume-fit-card">
+            <span class="label">匹配分析</span>
+            <div class="resume-score-row">
+              <div class="resume-score-ring pink"><strong data-candidate-score>92</strong></div>
+              <div>
+                <strong>高度匹配</strong>
+                <p data-candidate-match-note>与“支付风控 Java 后端”搜索条件匹配度较高。</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-card candidate-side-card resume-hit-card">
+            <span class="label">条件匹配</span>
+            <p><span>Java / Spring</span><strong class="green">强匹配</strong></p>
+            <p><span>支付或风控</span><strong class="green">强匹配</strong></p>
+            <p><span>高并发项目</span><strong class="green">强匹配</strong></p>
+            <p><span>金融科技</span><strong class="blue">加分</strong></p>
+          </section>
+
+          <section class="panel-card candidate-side-card resume-actions-card">
+            <span class="label">快捷操作</span>
+            <button class="primary-action side-primary" type="button" data-resume-action="shortlist">加入短名单</button>
+            <button class="secondary-action side-primary" type="button" data-resume-action="copySummary">复制候选人摘要</button>
+            <button class="secondary-action side-primary" type="button" data-resume-action="similar">查找相似候选人</button>
+            <button class="secondary-action side-primary" type="button" data-tag-open="candidate">编辑标签</button>
+          </section>
+
+          <section class="panel-card candidate-side-card resume-origin-card">
+            <span class="label">来源与资料</span>
+            <p><span>来源批次</span><strong data-candidate-source>FinTech_Backend_2026</strong></p>
+            <p><span>完整度</span><strong class="green" data-candidate-completeness>92%</strong></p>
+            <p><span>联系方式</span><strong class="green">完整</strong></p>
+            <p><span>项目经历</span><strong class="blue">4 段</strong></p>
+          </section>
+        </section>
+
+        <section class="side-state candidate-resume-assistant state-hidden" data-candidate-resume-entry="talent">
+          <h2>候选人助手</h2>
+
+          <section class="panel-card candidate-side-card resume-fit-card">
+            <span class="label">资料概览</span>
+            <div class="resume-score-row">
+              <div class="resume-score-ring green"><strong data-candidate-completeness>92%</strong></div>
+              <div>
+                <strong>资料完整</strong>
+                <p>可直接用于搜索、短名单和后续沟通。</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-card candidate-side-card resume-hit-card">
+            <span class="label">匹配分析</span>
+            <p><span>Java / Spring</span><strong class="green">强匹配</strong></p>
+            <p><span>支付或风控</span><strong class="green">强匹配</strong></p>
+            <p><span>高并发项目</span><strong class="green">强匹配</strong></p>
+            <p><span>金融科技</span><strong class="blue">加分</strong></p>
+          </section>
+
+          <section class="panel-card candidate-side-card resume-actions-card">
+            <span class="label">快捷操作</span>
+            <button class="primary-action side-primary" type="button" data-resume-action="shortlist">加入短名单</button>
+            <button class="secondary-action side-primary" type="button" data-resume-action="copySummary">复制候选人摘要</button>
+            <button class="secondary-action side-primary" type="button" data-resume-action="similar">查找相似候选人</button>
+            <button class="secondary-action side-primary" type="button" data-tag-open="candidate">编辑标签</button>
+          </section>
+
+          <section class="panel-card candidate-side-card resume-origin-card">
+            <span class="label">来源与资料</span>
+            <p><span>来源批次</span><strong data-candidate-source>FinTech_Backend_2026</strong></p>
+            <p><span>完整度</span><strong class="green" data-candidate-completeness>92%</strong></p>
+            <p><span>联系方式</span><strong class="green">完整</strong></p>
+            <p><span>项目经历</span><strong class="blue">4 段</strong></p>
+          </section>
+        </section>
+
+        <section class="side-state candidate-resume-assistant state-hidden" data-candidate-resume-entry="task">
+          <h2>候选人助手</h2>
+
+          <section class="panel-card candidate-side-card resume-fit-card">
+            <span class="label">任务入库资料</span>
+            <div class="resume-score-row">
+              <div class="resume-score-ring green"><strong data-candidate-completeness>92%</strong></div>
+              <div>
+                <strong>解析结果可用</strong>
+                <p>来自解析任务的成功文件，可继续补充标签或加入短名单。</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-card candidate-side-card resume-hit-card">
+            <span class="label">匹配分析</span>
+            <p><span>Java / Spring</span><strong class="green">强匹配</strong></p>
+            <p><span>支付或风控</span><strong class="green">强匹配</strong></p>
+            <p><span>高并发项目</span><strong class="green">强匹配</strong></p>
+            <p><span>金融科技</span><strong class="blue">加分</strong></p>
+          </section>
+
+          <section class="panel-card candidate-side-card resume-actions-card">
+            <span class="label">快捷操作</span>
+            <button class="primary-action side-primary" type="button" data-resume-action="shortlist">加入短名单</button>
+            <button class="secondary-action side-primary" type="button" data-resume-action="copySummary">复制候选人摘要</button>
+            <button class="secondary-action side-primary" type="button" data-resume-action="similar">查找相似候选人</button>
+            <button class="secondary-action side-primary" type="button" data-tag-open="candidate">编辑标签</button>
+          </section>
+
+          <section class="panel-card candidate-side-card resume-origin-card">
+            <span class="label">来源与资料</span>
+            <p><span>来源批次</span><strong data-candidate-source>FinTech_Backend_2026</strong></p>
+            <p><span>完整度</span><strong class="green" data-candidate-completeness>92%</strong></p>
+            <p><span>联系方式</span><strong class="green">完整</strong></p>
+            <p><span>项目经历</span><strong class="blue">4 段</strong></p>
+          </section>
+        </section>
+
+        <section class="side-state import-assistant state-hidden" data-import-side="default">
+          <h2>导入助手</h2>
+
+          <section class="panel-card import-side-card waiting-card">
+            <span class="label">等待导入</span>
+            <div class="hourglass-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M6 2h12"></path>
+                <path d="M6 22h12"></path>
+                <path d="M8 2v6a4 4 0 0 0 1.5 3.1L12 13l2.5-1.9A4 4 0 0 0 16 8V2"></path>
+                <path d="M8 22v-6a4 4 0 0 1 1.5-3.1L12 11l2.5 1.9A4 4 0 0 1 16 16v6"></path>
+              </svg>
+            </div>
+            <strong>还没有导入任务</strong>
+            <p>将简历文件或文件夹拖入中间区域，或选择导入方式开始解析。</p>
+          </section>
+
+          <p class="side-section-title">可用能力</p>
+          <section class="panel-card cap-card import-cap-card">
+            <div class="cap-list">
+              <button class="cap-row import-state-button" type="button" data-target-state="preview">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>
+                </svg>
+                <div>
+                  <strong>批量文件夹导入</strong>
+                  <span>支持子文件夹扫描</span>
+                </div>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6"></path>
+                </svg>
+              </button>
+              <button class="cap-row" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path>
+                  <path d="M14 2v6h6"></path>
+                  <circle cx="12" cy="15" r="3"></circle>
+                  <path d="m15 18 3 3"></path>
+                </svg>
+                <div>
+                  <strong>简历格式识别</strong>
+                  <span>智能解析多种格式</span>
+                </div>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6"></path>
+                </svg>
+              </button>
+              <button class="cap-row" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <ellipse cx="12" cy="5" rx="7" ry="3"></ellipse>
+                  <path d="M5 5v6c0 1.7 3.1 3 7 3s7-1.3 7-3V5"></path>
+                  <path d="M5 11v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"></path>
+                </svg>
+                <div>
+                  <strong>自动去重入库</strong>
+                  <span>识别重复，合并信息</span>
+                </div>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6"></path>
+                </svg>
+              </button>
+            </div>
+          </section>
+
+          <section class="panel-card tips-card">
+            <h3>导入建议</h3>
+            <ul class="tips-list">
+              <li>建议按来源或时间整理文件夹</li>
+              <li>单次导入数量过大时，可分批导入</li>
+              <li>扫描件建议使用 PDF 格式</li>
+            </ul>
+          </section>
+        </section>
+
+        <section class="side-state import-assistant state-hidden" data-import-side="preview">
+          <h2>本次导入预检</h2>
+
+          <section class="panel-card import-side-card">
+            <span class="label">概览</span>
+            <div class="side-stat-list">
+              <div><span>已选文件</span><strong>126</strong></div>
+              <div class="green"><span>可解析</span><strong>108</strong></div>
+              <div class="yellow"><span>可能重复</span><strong>12</strong></div>
+              <div class="purple"><span>格式不支持</span><strong>6</strong></div>
+            </div>
+            <button class="side-link" type="button">查看详情 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          </section>
+
+          <p class="side-section-title">导入设置</p>
+          <section class="panel-card import-side-card toggle-card">
+            <label><span><strong>扫描子文件夹</strong><small>包含所选目录下的子文件夹</small></span><input type="checkbox" checked /></label>
+            <label><span><strong>自动去重</strong><small>识别重复简历，合并信息</small></span><input type="checkbox" checked /></label>
+            <label><span><strong>解析后加入人才库</strong><small>解析完成后自动入库</small></span><input type="checkbox" checked /></label>
+          </section>
+
+          <section class="panel-card import-side-card estimate-card">
+            <span class="label">预估信息</span>
+            <div class="estimate-row">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v6l4 2"></path>
+              </svg>
+              <div><span>预计耗时</span><strong>约 6 分钟</strong></div>
+            </div>
+            <p>使用中等性能模式（可在设置中调整）</p>
+            <button class="primary-action import-state-button side-primary" type="button" data-target-state="loading">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3 19 12 5 21Z"></path></svg>
+              开始导入
+            </button>
+            <small class="lock-note">导入过程中不会修改原始文件</small>
+          </section>
+        </section>
+
+        <section class="side-state import-assistant state-hidden" data-import-side="loading">
+          <h2>导入助手</h2>
+
+          <section class="panel-card import-side-card current-file-card">
+            <span class="label">当前解析文件</span>
+            <div class="current-file">
+              <span class="file-outline">PDF</span>
+              <div>
+                <strong>张明_高级Java开发工程师.pdf</strong>
+                <small>2.4 MB · PDF</small>
+              </div>
+            </div>
+            <div class="progress-track" aria-hidden="true"><span style="width: 58%"></span></div>
+            <p>解析中... 58%</p>
+          </section>
+
+          <section class="panel-card import-side-card estimate-card">
+            <span class="label">预计剩余时间</span>
+            <div class="estimate-row">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v6l4 2"></path>
+              </svg>
+              <div><strong>约 2 分 30 秒</strong><span>基于当前速度估算</span></div>
+            </div>
+          </section>
+
+          <section class="panel-card import-side-card">
+            <span class="label">导入进度概览</span>
+            <div class="side-stat-list compact">
+              <div><span>总文件</span><strong>126</strong></div>
+              <div class="green"><span>已完成</span><strong>86 (68%)</strong></div>
+              <div class="purple"><span>解析中</span><strong>4 (3%)</strong></div>
+              <div class="red"><span>失败</span><strong>2 (2%)</strong></div>
+            </div>
+          </section>
+
+          <section class="panel-card tips-card">
+            <h3>提示</h3>
+            <p>解析完成的简历将自动入库，您可以在“解析任务”中查看详细记录和处理结果。</p>
+            <button class="more-tips import-state-button" type="button" data-target-state="finished">
+              查看导入结果
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+            </button>
+          </section>
+        </section>
+
+        <section class="side-state import-assistant state-hidden" data-import-side="finished">
+          <h2>导入结果</h2>
+
+          <section class="panel-card import-side-card result-overview-card">
+            <span class="label">本次导入概览</span>
+            <div class="donut-row">
+              <div class="donut" aria-hidden="true"><span>126<small>总文件</small></span></div>
+              <div class="legend-list">
+                <span class="green">96 新增简历（76%）</span>
+                <span class="blue">18 更新已有（14%）</span>
+                <span class="yellow">9 重复跳过（7%）</span>
+                <span class="red">3 解析失败（2%）</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel-card import-side-card next-card">
+            <span class="label">下一步建议</span>
+            <button type="button" data-import-open="searchImported"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 5 5"></path></svg><span><strong>去 DeerSearch 搜索</strong><small>快速查找新导入的候选人</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-import-open="dedupeImported"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10"></path><path d="m17 7-10 10"></path><rect x="4" y="4" width="16" height="16" rx="4"></rect></svg><span><strong>智能去重与合并</strong><small>发现疑似重复简历并合并信息</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-import-open="tagImported"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6"></path><path d="M9 21h6"></path><path d="M7 7h10v10H7Z"></path></svg><span><strong>标签与分组</strong><small>为新简历添加标签或分组</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-import-open="ruleImported"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"></path><path d="M7 12h10"></path><path d="M10 17h4"></path></svg><span><strong>更新解析规则</strong><small>优化解析效果，提升准确率</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          </section>
+
+          <section class="panel-card import-side-card history-card">
+            <div class="history-head"><span class="label">最近导入记录</span><button type="button">查看全部</button></div>
+            <p><strong>2025-05-14 10:32</strong><span>126 文件 · 96 新增 · 18 更新 · 9 跳过 · 3 失败</span></p>
+            <p><strong>2025-05-13 16:48</strong><span>78 文件 · 60 新增 · 10 更新 · 6 跳过 · 2 失败</span></p>
+            <p><strong>2025-05-12 09:21</strong><span>54 文件 · 42 新增 · 7 更新 · 3 跳过 · 2 失败</span></p>
+            <button class="secondary-action side-primary" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 3v12"></path>
+                <path d="m7 8 5-5 5 5"></path>
+                <path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path>
+              </svg>
+              查看所有导入任务
+            </button>
+          </section>
+        </section>
+
+        <section class="side-state task-assistant state-hidden" data-task-panel="overview">
+          <h2>解析中心</h2>
+
+          <section class="panel-card task-side-card">
+            <span class="label">当前概况</span>
+            <div class="overview-grid">
+              <div><span class="spinner mini"></span><small>解析中</small><strong class="blue">1</strong></div>
+              <div><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v6l4 2"></path></svg><small>等待中</small><strong>0</strong></div>
+              <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg><small>今日完成</small><strong class="green">3</strong></div>
+              <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><small>需处理</small><strong class="red">2</strong></div>
+            </div>
+          </section>
+
+          <section class="panel-card task-side-card side-action-list">
+            <span class="label">可用操作</span>
+            <button type="button" data-task-panel-target="result"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path></svg><span><strong>查看解析结果</strong><small>浏览入库结果与统计</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-task-open="issue" data-task-id="customer_backend_001"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span><strong>重试失败文件</strong><small>重新解析失败的文件</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6v14"></path><path d="M16 6v14"></path><path d="M5 6l1 16h12l1-16"></path></svg><span><strong>清理已完成任务</strong><small>释放空间，保持整洁</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          </section>
+
+          <section class="panel-card tips-card task-tips">
+            <h3>提示</h3>
+            <ul class="tips-list">
+              <li>解析失败通常由文件损坏、扫描件不可读或格式不支持导致。</li>
+              <li>完成的简历会自动入库，可前往 DeerSearch 搜索。</li>
+              <li>建议优先处理失败任务，保持人才库数据完整。</li>
+            </ul>
+          </section>
+
+          <button class="primary-action side-primary task-panel-button" type="button" data-task-panel-target="overview">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h10"></path></svg>
+            查看全部任务
+          </button>
+        </section>
+
+        <section class="side-state task-assistant state-hidden" data-task-panel="detail">
+          <h2>任务详情助手</h2>
+
+          <section class="panel-card task-side-card current-task-card">
+            <span class="label">任务信息</span>
+            <div class="current-task">
+              <div class="task-folder-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></svg></div>
+              <div><strong data-task-text="source">客户A_后端简历包</strong><small data-task-text="time">今天 09:40</small></div>
+            </div>
+          </section>
+
+          <section class="panel-card task-side-card result-list-card">
+            <span class="label">导入设置</span>
+            <div><span>扫描子文件夹</span><strong class="green">已开启</strong></div>
+            <div><span>自动去重</span><strong class="green">已开启</strong></div>
+            <div><span>解析后入库</span><strong class="green">已开启</strong></div>
+          </section>
+
+          <section class="panel-card task-side-card">
+            <span class="label">入库结果</span>
+            <div class="progress-side-list">
+              <div><span>新增简历</span><strong class="green" data-task-metric="newProfiles">34</strong></div>
+              <div><span>更新已有</span><strong class="blue" data-task-metric="updatedProfiles">8</strong></div>
+              <div><span>解析失败</span><strong class="red" data-task-metric="failed">8</strong></div>
+              <div><span>格式不支持</span><strong data-task-metric="unsupported">4</strong></div>
+            </div>
+            <div class="progress-track" aria-hidden="true"><span data-task-progress style="width: 77.8%"></span></div>
+            <p class="side-note" data-task-metric="successRate">77.8%</p>
+          </section>
+
+          <section class="panel-card task-side-card timeline-card">
+            <span class="label">时间信息</span>
+            <p><span></span><strong>09:40</strong>开始导入</p>
+            <p><span></span><strong>09:46</strong>完成解析</p>
+            <p><span></span><strong>6 分 12 秒</strong>总耗时</p>
+          </section>
+
+          <button class="primary-action side-primary" type="button" data-task-open="issue" data-task-id="customer_backend_001"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-3-3Z"></path></svg>处理问题</button>
+          <button class="secondary-action side-primary" type="button" data-task-return="list"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h10"></path></svg>返回任务列表</button>
+        </section>
+
+        <section class="side-state task-assistant state-hidden" data-task-panel="issue">
+          <h2>问题处理助手</h2>
+
+          <section class="panel-card task-side-card failed-summary-card">
+            <div>
+              <span class="label">当前选中</span>
+              <strong data-task-metric="selectedIssues">3</strong>
+              <small>个文件</small>
+            </div>
+            <div class="error-doc-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path><path d="M9 12h6"></path><path d="M9 16h4"></path></svg><span>!</span></div>
+          </section>
+
+          <section class="panel-card task-side-card reason-card">
+            <span class="label">问题分布</span>
+            <div><span>文件损坏</span><strong class="red">3</strong></div>
+            <div><span>扫描件不可读</span><strong class="red">2</strong></div>
+            <div><span>格式不支持</span><strong data-task-metric="unsupported">4</strong></div>
+            <div><span>内容为空</span><strong>1</strong></div>
+          </section>
+
+          <section class="panel-card task-side-card suggestion-card">
+            <span class="label">推荐处理</span>
+            <p>优先重试扫描件不可读和内容为空的文件。</p>
+            <p>格式不支持文件建议转为 PDF / DOCX 后重新导入。</p>
+            <p>文件损坏时先定位原文件，替换后再解析。</p>
+          </section>
+
+          <section class="panel-card task-side-card side-action-list compact-actions">
+            <span class="label">批量操作</span>
+            <button type="button" data-task-resolve="retrySelected"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span><strong>批量重试</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-export-open="failedList"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path></svg><span><strong>导出失败列表</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-task-resolve="ignoreSelected"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12s3-6 9-6 9 6 9 6-3 6-9 6-9-6-9-6Z"></path><circle cx="12" cy="12" r="3"></circle></svg><span><strong>标记为忽略</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          </section>
+
+          <button class="primary-action side-primary" type="button" data-task-resolve="retrySelected"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg>重试已选文件</button>
+          <button class="secondary-action side-primary" type="button" data-task-return="detail">返回任务详情</button>
+        </section>
+
+        <section class="side-state task-assistant state-hidden" data-task-panel="result">
+          <h2>解析结果</h2>
+
+          <section class="panel-card task-side-card result-list-card">
+            <span class="label">本次结果</span>
+            <div><span>新增简历</span><strong class="green">60</strong></div>
+            <div><span>更新已有</span><strong class="blue">10</strong></div>
+            <div><span>重复跳过</span><strong>6</strong></div>
+            <div><span>解析失败</span><strong class="red">2</strong></div>
+          </section>
+
+          <section class="panel-card task-side-card result-list-card">
+            <span class="label">入库结果</span>
+            <div><span>已入人才库</span><strong class="green">70</strong></div>
+            <div><span>待人工处理</span><strong class="yellow">2</strong></div>
+            <div><span>已跳过</span><strong>6</strong></div>
+          </section>
+
+          <section class="panel-card task-side-card side-action-list compact-actions">
+            <span class="label">下一步</span>
+            <button type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 5 5"></path></svg><span><strong>去 DeerSearch 搜索</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-task-open="issue" data-task-id="customer_backend_001"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span><strong>查看失败文件</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-nav-view-proxy="import"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path></svg><span><strong>继续导入简历</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          </section>
+
+          <section class="panel-card task-side-card timeline-card">
+            <span class="label">最近动作</span>
+            <p><span></span><strong>16:48</strong>任务完成</p>
+            <p><span></span><strong>16:49</strong>已自动入库</p>
+            <p><span></span><strong>16:50</strong>可开始搜索</p>
+          </section>
+
+          <button class="primary-action side-primary" type="button">去 DeerSearch 搜索</button>
+          <button class="secondary-action side-primary" type="button" data-task-open="issue" data-task-id="customer_backend_001">查看失败文件</button>
+        </section>
+
+        <section class="side-state talent-assistant" data-talent-panel="overview">
+          <h2>人才库助手</h2>
+
+          <section class="panel-card talent-side-card quick-card">
+            <span class="label">快捷入口</span>
+            <button type="button" data-talent-panel-target="pending"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path></svg><span>查看待完善资料</span><strong>41</strong></button>
+            <button type="button" data-talent-panel-target="duplicate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>处理疑似重复</span><strong class="red">18</strong></button>
+            <button type="button" data-talent-panel-target="recent"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></svg><span>最近导入来源</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-talent-panel-target="saved"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"></path></svg><span>我的收藏</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          </section>
+
+          <section class="panel-card talent-side-card source-card">
+            <span class="label">最近导入来源</span>
+            <button type="button" data-talent-panel-target="recent"><strong>FinTech_Backend_2026</strong><span>今天 10:32 · 来源累计 248 份</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-talent-panel-target="recent"><strong>客户A_后端简历包</strong><span>今天 09:48 · 来源累计 186 份</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-talent-panel-target="recent"><strong>Java后端候选人_5月</strong><span>昨天 16:22 · 132 份</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          </section>
+
+          <section class="panel-card talent-side-card tag-cloud-card">
+            <span class="label">标签云（Top 10）</span>
+            <div class="talent-tags"><span>Java</span><span>后端开发</span><span>微服务</span><span>Spring Boot</span><span>分布式</span><span>高并发</span><span>MySQL</span><span>Redis</span><span>支付</span><span>金融科技</span></div>
+          </section>
+
+          <button class="primary-action side-primary talent-import-more" type="button" data-nav-view-proxy="import"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path><path d="M5 21h14"></path></svg>导入更多简历</button>
+        </section>
+
+        <section class="side-state talent-assistant state-hidden" data-talent-panel="recent">
+          <h2>最近导入</h2>
+          <section class="panel-card talent-side-card source-summary">
+            <span class="label">当前来源</span>
+            <strong>FinTech_Backend_2026</strong>
+            <p>今天 10:32 导入 · 来源累计 248 份简历 · 96 新增 · 18 更新 · 9 重复跳过。</p>
+          </section>
+          <section class="panel-card talent-side-card result-list-card">
+            <span class="label">来源质量</span>
+            <div><span>资料完整</span><strong class="green">86%</strong></div>
+            <div><span>待完善</span><strong class="yellow">12</strong></div>
+            <div><span>疑似重复</span><strong class="red">5</strong></div>
+          </section>
+          <section class="panel-card talent-side-card side-action-list compact-actions">
+            <span class="label">可用操作</span>
+            <button type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 5 5"></path></svg><span><strong>在来源中搜索</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-export-open="sourceList"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span><strong>导出来源列表</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-nav-view-proxy="import"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 8 5-5 5 5"></path><path d="M5 21h14"></path></svg><span><strong>继续导入</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          </section>
+        </section>
+
+        <section class="side-state talent-assistant state-hidden" data-talent-panel="profile">
+          <h2>简历概览</h2>
+          <section class="panel-card talent-side-card source-summary">
+            <span class="label">当前候选人</span>
+            <strong>陈屿</strong>
+            <p>Java 后端开发工程师 · 上海 · 7 年经验。支付风控与高并发项目经验完整。</p>
+          </section>
+          <section class="panel-card talent-side-card result-list-card">
+            <span class="label">资料状态</span>
+            <div><span>联系方式</span><strong class="green">完整</strong></div>
+            <div><span>工作经历</span><strong class="green">完整</strong></div>
+            <div><span>项目经历</span><strong class="blue">4 段</strong></div>
+            <div><span>匹配标签</span><strong>8</strong></div>
+          </section>
+          <section class="panel-card talent-side-card side-action-list compact-actions">
+            <span class="label">可用操作</span>
+            <button class="candidate-resume-open" type="button" data-candidate-id="candidate_chenyu_001" data-candidate-resume-entry="talent"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path></svg><span><strong>打开完整简历</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"></path></svg><span><strong>加入收藏</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-talent-panel-target="overview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16"></path><path d="M4 12h16"></path><path d="M4 18h10"></path></svg><span><strong>返回人才库助手</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          </section>
+        </section>
+
+        <section class="side-state talent-assistant state-hidden" data-talent-panel="saved">
+          <h2>收藏助手</h2>
+          <section class="panel-card talent-side-card saved-summary">
+            <span class="label">当前收藏</span>
+            <strong>3</strong>
+            <p>适合进入下一轮沟通的候选人，可生成短名单或导出给业务方。</p>
+          </section>
+          <section class="panel-card talent-side-card result-list-card">
+            <span class="label">收藏分布</span>
+            <div><span>Java 后端</span><strong>2</strong></div>
+            <div><span>架构方向</span><strong>1</strong></div>
+            <div><span>待补资料</span><strong class="yellow">1</strong></div>
+          </section>
+          <section class="panel-card talent-side-card side-action-list compact-actions">
+            <span class="label">可用操作</span>
+            <button type="button" data-shortlist-open="saved"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg><span><strong>生成短名单</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-export-open="savedList"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span><strong>导出收藏列表</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-talent-panel-target="pending"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path></svg><span><strong>补全收藏资料</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          </section>
+        </section>
+
+        <section class="side-state talent-assistant state-hidden" data-talent-panel="pending">
+          <h2>数据健康助手</h2>
+          <section class="panel-card talent-side-card missing-card">
+            <span class="label">缺失字段分布</span>
+            <div class="missing-donut"><strong>128</strong><span>待完善字段</span></div>
+            <div class="missing-legend"><span>手机号缺失 38</span><span>邮箱缺失 31</span><span>最近经历缺失 33</span><span>教育经历缺失 26</span></div>
+          </section>
+          <section class="panel-card talent-side-card health-advice">
+            <span class="label">数据健康建议</span>
+            <p><strong>补全关键信息</strong><span>完善手机号、邮箱等联系方式，提升触达成功率。</span></p>
+            <p><strong>补充经历信息</strong><span>填写最近工作经历与教育经历，提升匹配准确度。</span></p>
+            <p><strong>保持数据新鲜</strong><span>定期更新简历，确保信息时效性与有效性。</span></p>
+          </section>
+          <section class="panel-card talent-side-card side-action-list compact-actions">
+            <span class="label">快捷操作</span>
+            <button type="button" data-talent-open="pendingComplete"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg><span><strong>批量补全资料</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"></path><path d="M21 3v6h-6"></path></svg><span><strong>重新解析原简历</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button" data-export-open="pendingList"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span><strong>导出待完善列表</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+            <button type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12h8"></path></svg><span><strong>忽略本次提醒</strong></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          </section>
+        </section>
+
+        <section class="side-state talent-assistant state-hidden" data-talent-panel="duplicate">
+          <h2>重复分析</h2>
+          <section class="panel-card talent-side-card duplicate-current">
+            <span class="label">当前选中</span>
+            <strong>重复组 #20240520-001 <em>高相似度 98%</em></strong>
+            <p>2 份简历</p>
+          </section>
+          <section class="panel-card talent-side-card reason-card">
+            <span class="label">相似原因</span>
+            <div><span>姓名一致</span><strong class="green">100%</strong></div>
+            <div><span>手机号一致</span><strong class="green">100%</strong></div>
+            <div><span>工作经历高度重合</span><strong class="green">95%</strong></div>
+            <div><span>教育背景一致</span><strong class="green">90%</strong></div>
+            <div><span>技能标签重合度</span><strong class="green">92%</strong></div>
+          </section>
+          <section class="panel-card talent-side-card diff-card">
+            <span class="label">差异摘要</span>
+            <p>简历 A 最近工作经历描述更详细</p>
+            <p>简历 B 项目经验多 1 个</p>
+            <button type="button" data-talent-open="duplicateDetail">查看差异详情 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+          </section>
+          <section class="panel-card talent-side-card duplicate-actions">
+            <span class="label">推荐操作</span>
+            <p>建议合并为一份简历以避免重复统计。</p>
+            <button class="primary-action side-primary" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 7 4-4 4 4"></path><path d="M12 3v18"></path><path d="m8 17 4 4 4-4"></path></svg>合并简历（推荐）</button>
+            <button class="secondary-action side-primary" type="button">保留较新版本</button>
+            <button class="secondary-action side-primary" type="button">分别保留</button>
+            <button class="secondary-action side-primary" type="button" data-talent-open="duplicateDetail">查看差异</button>
+          </section>
+        </section>
+
+        <section class="side-state talent-detail-assistant state-hidden" data-talent-detail-assistant="duplicate">
+          <h2>差异决策助手</h2>
+          <section class="panel-card talent-side-card duplicate-current">
+            <span class="label">当前重复组</span>
+            <strong>#20240520-001 <em>98% 相似</em></strong>
+            <p>建议合并为一份主档，并保留两个来源链路。</p>
+          </section>
+          <section class="panel-card talent-side-card reason-card">
+            <span class="label">合并前检查</span>
+            <div><span>手机号</span><strong class="green">一致</strong></div>
+            <div><span>姓名</span><strong class="green">一致</strong></div>
+            <div><span>项目经历</span><strong class="yellow">有补充</strong></div>
+            <div><span>来源链路</span><strong class="blue">需保留</strong></div>
+          </section>
+          <section class="panel-card talent-side-card duplicate-actions">
+            <span class="label">推荐操作</span>
+            <button class="primary-action side-primary" type="button" data-talent-detail-action="merge">合并简历（推荐）</button>
+            <button class="secondary-action side-primary" type="button" data-talent-detail-action="newer">保留较新版本</button>
+            <button class="secondary-action side-primary" type="button" data-talent-detail-return>返回重复列表</button>
+          </section>
+        </section>
+
+        <section class="side-state talent-detail-assistant state-hidden" data-talent-detail-assistant="pending">
+          <h2>补全助手</h2>
+          <section class="panel-card talent-side-card missing-card">
+            <span class="label">当前候选人</span>
+            <div class="missing-donut"><strong>62%</strong><span>完整度</span></div>
+            <div class="missing-legend"><span>手机号待确认</span><span>邮箱待确认</span><span>最近经历待补</span><span>教育经历低置信</span></div>
+          </section>
+          <section class="panel-card talent-side-card health-advice">
+            <span class="label">保存影响</span>
+            <p><strong>触达可用</strong><span>联系方式确认后可进入短名单沟通。</span></p>
+            <p><strong>搜索更准</strong><span>最近经历和教育字段会参与召回排序。</span></p>
+          </section>
+          <section class="panel-card talent-side-card duplicate-actions">
+            <span class="label">快捷操作</span>
+            <button class="primary-action side-primary" type="button" data-talent-detail-action="save">保存补全</button>
+            <button class="secondary-action side-primary" type="button" data-talent-detail-action="parse">重新解析原简历</button>
+            <button class="secondary-action side-primary" type="button" data-talent-detail-return>返回待完善列表</button>
+          </section>
+        </section>
+
+        <section class="side-state p1-detail-assistant state-hidden" data-p1-assistant="source">
+          <h2>来源助手</h2>
+          <section class="panel-card talent-side-card">
+            <span class="label">批次状态</span>
+            <p><strong>FinTech_Backend_2026</strong><span>126 文件 · 96 新增 · 18 更新</span></p>
+            <p><strong>质量重点</strong><span>优先处理重复组和低置信联系方式。</span></p>
+          </section>
+          <section class="panel-card talent-side-card duplicate-actions">
+            <span class="label">快捷操作</span>
+            <button class="primary-action side-primary" type="button" data-talent-open="advancedFilter">按来源筛选</button>
+            <button class="secondary-action side-primary" type="button" data-p1-return="talentRecent">返回本周新增</button>
+          </section>
+        </section>
+
+        <section class="side-state p1-detail-assistant state-hidden" data-p1-assistant="importAction">
+          <h2>导入动作助手</h2>
+          <section class="panel-card import-side-card">
+            <span class="label">推荐顺序</span>
+            <p><strong>先搜索</strong><span>确认新增候选人是否可召回。</span></p>
+            <p><strong>再治理</strong><span>处理重复、标签和解析规则。</span></p>
+          </section>
+          <section class="panel-card import-side-card duplicate-actions">
+            <span class="label">入口</span>
+            <button class="primary-action side-primary" type="button" data-import-action-run="search">打开搜索</button>
+            <button class="secondary-action side-primary" type="button" data-p1-return="importFinished">返回导入结果</button>
+          </section>
+        </section>
+
+        <section class="side-state p1-detail-assistant state-hidden" data-p1-assistant="filter">
+          <h2>筛选助手</h2>
+          <section class="panel-card talent-side-card">
+            <span class="label">当前条件</span>
+            <p><strong>Java 后端</strong><span>上海 / 杭州 / 深圳 · 5 - 9 年</span></p>
+            <p><strong>标签</strong><span>支付风控、高并发、Spring Boot</span></p>
+          </section>
+          <section class="panel-card talent-side-card duplicate-actions">
+            <span class="label">操作</span>
+            <button class="primary-action side-primary" type="button" data-p1-action="applyFilter">应用筛选</button>
+            <button class="secondary-action side-primary" type="button" data-p1-return="talentAll">返回人才库</button>
+          </section>
+        </section>
+
+        <section class="side-state p1-detail-assistant state-hidden" data-p1-assistant="candidateActions">
+          <h2>操作助手</h2>
+          <section class="panel-card talent-side-card">
+            <span class="label">当前候选人</span>
+            <p><strong>陈屿</strong><span>Java 后端开发工程师 · 92 完整度</span></p>
+            <p><strong>建议</strong><span>可加入短名单并导出给业务方。</span></p>
+          </section>
+          <section class="panel-card talent-side-card duplicate-actions">
+            <span class="label">快捷操作</span>
+            <button class="primary-action side-primary" type="button" data-resume-action="shortlist">加入短名单</button>
+            <button class="secondary-action side-primary" type="button" data-p1-return="talentAll">返回人才库</button>
+          </section>
+        </section>
+
+        <section class="side-state p1-detail-assistant state-hidden" data-p1-assistant="settings">
+          <h2>设置助手</h2>
+          <section class="panel-card talent-side-card">
+            <span class="label">当前配置</span>
+            <p><strong>AI 解析</strong><span>低置信字段自动标记待确认。</span></p>
+            <p><strong>导入规则</strong><span>重复检测阈值 85%。</span></p>
+          </section>
+          <section class="panel-card talent-side-card duplicate-actions">
+            <span class="label">保存</span>
+            <button class="primary-action side-primary" type="button" data-p1-action="saveSettings">保存设置</button>
+          </section>
+        </section>
+
+        <section class="side-state p2-detail-assistant state-hidden" data-p2-assistant="export">
+          <h2>导出助手</h2>
+          <section class="panel-card talent-side-card result-list-card">
+            <span class="label">导出检查</span>
+            <div><span>范围</span><strong data-export-title>候选人列表</strong></div>
+            <div><span>数量</span><strong data-export-count>428</strong></div>
+            <div><span>格式</span><strong class="green">XLSX</strong></div>
+          </section>
+          <section class="panel-card talent-side-card duplicate-actions">
+            <span class="label">操作</span>
+            <button class="primary-action side-primary" type="button" data-p2-action="exportNow">生成导出文件</button>
+            <button class="secondary-action side-primary" type="button" data-p2-return>返回上一页</button>
+          </section>
+        </section>
+
+        <section class="side-state p2-detail-assistant state-hidden" data-p2-assistant="shortlist">
+          <h2>短名单助手</h2>
+          <section class="panel-card talent-side-card saved-summary">
+            <span class="label">当前名单</span>
+            <strong data-shortlist-total>3</strong>
+            <p>建议先复制给业务方确认，再按反馈调整候选人顺序。</p>
+          </section>
+          <section class="panel-card talent-side-card duplicate-actions">
+            <span class="label">快捷操作</span>
+            <button class="primary-action side-primary" type="button" data-p2-action="copyShortlist">复制名单</button>
+            <button class="secondary-action side-primary" type="button" data-export-open="savedList">导出名单</button>
+          </section>
+        </section>
+
+        <section class="side-state p2-detail-assistant state-hidden" data-p2-assistant="tags">
+          <h2>标签助手</h2>
+          <section class="panel-card talent-side-card tag-cloud-card">
+            <span class="label">建议标签</span>
+            <div class="talent-tags"><span>规则引擎</span><span>交易链路</span><span>Kafka</span><span>金融科技</span></div>
+          </section>
+          <section class="panel-card talent-side-card duplicate-actions">
+            <span class="label">操作</span>
+            <button class="primary-action side-primary" type="button" data-p2-action="saveTags">保存标签</button>
+            <button class="secondary-action side-primary" type="button" data-p2-action="batchTags">批量应用</button>
+          </section>
+        </section>
+
+        <section class="side-state p2-detail-assistant state-hidden" data-p2-assistant="failure">
+          <h2>失败处理助手</h2>
+          <section class="panel-card task-side-card reason-card">
+            <span class="label">问题分布</span>
+            <div><span>扫描件不可读</span><strong class="red">2</strong></div>
+            <div><span>文件损坏</span><strong class="red">3</strong></div>
+            <div><span>格式不支持</span><strong>4</strong></div>
+          </section>
+          <section class="panel-card task-side-card duplicate-actions">
+            <span class="label">推荐动作</span>
+            <button class="primary-action side-primary" type="button" data-task-resolve="retrySelected">批量重试</button>
+            <button class="secondary-action side-primary" type="button" data-export-open="failedList">导出失败列表</button>
+            <button class="secondary-action side-primary" type="button" data-p2-return>返回问题列表</button>
+          </section>
+        </section>
+
+        <section class="side-state p2-detail-assistant state-hidden" data-p2-assistant="searchFilter">
+          <h2>搜索筛选助手</h2>
+          <section class="panel-card query-card">
+            <span class="label">当前搜索</span>
+            <p>支付风控 Java 后端，高并发项目经验，金融科技优先。</p>
+          </section>
+          <section class="panel-card condition-card">
+            <span class="label">相似候选人条件</span>
+            <div class="condition-grid">
+              <div class="condition-cell"><small>技术</small><strong>Java</strong></div>
+              <div class="condition-cell"><small>业务</small><strong>支付风控</strong></div>
+              <div class="condition-cell"><small>项目</small><strong>高并发</strong></div>
+              <div class="condition-cell"><small>城市</small><strong>可放宽</strong></div>
+            </div>
+          </section>
+          <section class="panel-card talent-side-card duplicate-actions">
+            <span class="label">操作</span>
+            <button class="primary-action side-primary" type="button" data-p2-action="applySearchFilter">应用筛选</button>
+            <button class="secondary-action side-primary" type="button" data-p2-return>返回搜索结果</button>
+          </section>
+        </section>
+      </aside>
+    </main>
+
+    <div class="app-toast" id="appToast" role="status" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
