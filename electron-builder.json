@@ -5,12 +5,13 @@
     "output": "release/electron"
   },
   "files": [
-    "desktop/main.cjs",
-    "desktop/preload.cjs",
-    "dist/**/*"
+    "desktop/**/*.cjs",
+    "dist/**/*",
+    "node_modules/**/*"
   ],
   "mac": {
     "category": "public.app-category.business",
-    "target": ["dir"]
+    "identity": null,
+    "target": ["dir", "dmg"]
   }
 }

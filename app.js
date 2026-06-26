@@ -45,7 +45,7 @@ const importTaskOpenButtons = document.querySelectorAll("[data-import-task-open]
 const taskAssistantPanels = document.querySelectorAll("[data-task-panel]");
 const taskFilterButtons = document.querySelectorAll("[data-task-filter]");
 const taskPanelButtons = document.querySelectorAll("[data-task-panel-target]");
-const taskRows = document.querySelectorAll("[data-task-item]");
+let taskRows = document.querySelectorAll("[data-task-item]");
 const taskViews = document.querySelectorAll("[data-task-view]");
 const taskOpenButtons = document.querySelectorAll("[data-task-open]");
 const taskReturnButtons = document.querySelectorAll("[data-task-return]");
@@ -56,7 +56,7 @@ const talentAssistantPanels = document.querySelectorAll("[data-talent-panel]");
 const talentFilterButtons = document.querySelectorAll("[data-talent-filter]");
 const talentPanelButtons = document.querySelectorAll("[data-talent-panel-target]");
 const talentViews = document.querySelectorAll("[data-talent-view]");
-const talentItems = document.querySelectorAll("[data-talent-item]");
+let talentItems = document.querySelectorAll("[data-talent-item]");
 const talentStars = document.querySelectorAll(".talent-star");
 const talentOpenButtons = document.querySelectorAll("[data-talent-open]");
 const talentDetailReturnButtons = document.querySelectorAll("[data-talent-detail-return]");
@@ -92,7 +92,13 @@ const searchSortToggle = document.querySelector("[data-search-sort-toggle]");
 const searchSortLabel = document.querySelector("[data-search-sort-label]");
 const searchResultCountLine = document.querySelector("[data-search-result-count]");
 const searchCandidateGrid = document.querySelector(".candidate-grid");
-const searchCandidateCards = Array.from(document.querySelectorAll(".candidate-grid [data-search-score]"));
+let searchCandidateCards = Array.from(document.querySelectorAll(".candidate-grid [data-search-score]"));
+const localLibraryEmpty = document.querySelector("[data-local-library-empty]");
+const localCandidateList = document.querySelector("[data-local-candidate-list]");
+const localSearchList = document.querySelector("[data-local-search-list]");
+const localSourceList = document.querySelector("[data-local-source-list]");
+const localTaskList = document.querySelector("[data-local-task-list]");
+const isDesktopLocalLibrary = Boolean(window.deerRecallDesktop);
 const searchAiCard = document.querySelector("[data-search-ai-card]");
 const searchAiStatus = document.querySelector("[data-search-ai-status]");
 const searchAiAnswer = document.querySelector("[data-search-ai-answer]");
@@ -376,6 +382,7 @@ let searchExtraFilterCursor = 0;
 let searchAiHistory = loadSearchAiHistory();
 let activeSearchAiHistoryId = searchAiHistory[0]?.id || null;
 let searchAiServiceStatus = null;
+let localTalentLibrary = null;
 let p2ReturnContext = { view: "talents", talentFilter: "all", taskId: null, searchQuery: defaultQuery };
 
 function hideCandidateResumeContext() {
@@ -437,6 +444,306 @@ function escapeHtml(value = "") {
 function renderInlineList(target, items) {
   if (!target) return;
   target.innerHTML = (items || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+}
+
+function normalizeLocalLibrary(library) {
+  return {
+    schemaVersion: library?.schemaVersion || 1,
+    candidates: Array.isArray(library?.candidates) ? library.candidates : [],
+    importTasks: Array.isArray(library?.importTasks) ? library.importTasks : [],
+    sources: Array.isArray(library?.sources) ? library.sources : [],
+  };
+}
+
+function getLocalCandidates() {
+  return normalizeLocalLibrary(localTalentLibrary).candidates;
+}
+
+function formatLocalTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value || "刚刚";
+  return date.toLocaleString("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function getLocalCandidateRole(candidate) {
+  return candidate.shortRole || candidate.role || candidate.title || "候选人";
+}
+
+function getLocalCandidateStatus(candidate) {
+  const hasContact = Boolean(candidate.contacts?.phone || candidate.contacts?.email);
+  if (candidate.completeness >= 80 || hasContact) return { label: "资料完整", className: "green" };
+  return { label: "待完善", className: "yellow" };
+}
+
+function getLocalCandidateTags(candidate) {
+  const tags = Array.isArray(candidate.tags) ? candidate.tags.filter(Boolean).slice(0, 6) : [];
+  return tags.length ? tags : ["本地解析"];
+}
+
+function getLocalCandidateSummary(candidate) {
+  if (Array.isArray(candidate.summary) && candidate.summary.length) return candidate.summary[0];
+  return candidate.experience || candidate.matchNote || "已从本地简历提取正文，等待补充结构化信息。";
+}
+
+function updateLocalKpis(candidates) {
+  const pending = candidates.filter((candidate) => getLocalCandidateStatus(candidate).label === "待完善").length;
+  const counts = {
+    total: candidates.length,
+    recent: candidates.length,
+    pending,
+    duplicate: 0,
+  };
+  document.querySelectorAll("[data-local-kpi]").forEach((node) => {
+    const value = counts[node.dataset.localKpi];
+    if (Number.isFinite(value)) node.textContent = String(value);
+  });
+  document.querySelectorAll("[data-local-indexed-count]").forEach((node) => {
+    node.textContent = String(candidates.length);
+  });
+}
+
+function renderLocalSearchCards(candidates) {
+  if (!localSearchList) return;
+  if (!candidates.length) {
+    localSearchList.innerHTML = `
+      <article class="candidate-card local-empty-card">
+        <div class="candidate-top">
+          <div>
+            <h3>暂无候选人</h3>
+            <p class="candidate-role">请先导入本地简历文件夹</p>
+          </div>
+          <div class="score"><strong>0</strong><span>匹配</span></div>
+        </div>
+        <p class="candidate-desc">本地人才库为空，搜索会在导入并解析简历后开始返回结果。</p>
+        <div class="candidate-actions">
+          <button class="resume-btn" type="button" data-import-pick="folder">选择简历文件夹</button>
+        </div>
+      </article>
+    `;
+    searchCandidateCards = [];
+    updateSearchResultCount(0);
+    return;
+  }
+
+  localSearchList.innerHTML = candidates
+    .map((candidate, index) => {
+      const tags = getLocalCandidateTags(candidate);
+      const score = candidate.matchScore || candidate.score || Math.max(35, candidate.completeness || 0);
+      return `
+        <article class="candidate-card" data-candidate="${escapeHtml(candidate.name)}" data-candidate-id="${escapeHtml(candidate.id)}" data-search-score="${score}" data-search-years="${candidate.years || 0}" data-search-city="${escapeHtml(candidate.city || "")}" data-search-index="${index}">
+          <div class="candidate-top">
+            <div>
+              <h3>${escapeHtml(candidate.name)}</h3>
+              <p class="candidate-role">${escapeHtml(getLocalCandidateRole(candidate))}</p>
+            </div>
+            <div class="score"><strong>${score}</strong><span>匹配</span></div>
+          </div>
+          <p class="candidate-desc">${escapeHtml(getLocalCandidateSummary(candidate))}</p>
+          <div class="tag-row">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
+          <div class="candidate-actions">
+            <button class="resume-btn candidate-resume-open" type="button" data-candidate-id="${escapeHtml(candidate.id)}" data-candidate-resume-entry="search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path><path d="M9 15h6"></path><path d="M9 18h4"></path></svg> 查看简历</button>
+            <button class="bookmark-btn shortlist-action" type="button" aria-label="加入短名单" data-name="${escapeHtml(candidate.name)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"></path></svg></button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+  searchCandidateCards = Array.from(localSearchList.querySelectorAll("[data-search-score]"));
+  updateSearchResultCount(candidates.length);
+}
+
+function renderLocalTalentRows(candidates) {
+  if (!localCandidateList) return;
+  if (!candidates.length) {
+    localCandidateList.innerHTML = `
+      <article class="talent-row local-empty-row" data-talent-item data-talent-kind="all" data-talent-panel-target="overview">
+        <div class="talent-avatar">0</div>
+        <div class="talent-main">
+          <div class="talent-name-line"><h3>暂无候选人</h3></div>
+          <p>选择本地文件夹后开始建立人才库。</p>
+          <div class="talent-tags"><span>PDF</span><span>DOCX</span><span>TXT</span><span>Markdown</span></div>
+        </div>
+        <div class="talent-source"><span>来源：本地 Mac</span><strong class="yellow">等待导入</strong><small>从 0 开始</small></div>
+        <div class="talent-actions"><button type="button" data-import-pick="folder">选择文件夹</button></div>
+      </article>
+    `;
+    talentItems = document.querySelectorAll("[data-talent-item]");
+    selectTalentItem(localCandidateList.querySelector("[data-talent-item]"));
+    return;
+  }
+
+  localCandidateList.innerHTML = `${candidates
+    .map((candidate, index) => {
+      const status = getLocalCandidateStatus(candidate);
+      const tags = getLocalCandidateTags(candidate);
+      return `
+        <article class="talent-row${index === 0 ? " is-selected" : ""}" data-talent-item data-candidate-id="${escapeHtml(candidate.id)}" data-talent-kind="all" data-talent-panel-target="profile">
+          <div class="talent-avatar">${escapeHtml(candidate.initial || candidate.name.slice(0, 1))}</div>
+          <div class="talent-main">
+            <div class="talent-name-line"><h3>${escapeHtml(candidate.name)}</h3><button class="talent-star" type="button" aria-label="收藏">☆</button></div>
+            <p>${escapeHtml(getLocalCandidateRole(candidate))}</p>
+            <div class="talent-tags">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
+          </div>
+          <div class="talent-source"><span>来源：${escapeHtml(candidate.sourceName || candidate.source || "本地导入")}</span><strong class="${status.className}">${status.label}</strong><small>${escapeHtml(formatLocalTime(candidate.importedAt || candidate.created))} 入库</small></div>
+          <div class="talent-actions"><button class="candidate-resume-open" type="button" data-candidate-id="${escapeHtml(candidate.id)}" data-candidate-resume-entry="talent">查看简历</button><button class="dot-menu" type="button" aria-label="更多操作" data-talent-open="candidateActions">...</button></div>
+        </article>
+      `;
+    })
+    .join("")}<footer class="talent-pagination"><span>共 ${candidates.length} 位候选人</span></footer>`;
+  talentItems = document.querySelectorAll("[data-talent-item]");
+  selectTalentItem(localCandidateList.querySelector("[data-talent-item]"));
+}
+
+function renderLocalSources(library) {
+  if (!localSourceList) return;
+  const sources = library.sources.length
+    ? library.sources
+    : library.importTasks.map((task) => ({
+        id: task.id,
+        name: task.source,
+        path: task.folderPath,
+        total: task.total,
+        parseable: task.success,
+        failed: task.failed,
+        unsupported: task.unsupported,
+        importedAt: task.time,
+      }));
+  const header = '<h2>最近导入</h2><p class="talent-view-note">按导入来源查看本地简历解析结果。</p>';
+  if (!sources.length) {
+    localSourceList.innerHTML = `${header}<article class="import-source-row" data-talent-item data-talent-kind="recent" data-talent-panel-target="recent"><div class="source-icon">0</div><div><h3>暂无导入来源</h3><p>选择本地简历文件夹后会显示来源批次。</p></div><strong>0 新增</strong><span>0 失败</span><button type="button" data-import-pick="folder">导入</button></article>`;
+  } else {
+    localSourceList.innerHTML = `${header}${sources
+      .map(
+        (source, index) => `
+          <article class="import-source-row${index === 0 ? " is-selected" : ""}" data-talent-item data-talent-kind="recent" data-talent-panel-target="recent">
+            <div class="source-icon">${escapeHtml((source.name || "本").slice(0, 1))}</div>
+            <div><h3>${escapeHtml(source.name || "本地导入")}</h3><p>${escapeHtml(formatLocalTime(source.importedAt))} · ${source.total || 0} 个文件 · ${escapeHtml(source.path || "本地文件夹")}</p></div>
+            <strong>${source.parseable || 0} 成功</strong><span>${(source.failed || 0) + (source.unsupported || 0)} 需处理</span><button type="button" data-talent-open="sourceDetail">查看来源</button>
+          </article>
+        `
+      )
+      .join("")}`;
+  }
+  talentItems = document.querySelectorAll("[data-talent-item]");
+}
+
+function renderTaskRow(task) {
+  const kind = getTaskKindFromRecord(task);
+  const pendingIssues = (task.failed || 0) + (task.unsupported || 0);
+  const icon =
+    pendingIssues > 0
+      ? '<div class="task-status-icon alert"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v6"></path><path d="M12 17h.01"></path></svg></div>'
+      : '<div class="task-status-icon success"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg></div>';
+  const primaryAction = pendingIssues
+    ? `<button class="task-action primary-lite" type="button" data-task-open="issue" data-task-id="${escapeHtml(task.id)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-3-3Z"></path></svg>处理问题</button>`
+    : "";
+  return `
+    <article class="task-row task-${kind}" data-task-item data-task-id="${escapeHtml(task.id)}" data-task-kind="${kind}" data-task-panel-target="${pendingIssues ? "issue" : "detail"}">
+      ${icon}
+      <div class="task-main">
+        <div class="task-title-line"><h3>${escapeHtml(task.source || "本地导入")}</h3><span class="task-badge">${pendingIssues ? "需处理" : "已完成"}</span></div>
+        <p>${escapeHtml(task.importType || "文件夹导入")} · ${task.total || 0} 个文件 · ${escapeHtml(formatLocalTime(task.time))}</p>
+        <div class="task-stats"><span>成功 <strong class="green">${task.success || 0}</strong></span><span>失败 <strong class="red">${task.failed || 0}</strong></span><span>格式不支持 <strong>${task.unsupported || 0}</strong></span></div>
+      </div>
+      <div class="task-actions">
+        ${primaryAction}
+        <button class="task-action" type="button" data-task-open="detail" data-task-id="${escapeHtml(task.id)}">查看详情 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+      </div>
+    </article>
+  `;
+}
+
+function renderLocalImportTasks(library) {
+  if (!localTaskList) return;
+  const tasks = Array.isArray(library.importTasks) ? library.importTasks : [];
+  Object.keys(taskRecords).forEach((taskId) => {
+    if (isDesktopLocalLibrary) delete taskRecords[taskId];
+  });
+  tasks.forEach((task) => {
+    taskRecords[task.id] = task;
+  });
+
+  if (!tasks.length) {
+    localTaskList.innerHTML = `
+      <section class="task-group" data-task-group="completed">
+        <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg>最近完成</h2>
+        <article class="task-row task-completed local-empty-row">
+          <div class="task-status-icon success"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg></div>
+          <div class="task-main"><div class="task-title-line"><h3>暂无解析任务</h3></div><p>导入本地简历文件夹后会生成任务记录。</p></div>
+          <div class="task-actions"><button class="task-action" type="button" data-import-pick="folder">选择文件夹</button></div>
+        </article>
+      </section>
+    `;
+  } else {
+    const groups = {
+      needs: tasks.filter((task) => getTaskKindFromRecord(task) === "needs"),
+      processing: tasks.filter((task) => getTaskKindFromRecord(task) === "processing"),
+      completed: tasks.filter((task) => getTaskKindFromRecord(task) === "completed"),
+    };
+    localTaskList.innerHTML = `
+      <section class="task-group" data-task-group="needs">
+        <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>需处理</h2>
+        ${groups.needs.map(renderTaskRow).join("")}
+      </section>
+      <section class="task-group" data-task-group="processing">
+        <h2><span class="mini-ring"></span>正在解析</h2>
+        ${groups.processing.map(renderTaskRow).join("")}
+      </section>
+      <section class="task-group" data-task-group="completed">
+        <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg>最近完成</h2>
+        ${groups.completed.map(renderTaskRow).join("")}
+      </section>
+    `;
+  }
+  taskRows = document.querySelectorAll("[data-task-item]");
+  updateTaskFilterCounts();
+}
+
+function renderLocalCandidates(candidates) {
+  updateLocalKpis(candidates);
+  renderLocalSearchCards(candidates);
+  renderLocalTalentRows(candidates);
+  localLibraryEmpty?.classList.toggle("state-hidden", candidates.length > 0);
+}
+
+function applyLocalTalentLibrary(library) {
+  localTalentLibrary = normalizeLocalLibrary(library);
+  const candidates = getLocalCandidates();
+  candidates.forEach((candidate) => {
+    candidateRecords[candidate.id] = candidate;
+  });
+  renderLocalCandidates(candidates);
+  renderLocalSources(localTalentLibrary);
+  renderLocalImportTasks(localTalentLibrary);
+  currentImportSource = localTalentLibrary.sources[0]
+    ? {
+        name: localTalentLibrary.sources[0].name,
+        path: localTalentLibrary.sources[0].path,
+        type: localTalentLibrary.sources[0].type || "文件夹",
+        files: [],
+        rawStats: localTalentLibrary.importTasks[0]?.stats || {},
+        stats: deriveImportStats(localTalentLibrary.importTasks[0]?.stats || {}),
+      }
+    : getEmptyImportSource();
+  updateImportPreview(currentImportSource);
+}
+
+async function loadLocalTalentLibrary() {
+  if (!isDesktopLocalLibrary) return;
+  try {
+    const library = await window.deerRecallDesktop?.getTalentLibrary();
+    applyLocalTalentLibrary(library);
+    showTalentState("all");
+  } catch {
+    applyLocalTalentLibrary({ candidates: [], importTasks: [], sources: [] });
+    showTalentState("all");
+    showToast("本地人才库读取失败，请重新打开应用或重新导入。");
+  }
 }
 
 function createSearchAiHistoryId() {
@@ -808,6 +1115,27 @@ function deriveImportStats(rawStats) {
   };
 }
 
+function getEmptyImportSource() {
+  const rawStats = {
+    total: 0,
+    parseable: 0,
+    duplicate: 0,
+    unsupported: 0,
+    newProfiles: 0,
+    updatedProfiles: 0,
+    skippedDuplicates: 0,
+    failed: 0,
+  };
+  return {
+    name: "等待选择本地文件夹",
+    path: "本地人才库为空",
+    type: "文件夹",
+    files: [],
+    rawStats,
+    stats: deriveImportStats(rawStats),
+  };
+}
+
 function getSeedImportSource(overrides = {}) {
   const seedRawStats = {
     total: 126,
@@ -832,6 +1160,12 @@ function getSeedImportSource(overrides = {}) {
 }
 
 function openImportPickerCard(mode = "folder") {
+  if (isDesktopLocalLibrary && mode === "files") {
+    if (importPickerStatus) importPickerStatus.textContent = "请使用 Desktop 文件夹选择器解析并入库。";
+    requestImportSource("desktopFolder");
+    return;
+  }
+
   if (mode === "files") {
     if (importPickerCard) importPickerCard.classList.add("state-hidden");
     if (importPickerStatus) importPickerStatus.textContent = "请选择一个或多个简历文件。";
@@ -842,42 +1176,49 @@ function openImportPickerCard(mode = "folder") {
   if (!importPickerCard) return;
   importPickerCard.classList.remove("state-hidden");
   if (importPickerStatus) {
-    importPickerStatus.textContent = "请选择 Desktop 文件夹、浏览器文件夹，或使用示例文件夹继续本地测试。";
+    importPickerStatus.textContent = "请选择 Desktop 文件夹，普通浏览器预览可使用系统文件夹选择器。";
   }
 }
 
 async function requestImportSource(action) {
+  if (isDesktopLocalLibrary && action === "browserFolder") {
+    if (importPickerStatus) importPickerStatus.textContent = "请使用 Desktop 文件夹选择器解析并入库。";
+    await requestImportSource("desktopFolder");
+    return;
+  }
+
   if (action === "browserFolder") {
     if (importPickerStatus) importPickerStatus.textContent = "正在打开浏览器文件夹选择器。";
     importFolderInput?.click();
     return;
   }
 
-  if (action === "demoFolder") {
-    const source = getSeedImportSource({ type: "示例文件夹" });
-    updateImportPreview(source);
-    persistImportTask(source);
-    showImportState("preview");
-    showToast("已载入示例文件夹");
-    return;
-  }
-
   if (action === "desktopFolder") {
     if (importPickerStatus) importPickerStatus.textContent = "正在连接 Desktop 文件夹选择器。";
-    const desktopBridge = window.deerRecallDesktop;
-    if (desktopBridge?.selectImportFolder) {
+    if (window.deerRecallDesktop?.selectImportFolder) {
       try {
-        const selectedFolder = await desktopBridge.selectImportFolder();
+        const selectedFolder = await window.deerRecallDesktop?.selectImportFolder();
         if (!selectedFolder) {
           if (importPickerStatus) importPickerStatus.textContent = "已取消文件夹选择。";
           return;
         }
-        handleImportFiles(selectedFolder.files || [], {
+        const sourceStats = selectedFolder.stats || selectedFolder.task?.stats || {};
+        const source = {
           type: selectedFolder.type || "文件夹",
           name: selectedFolder.name,
           path: selectedFolder.path,
-          stats: selectedFolder.stats,
-        });
+          files: selectedFolder.files || [],
+          rawStats: sourceStats,
+          stats: deriveImportStats(sourceStats),
+          task: selectedFolder.task,
+        };
+        updateImportPreview(source);
+        if (selectedFolder.library) applyLocalTalentLibrary(selectedFolder.library);
+        if (importPickerStatus) {
+          importPickerStatus.textContent = `已解析 ${source.stats?.total || 0} 个文件，${source.stats?.parseable || 0} 个已入库。`;
+        }
+        showImportState("finished");
+        showToast("本地简历解析完成");
         return;
       } catch (error) {
         if (importPickerStatus) importPickerStatus.textContent = "Desktop 选择器不可用，已切换到浏览器文件夹选择。";
@@ -994,7 +1335,9 @@ function updateImportPreview(source = currentImportSource) {
 }
 
 function buildTaskFilesFromImport(source) {
-  const files = source.files?.length ? source.files.slice(0, 12) : getTaskRecord("fintech_backend_2026").files;
+  if (source.task?.files?.length) return source.task.files.slice(0, 12);
+  const fallbackTask = getTaskRecord("fintech_backend_2026");
+  const files = source.files?.length ? source.files.slice(0, 12) : isDesktopLocalLibrary ? [] : fallbackTask.files;
   return files.map((file, index) => {
     const extension = getImportFileExtension(file).toUpperCase() || "PDF";
     const name = getImportFileName(file);
@@ -1118,6 +1461,12 @@ function persistImportTask(source = currentImportSource) {
 }
 
 function handleImportFiles(fileList, options = {}) {
+  if (isDesktopLocalLibrary) {
+    if (importPickerStatus) importPickerStatus.textContent = "请使用 Desktop 文件夹选择器解析并入库。";
+    showToast("请使用 Desktop 文件夹选择器解析并入库");
+    return;
+  }
+
   const files = Array.from(fileList || []);
   if (!files.length && !options.stats && !options.path && !options.useDemo) {
     if (importPickerStatus) importPickerStatus.textContent = "没有读取到文件，请重新选择文件夹。";
@@ -1137,6 +1486,11 @@ function handleImportFiles(fileList, options = {}) {
 function handleImportDrop(event) {
   event.preventDefault();
   importDropZone?.classList.remove("is-dragging");
+  if (isDesktopLocalLibrary) {
+    if (importPickerStatus) importPickerStatus.textContent = "请使用 Desktop 文件夹选择器解析并入库。";
+    showToast("请使用 Desktop 文件夹选择器解析并入库");
+    return;
+  }
   const files = event.dataTransfer?.files || [];
   handleImportFiles(files, { type: "拖拽文件夹" });
 }
@@ -1307,6 +1661,24 @@ function showImportState(nextState = currentImportState) {
 }
 
 function getTaskRecord(taskId = selectedTaskId) {
+  if (isDesktopLocalLibrary) {
+    return taskRecords[taskId] || Object.values(taskRecords)[0] || {
+      id: "local_empty_task",
+      source: "暂无解析任务",
+      importType: "文件夹导入",
+      time: "",
+      status: "completed",
+      total: 0,
+      success: 0,
+      failed: 0,
+      unsupported: 0,
+      skipped: 0,
+      retryable: 0,
+      newProfiles: 0,
+      updatedProfiles: 0,
+      files: [],
+    };
+  }
   return taskRecords[taskId] || taskRecords.customer_backend_001;
 }
 
@@ -2104,6 +2476,19 @@ function selectTalentItem(item) {
   talentItems.forEach((talentItem) => talentItem.classList.toggle("is-selected", talentItem === item));
 }
 
+function toggleShortlistButton(button) {
+  const name = button?.dataset.name;
+  if (!name) return;
+  if (selectedCandidates.has(name)) {
+    selectedCandidates.delete(name);
+    button.classList.remove("is-selected");
+  } else {
+    selectedCandidates.add(name);
+    button.classList.add("is-selected");
+  }
+  updateShortlist();
+}
+
 function updateShortlist() {
   shortlistCount.textContent = selectedCandidates.size;
   shortlistText.textContent =
@@ -2113,6 +2498,9 @@ function updateShortlist() {
 }
 
 function getCandidateRecord(candidateId = selectedCandidateId) {
+  if (isDesktopLocalLibrary) {
+    return candidateRecords[candidateId] || getLocalCandidates()[0] || null;
+  }
   return candidateRecords[candidateId] || candidateRecords.candidate_chenyu_001;
 }
 
@@ -2223,10 +2611,10 @@ function updateCandidateResume(candidate) {
     node.textContent = candidate.matchNote;
   });
   document.querySelectorAll("[data-candidate-tags]").forEach((node) => {
-    node.innerHTML = candidate.tags.map((tag) => `<span>${tag}</span>`).join("");
+    node.innerHTML = (candidate.tags || []).map((tag) => `<span>${escapeHtml(tag)}</span>`).join("");
   });
   document.querySelectorAll("[data-candidate-summary]").forEach((node) => {
-    node.innerHTML = candidate.summary.map((item) => `<li>${item}</li>`).join("");
+    node.innerHTML = (candidate.summary || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
   });
   document.querySelectorAll("[data-candidate-evidence]").forEach((node) => {
     node.innerHTML = `
@@ -2234,7 +2622,7 @@ function updateCandidateResume(candidate) {
       ${evidence
         .map(
           (item) =>
-            `<p style="--score: ${item.score}%"><span>${item.label}</span><i></i><strong>${item.level === "bonus" ? "加分" : "强"}</strong></p>`
+            `<p style="--score: ${Number(item.score) || 0}%"><span>${escapeHtml(item.label)}</span><i></i><strong>${item.level === "bonus" ? "加分" : escapeHtml(item.level || "强")}</strong></p>`
         )
         .join("")}
     `;
@@ -2281,6 +2669,25 @@ function copyText(text, message) {
 }
 
 function getMarketInsightCandidatePayload(candidate = getCandidateRecord()) {
+  if (!candidate) {
+    return {
+      id: "",
+      name: "",
+      role: "",
+      city: "",
+      years: "",
+      source: "",
+      company: "",
+      project: "",
+      experience: "",
+      stack: "",
+      tags: [],
+      summary: [],
+      matchEvidence: [],
+      recentExperience: null,
+      keyProject: null,
+    };
+  }
   return {
     id: candidate.id,
     name: candidate.name,
@@ -2362,6 +2769,10 @@ async function requestMarketInsight() {
 function openCandidateResume(candidateId, options = {}) {
   const entry = normalizeCandidateResumeEntry(options.entry || "talent");
   const candidate = getCandidateRecord(candidateId);
+  if (!candidate) {
+    showToast("请先导入本地简历后再查看候选人详情");
+    return;
+  }
   currentView = "candidateResumeDetail";
   currentCandidateView = "summary";
   selectedCandidateId = candidate.id;
@@ -2421,6 +2832,10 @@ function closeCandidateResume() {
 
 function handleResumeAction(action) {
   const candidate = getCandidateRecord();
+  if (!candidate) {
+    showToast("请先导入本地简历");
+    return;
+  }
   if (action === "shortlist") {
     selectedCandidates.add(candidate.name);
     updateShortlist();
@@ -2521,16 +2936,9 @@ searchAiHistoryClear?.addEventListener("click", () => {
 });
 
 document.querySelectorAll(".shortlist-action").forEach((button) => {
-  button.addEventListener("click", () => {
-    const name = button.dataset.name;
-    if (selectedCandidates.has(name)) {
-      selectedCandidates.delete(name);
-      button.classList.remove("is-selected");
-    } else {
-      selectedCandidates.add(name);
-      button.classList.add("is-selected");
-    }
-    updateShortlist();
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleShortlistButton(button);
   });
 });
 
@@ -2571,7 +2979,8 @@ importStateButtons.forEach((button) => {
 });
 
 importPickButtons.forEach((button) => {
-  button.addEventListener("click", () => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
     openImportPickerCard(button.dataset.importPick);
   });
 });
@@ -2630,7 +3039,8 @@ taskFilterButtons.forEach((button) => {
 });
 
 taskRows.forEach((row) => {
-  row.addEventListener("click", () => {
+  row.addEventListener("click", (event) => {
+    event.stopPropagation();
     selectTaskRow(row);
     selectedTaskId = row.dataset.taskId || null;
     currentTaskView = "list";
@@ -2718,11 +3128,53 @@ talentFilterButtons.forEach((button) => {
 
 talentItems.forEach((item) => {
   item.addEventListener("click", (event) => {
+    event.stopPropagation();
     if (event.target.closest(".candidate-resume-open")) return;
     if (event.target.closest("[data-talent-open]")) return;
     selectTalentItem(item);
     showTalentPanel(item.dataset.talentPanelTarget || currentTalentPanel);
   });
+});
+
+document.addEventListener("click", (event) => {
+  const resumeButton = event.target.closest(".candidate-resume-open");
+  if (resumeButton) {
+    event.stopPropagation();
+    openCandidateResume(resumeButton.dataset.candidateId, getCandidateResumeOpenOptions(resumeButton));
+    return;
+  }
+
+  const shortlistButton = event.target.closest(".shortlist-action");
+  if (shortlistButton) {
+    event.stopPropagation();
+    toggleShortlistButton(shortlistButton);
+    return;
+  }
+
+  const importPickButton = event.target.closest("[data-import-pick]");
+  if (importPickButton) {
+    event.stopPropagation();
+    openImportPickerCard(importPickButton.dataset.importPick);
+    return;
+  }
+
+  const dynamicTaskRow = event.target.closest("[data-task-item]");
+  if (dynamicTaskRow && !event.target.closest("button, a, input, textarea, select")) {
+    event.stopPropagation();
+    selectTaskRow(dynamicTaskRow);
+    selectedTaskId = dynamicTaskRow.dataset.taskId || null;
+    currentTaskView = "list";
+    if (selectedTaskId) renderSelectedTask();
+    showTaskState(dynamicTaskRow.dataset.taskPanelTarget || "overview");
+    return;
+  }
+
+  const dynamicTalentItem = event.target.closest("[data-talent-item]");
+  if (dynamicTalentItem && !event.target.closest("button, a, input, textarea, select")) {
+    event.stopPropagation();
+    selectTalentItem(dynamicTalentItem);
+    showTalentPanel(dynamicTalentItem.dataset.talentPanelTarget || currentTalentPanel);
+  }
 });
 
 talentPanelButtons.forEach((button) => {
@@ -2979,6 +3431,12 @@ renderSearchAiHistory();
 refreshSearchFilterAddState();
 sortSearchCandidates();
 applySearchResultFilters();
-setTaskFilter("all");
-setTalentFilter("all");
-showTalentState("all");
+if (isDesktopLocalLibrary) {
+  applyLocalTalentLibrary({ candidates: [], importTasks: [], sources: [] });
+  showTalentState("all");
+  loadLocalTalentLibrary();
+} else {
+  setTaskFilter("all");
+  setTalentFilter("all");
+  showTalentState("all");
+}

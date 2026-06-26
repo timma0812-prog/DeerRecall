@@ -161,7 +161,7 @@
                 <path d="M5 5v6c0 1.7 3.1 3 7 3s7-1.3 7-3V5"></path>
                 <path d="M5 11v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"></path>
               </svg>
-              已索引 <strong>12,486</strong> 份简历
+              已索引 <strong data-local-indexed-count>12,486</strong> 份简历
             </div>
           </header>
 
@@ -219,7 +219,7 @@
             </div>
           </section>
 
-          <section class="candidate-grid" aria-label="候选人列表">
+          <section class="candidate-grid" aria-label="候选人列表" data-local-search-list>
             <article class="candidate-card" data-candidate="陈屿" data-candidate-id="chen-yu" data-search-score="92" data-search-years="7" data-search-city="上海" data-search-index="0">
               <div class="candidate-top">
                 <div>
@@ -351,7 +351,6 @@
                   连接 Desktop 选择文件夹
                 </button>
                 <button class="secondary-action" type="button" data-import-source-action="browserFolder">浏览器选择文件夹</button>
-                <button class="secondary-action" type="button" data-import-source-action="demoFolder">使用示例文件夹</button>
               </div>
               <p class="import-picker-status" data-import-picker-status>还未选择本地来源。</p>
             </div>
@@ -530,10 +529,10 @@
           </header>
 
           <section class="talent-kpis" aria-label="人才库指标">
-            <article class="talent-kpi purple"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7" r="4"></circle></svg><span>总人才</span><strong>12,486</strong></article>
-            <article class="talent-kpi blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg><span>本周新增</span><strong>326</strong></article>
-            <article class="talent-kpi yellow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path><path d="M9 13h6"></path><path d="M9 17h4"></path></svg><span>待完善</span><strong>41</strong></article>
-            <article class="talent-kpi red"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>疑似重复</span><strong>18</strong></article>
+            <article class="talent-kpi purple"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"></path><circle cx="9.5" cy="7" r="4"></circle></svg><span>总人才</span><strong data-local-kpi="total">12,486</strong></article>
+            <article class="talent-kpi blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 17 6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg><span>本周新增</span><strong data-local-kpi="recent">326</strong></article>
+            <article class="talent-kpi yellow"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path><path d="M9 13h6"></path><path d="M9 17h4"></path></svg><span>待完善</span><strong data-local-kpi="pending">41</strong></article>
+            <article class="talent-kpi red"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>疑似重复</span><strong data-local-kpi="duplicate">18</strong></article>
           </section>
 
           <section class="talent-controls" aria-label="人才库筛选">
@@ -555,8 +554,17 @@
             <button class="talent-sort" type="button">排序：最近入库时间 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
           </section>
 
+          <section class="local-library-empty state-hidden" data-local-library-empty aria-label="空人才库">
+            <div>
+              <span class="label">本地人才库</span>
+              <h2>还没有候选人</h2>
+              <p>选择本地简历文件夹后，DeerRecall 会在这台 Mac 上解析正文并建立本地人才库。</p>
+            </div>
+            <button class="primary-action" type="button" data-import-pick="folder">选择简历文件夹</button>
+          </section>
+
           <section class="talent-list" aria-live="polite">
-            <section class="talent-view" data-talent-view="all" aria-label="全部候选人">
+            <section class="talent-view" data-talent-view="all" data-local-candidate-list aria-label="全部候选人">
               <article class="talent-row is-selected" data-talent-item data-candidate-id="chen-yu" data-talent-kind="all" data-talent-panel-target="profile">
                 <div class="talent-avatar">陈</div>
                 <div class="talent-main">
@@ -600,7 +608,7 @@
               <footer class="talent-pagination"><span>共 12,486 位候选人</span><div><button type="button">‹</button><strong>1</strong><button type="button">2</button><button type="button">3</button><button type="button">4</button><button type="button">5</button><em>...</em><button type="button">625</button><button type="button">›</button></div></footer>
             </section>
 
-            <section class="talent-view state-hidden" data-talent-view="recent" aria-label="最近导入">
+            <section class="talent-view state-hidden" data-talent-view="recent" data-local-source-list aria-label="最近导入">
               <h2>最近导入</h2>
               <p class="talent-view-note">按导入来源查看本周新增候选人，可快速进入来源批次或继续筛选。</p>
               <article class="import-source-row is-selected" data-talent-item data-talent-kind="recent" data-talent-panel-target="recent">
@@ -1073,7 +1081,7 @@
               </div>
             </header>
 
-            <section class="task-list" aria-label="解析任务列表">
+            <section class="task-list" aria-label="解析任务列表" data-local-task-list>
             <section class="task-group" data-task-group="needs">
               <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>需处理</h2>
               <article class="task-row task-needs" data-task-item data-task-id="customer_backend_001" data-task-kind="needs" data-task-panel-target="issue">

@@ -222,7 +222,7 @@ test("resume import supports local folder selection before preview", () => {
   assert.match(html, /连接 Desktop 选择文件夹/);
   assert.match(html, /data-import-source-action="desktopFolder"/);
   assert.match(html, /data-import-source-action="browserFolder"/);
-  assert.match(html, /data-import-source-action="demoFolder"/);
+  assert.doesNotMatch(html, /data-import-source-action="demoFolder"/);
   assert.match(html, /data-import-folder-input/);
   assert.match(html, /webkitdirectory/);
   assert.match(html, /data-import-file-input/);
@@ -235,6 +235,34 @@ test("resume import supports local folder selection before preview", () => {
   assert.match(js, /function requestImportSource/);
   assert.match(js, /function handleImportFiles/);
   assert.match(js, /function handleImportDrop/);
+});
+
+test("desktop renderer exposes local-library mode hooks without demo folder fallback", () => {
+  const html = read("index.html");
+  const js = read("app.js");
+  const preload = read("desktop/preload.cjs");
+
+  assert.match(html, /data-local-library-empty/);
+  assert.match(html, /data-local-candidate-list/);
+  assert.match(html, /data-local-search-list/);
+  assert.match(html, /data-local-source-list/);
+  assert.match(html, /data-local-task-list/);
+
+  assert.match(js, /const isDesktopLocalLibrary/);
+  assert.match(js, /let localTalentLibrary/);
+  assert.match(js, /async function loadLocalTalentLibrary/);
+  assert.match(js, /function applyLocalTalentLibrary/);
+  assert.match(js, /function renderLocalCandidates/);
+  assert.match(js, /function renderLocalImportTasks/);
+  assert.match(js, /window\.deerRecallDesktop\?\.getTalentLibrary/);
+  assert.match(js, /window\.deerRecallDesktop\?\.selectImportFolder/);
+  assert.match(js, /isDesktopLocalLibrary && action === "browserFolder"/);
+  assert.match(js, /isDesktopLocalLibrary && mode === "files"/);
+  assert.match(js, /if \(isDesktopLocalLibrary\) \{\s*if \(importPickerStatus\) importPickerStatus\.textContent = "请使用 Desktop 文件夹选择器解析并入库。"/);
+  assert.doesNotMatch(js, /requestImportSource\("demoFolder"\)/);
+
+  assert.match(preload, /getTalentLibrary/);
+  assert.match(preload, /selectImportFolder/);
 });
 
 test("resume import settings are stateful and affect import preview", () => {
@@ -744,7 +772,7 @@ test("project exposes npm scripts for Harness-compatible static delivery", () =>
   const pkg = JSON.parse(read("package.json"));
 
   assert.equal(pkg.scripts.check, "node --check app.js && node --check server/llm-gateway.mjs && node --check server/server.mjs && npm test");
-  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs");
+  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs");
   assert.equal(pkg.scripts.clean, "rm -rf dist");
   assert.equal(pkg.scripts.build, "node scripts/build-static.mjs");
   assert.equal(pkg.scripts["verify:dist"], "node scripts/verify-dist.mjs");
@@ -758,10 +786,13 @@ test("project exposes desktop packaging scripts for local macOS builds", () => {
   assert.equal(pkg.main, "desktop/main.cjs");
   assert.equal(pkg.scripts["desktop:dev"], "npm run build && electron desktop/main.cjs");
   assert.equal(pkg.scripts["desktop:build"], "npm run build && electron-builder --config electron-builder.json --mac dir");
+  assert.equal(pkg.scripts["desktop:build:trial"], "npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.json --mac dmg");
   assert.equal(pkg.scripts["desktop:build:tauri"], "tauri build");
   assert.equal(pkg.devDependencies["@tauri-apps/cli"], "^2.11.3");
   assert.equal(pkg.devDependencies.electron, "^42.5.0");
   assert.equal(pkg.devDependencies["electron-builder"], "^26.15.3");
+  assert.equal(pkg.dependencies.mammoth, "^1.12.0");
+  assert.equal(pkg.dependencies["pdf-parse"], "^2.4.5");
 });
 
 test("electron desktop wrapper reuses the static dist artifact", () => {
@@ -770,6 +801,9 @@ test("electron desktop wrapper reuses the static dist artifact", () => {
   const builder = JSON.parse(read("electron-builder.json"));
 
   assert.match(main, /BrowserWindow/);
+  assert.match(main, /importFolderToLibrary/);
+  assert.match(main, /loadLibrary/);
+  assert.match(main, /function getDatabasePath\(\)/);
   assert.match(main, /loadFile\(path\.join\(__dirname, "\.\.", "dist", "index\.html"\)\)/);
   assert.match(main, /contextIsolation: true/);
   assert.match(main, /nodeIntegration: false/);
@@ -778,12 +812,16 @@ test("electron desktop wrapper reuses the static dist artifact", () => {
   assert.match(main, /ipcMain\.handle\("import:select-folder"/);
   assert.match(main, /dialog\.showOpenDialog/);
   assert.match(preload, /contextBridge\.exposeInMainWorld\("deerRecallDesktop"/);
+  assert.match(preload, /getTalentLibrary/);
+  assert.match(preload, /ipcRenderer\.invoke\("library:get"\)/);
   assert.match(preload, /selectImportFolder/);
   assert.match(preload, /ipcRenderer\.invoke\("import:select-folder"\)/);
   assert.equal(builder.appId, "com.deerrecall.app");
   assert.equal(builder.productName, "DeerRecall");
-  assert.deepEqual(builder.mac.target, ["dir"]);
-  assert.match(builder.files.join(","), /desktop\/preload\.cjs/);
+  assert.equal(builder.mac.identity, null);
+  assert.deepEqual(builder.mac.target, ["dir", "dmg"]);
+  assert.match(builder.files.join(","), /desktop\/\*\*\/\*\.cjs/);
+  assert.match(builder.files.join(","), /node_modules\/\*\*\//);
   assert.match(builder.files.join(","), /dist\/\*\*\//);
 });
 
@@ -924,8 +962,15 @@ test("readme documents local, compose, and Harness workflows", () => {
   assert.match(readme, /npm test/);
   assert.match(readme, /npm run build/);
   assert.match(readme, /npm run desktop:build/);
+  assert.match(readme, /npm run desktop:build:trial/);
   assert.match(readme, /release\/electron\/mac-arm64\/DeerRecall\.app/);
+  assert.match(readme, /release\/electron\/DeerRecall-0\.1\.0-arm64\.dmg/);
   assert.match(readme, /未签名的本地 macOS app/);
+  assert.match(readme, /用户不需要安装 Electron/);
+  assert.match(readme, /第一版试用包启动时人才库为空/);
+  assert.match(readme, /Library\/Application Support\/deerrecall\/talent-library\.json/);
+  assert.match(readme, /PDF \/ DOCX \/ TXT \/ Markdown/);
+  assert.match(readme, /第一版桌面试用包不接云端 AI/);
   assert.match(readme, /docker build -t deerrecall:local \./);
   assert.match(readme, /docker compose up -d/);
   assert.match(readme, /Harness Open Source/);
@@ -994,7 +1039,7 @@ test("project exposes Node AI gateway runtime scripts", () => {
   const pkg = JSON.parse(read("package.json"));
 
   assert.equal(pkg.scripts.start, "node server/server.mjs");
-  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs");
+  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs");
   assert.match(pkg.scripts.check, /node --check server\/server\.mjs/);
   assert.match(pkg.scripts.check, /node --check server\/llm-gateway\.mjs/);
   assert.equal(pkg.scripts.serve, "npm run build && node server/server.mjs");

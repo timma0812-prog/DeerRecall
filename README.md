@@ -1,6 +1,6 @@
 # DeerRecall
 
-DeerRecall 是一个 AI 招聘工作台 MVP。前端仍然是原生 HTML、CSS、JavaScript 和本地种子数据；运行时现在增加了一个很薄的 Node AI 网关，用来支撑候选人市场画像 MVP。目前仓库里还没有数据库、简历解析器、向量搜索、外部实时薪资数据源，也不会持久化模型返回结果。
+DeerRecall 是一个 AI 招聘工作台 MVP。Web/Harness 版本仍保留静态演示页面和 Node AI 网关，用来支撑候选人市场画像 MVP；Electron 第一版试用包已经切到本地优先模式：启动时人才库为空，用户选择本地简历文件夹后，在 Mac 本机解析简历正文并写入本地人才库。
 
 ## 本地命令
 
@@ -59,6 +59,18 @@ DEERRECALL_LLM_API_KEY=... DEERRECALL_LLM_MODEL=... npm run serve
 
 ## 本地 macOS 桌面端
 
+第一版试用包启动时人才库为空，不会自动展示演示候选人。用户在 Electron 客户端中选择本地简历文件夹后，应用会扫描该文件夹和子文件夹，把支持格式的简历解析为本地候选人记录。
+
+第一版桌面试用包不接云端 AI，也不要求用户安装 Electron、Node、Docker、Rust 或数据库。支持本地解析 PDF / DOCX / TXT / Markdown，并对 DOC 做 macOS `textutil` best-effort 转换；扫描版 PDF 或图片型简历需要原文件自带可提取文字，否则会进入失败任务列表。
+
+本地人才库保存位置：
+
+```text
+~/Library/Application Support/deerrecall/talent-library.json
+```
+
+原始简历文件不会被移动、修改、上传或复制。
+
 构建未签名的本地 macOS app：
 
 ```bash
@@ -73,7 +85,15 @@ open release/electron/mac-arm64/DeerRecall.app
 
 生成产物位于 `release/electron/mac-arm64/DeerRecall.app`。这个包只用于本地验收，因为没有 Apple Developer ID 签名和 notarize，macOS 可能会提示安全警告。
 
-当前 Electron 目录版加载的是静态 `dist/` 页面。AI API 需要通过 Node runtime 或 Docker Compose 访问 `http://localhost:8080`；本轮 MVP 暂不在 Electron 内置本地 API 托管。
+构建给客户试用的未签名 DMG 安装包：
+
+```bash
+npm run desktop:build:trial
+```
+
+生成产物位于 `release/electron/DeerRecall-0.1.0-arm64.dmg`。用户不需要安装 Electron；Electron runtime、Chromium 和 DeerRecall 前端代码都会被打进 `.dmg` 内的 macOS app。用户双击 `.dmg` 后打开 DeerRecall，或拖到 Applications 目录即可。
+
+当前 Electron 目录版加载的是静态 `dist/` 页面，并通过 Electron IPC 调用 `desktop/` 下的本地解析与 JSON 持久化模块。AI API 需要通过 Node runtime 或 Docker Compose 访问 `http://localhost:8080`；第一版桌面试用包不内置云端 AI 调用。
 
 Tauri 已保留为后续更小运行时的打包选项，但本地需要先安装 Rust/Cargo：
 
