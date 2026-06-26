@@ -58,8 +58,18 @@ spec:
               script: |-
                 set -eu
                 APP_CONTAINER="${DEERRECALL_CONTAINER:-deerrecall}"
+                READY=0
 
-                docker exec "${APP_CONTAINER}" wget -qO- http://127.0.0.1/ > /tmp/deerrecall-index.html
+                for attempt in $(seq 1 20); do
+                  if docker exec "${APP_CONTAINER}" wget -qO- http://127.0.0.1/ > /tmp/deerrecall-index.html; then
+                    READY=1
+                    break
+                  fi
+                  sleep 1
+                done
+
+                test "${READY}" = "1"
+
                 grep -q "id=\"resultsState\"" /tmp/deerrecall-index.html
                 grep -q "id=\"candidateResumeState\"" /tmp/deerrecall-index.html
                 grep -q "id=\"exportCenterState\"" /tmp/deerrecall-index.html

@@ -3594,6 +3594,7 @@ svg {
   display: grid;
   gap: 16px;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   padding-right: 4px;
 }
 
@@ -3624,6 +3625,7 @@ svg {
 .p2-panel {
   min-width: 0;
   padding: 18px;
+  overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.07);
@@ -3778,6 +3780,10 @@ svg {
   font-size: 13px;
 }
 
+.p2-table-three .p2-table-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .p2-table-row span {
   min-width: 0;
   overflow: hidden;
@@ -3795,6 +3801,7 @@ svg {
 .p2-action-row {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
   margin-top: 14px;
 }
@@ -3828,11 +3835,16 @@ svg {
 
 .p2-workspace .primary-action,
 .p2-workspace .secondary-action {
+  flex: 0 1 auto;
   min-width: 0;
+  max-width: 100%;
   height: 42px;
   padding: 0 15px;
   border-radius: 8px;
   font-size: 14px;
+  line-height: 1.2;
+  text-align: center;
+  white-space: normal;
 }
 
 .p2-card-list section {
@@ -3882,6 +3894,12 @@ svg {
 
 .p2-card-list section.is-removed button {
   pointer-events: none;
+}
+
+.p2-card-list section,
+.p2-suggestion-list p,
+.p2-file-card {
+  overflow: hidden;
 }
 
 .shortlist-note-panel,
@@ -3959,7 +3977,7 @@ svg {
 }
 
 .p2-file-card {
-  grid-template-columns: 56px minmax(0, 1fr);
+  grid-template-columns: 78px minmax(0, 1fr);
   align-items: center;
 }
 

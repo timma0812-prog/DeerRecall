@@ -43,13 +43,19 @@ npm run build
 docker build -t deerrecall:local .
 ```
 
+The Dockerfile defaults to the public ECR Docker Library mirror for `nginx:1.27-alpine` so Harness and local builds do not depend on Docker Hub availability. To force Docker Hub explicitly:
+
+```bash
+docker build --build-arg NGINX_IMAGE=nginx:1.27-alpine -t deerrecall:local .
+```
+
 If Docker Desktop is installed but `docker` is not on your shell path, use:
 
 ```bash
 export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
 ```
 
-If Docker Hub is unreachable from the host, build with an alternate Docker Library mirror:
+If a different mirror is required, override the Nginx image:
 
 ```bash
 docker build \
@@ -109,7 +115,7 @@ Before deploying outside a demo environment:
 - `npm run verify:dist` fails the release if `dist` is missing runtime files, contains unexpected files, or includes empty assets.
 - JS and CSS use `no-cache, must-revalidate` because filenames are not content-hashed.
 - The SPA shell uses `no-store` so release checks always fetch the current HTML entry.
-- Harness verify checks the deployed HTML for core SPA states and validates cache headers for `app.js`, `styles.css`, and `/`.
+- Harness verify waits for Nginx readiness, checks the deployed HTML for core SPA states, and validates cache headers for `app.js`, `styles.css`, and `/`.
 - Create a release tag before production deployment, then deploy that image tag so rollback can use the previous immutable image tag.
 
 Example Harness Open Source startup:

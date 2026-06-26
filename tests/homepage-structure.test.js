@@ -425,6 +425,19 @@ test("P2 pages keep operational UI responsive inside the shared shell", () => {
   assert.match(js, /event\.target\.closest\("\[data-search-filter-open\]"\)/);
 });
 
+test("P2 UI closeout keeps dense operation panels aligned and readable", () => {
+  const html = read("index.html");
+  const css = read("styles.css");
+
+  assert.match(html, /class="p2-table p2-table-three"/);
+  assert.match(css, /\.p2-table-three \.p2-table-row\s*{[^}]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/s);
+  assert.match(css, /\.p2-file-card\s*{[^}]*grid-template-columns:\s*78px minmax\(0,\s*1fr\)/s);
+  assert.match(css, /\.p2-panel\s*{[^}]*overflow:\s*hidden/s);
+  assert.match(css, /\.p2-body-grid\s*{[^}]*scrollbar-gutter:\s*stable/s);
+  assert.match(css, /\.p2-workspace \.primary-action,\s*\.p2-workspace \.secondary-action\s*{[^}]*max-width:\s*100%/s);
+  assert.match(css, /\.p2-card-list section,\s*\.p2-suggestion-list p,\s*\.p2-file-card\s*{[^}]*overflow:\s*hidden/s);
+});
+
 test("P0 P1 and P2 pages share the Harness visual tokens", () => {
   const css = read("styles.css");
 
@@ -586,7 +599,7 @@ test("docker runtime serves built dist assets with nginx", () => {
   const dockerfile = read("Dockerfile");
   const nginx = read("nginx.conf");
 
-  assert.match(dockerfile, /ARG NGINX_IMAGE=nginx:1\.27-alpine/);
+  assert.match(dockerfile, /ARG NGINX_IMAGE=public\.ecr\.aws\/docker\/library\/nginx:1\.27-alpine/);
   assert.match(dockerfile, /FROM \$\{NGINX_IMAGE\}/);
   assert.match(dockerfile, /COPY nginx\.conf \/etc\/nginx\/conf\.d\/default\.conf/);
   assert.match(dockerfile, /COPY dist\/ \/usr\/share\/nginx\/html\//);
@@ -634,6 +647,10 @@ test("harness pipeline runs test, build, image, deploy, and verify stages", () =
   assert.match(pipeline, /name: verify_deploy/);
   assert.match(pipeline, /set -eu/);
   assert.match(pipeline, /APP_CONTAINER="\$\{DEERRECALL_CONTAINER:-deerrecall\}"/);
+  assert.match(pipeline, /READY=0/);
+  assert.match(pipeline, /for attempt in \$\(seq 1 20\)/);
+  assert.match(pipeline, /sleep 1/);
+  assert.match(pipeline, /test "\$\{READY\}" = "1"/);
   assert.match(pipeline, /docker exec "\$\{APP_CONTAINER\}" wget -qO-/);
   assert.doesNotMatch(pipeline, /curlimages\/curl/);
   assert.match(pipeline, /grep -q "id=\\"resultsState\\""/);
