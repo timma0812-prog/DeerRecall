@@ -1,7 +1,15 @@
-ARG NGINX_IMAGE=public.ecr.aws/docker/library/nginx:1.27-alpine
-FROM ${NGINX_IMAGE}
+ARG NODE_IMAGE=public.ecr.aws/docker/library/node:20-alpine
+FROM ${NODE_IMAGE}
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY dist/ /usr/share/nginx/html/
+WORKDIR /app
 
-EXPOSE 80
+COPY package.json package-lock.json ./
+COPY server/ ./server/
+COPY dist/ ./dist/
+
+ENV DEERRECALL_HOST=0.0.0.0
+ENV DEERRECALL_PORT=8080
+
+EXPOSE 8080
+
+CMD ["node", "server/server.mjs"]

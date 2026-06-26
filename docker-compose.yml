@@ -3,5 +3,12 @@ services:
     image: ${DEERRECALL_IMAGE:-deerrecall:local}
     container_name: ${DEERRECALL_CONTAINER:-deerrecall}
     ports:
-      - "${DEERRECALL_PORT:-8080}:80"
+      - "${DEERRECALL_PORT:-8080}:8080"
+    environment:
+      DEERRECALL_HOST: 0.0.0.0
+      DEERRECALL_PORT: 8080
+      DEERRECALL_LLM_API_KEY: ${DEERRECALL_LLM_API_KEY:-}
+      DEERRECALL_LLM_BASE_URL: ${DEERRECALL_LLM_BASE_URL:-https://api.openai.com/v1}
+      DEERRECALL_LLM_MODEL: ${DEERRECALL_LLM_MODEL:-}
+      DEERRECALL_LLM_TIMEOUT_MS: ${DEERRECALL_LLM_TIMEOUT_MS:-30000}
     restart: unless-stopped

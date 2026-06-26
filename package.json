@@ -5,12 +5,13 @@
   "main": "desktop/main.cjs",
   "description": "Static DeerRecall MVP prototype with Harness-compatible Docker Compose delivery.",
   "scripts": {
-    "check": "node --check app.js && npm test",
-    "test": "node --test tests/homepage-structure.test.js",
+    "check": "node --check app.js && node --check server/llm-gateway.mjs && node --check server/server.mjs && npm test",
+    "test": "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs",
     "clean": "rm -rf dist",
     "build": "node scripts/build-static.mjs",
     "verify:dist": "node scripts/verify-dist.mjs",
-    "serve": "npx --yes http-server dist -p 8080",
+    "serve": "npm run build && node server/server.mjs",
+    "start": "node server/server.mjs",
     "desktop:dev": "npm run build && electron desktop/main.cjs",
     "desktop:build": "npm run build && electron-builder --config electron-builder.json --mac dir",
     "desktop:build:tauri": "tauri build"

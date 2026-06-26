@@ -93,6 +93,12 @@ const searchSortLabel = document.querySelector("[data-search-sort-label]");
 const searchResultCountLine = document.querySelector("[data-search-result-count]");
 const searchCandidateGrid = document.querySelector(".candidate-grid");
 const searchCandidateCards = Array.from(document.querySelectorAll(".candidate-grid [data-search-score]"));
+const searchAiCard = document.querySelector("[data-search-ai-card]");
+const searchAiStatus = document.querySelector("[data-search-ai-status]");
+const searchAiAnswer = document.querySelector("[data-search-ai-answer]");
+const searchAiSuggestions = document.querySelector("[data-search-ai-suggestions]");
+const marketInsightButtons = document.querySelectorAll("[data-market-insight-run]");
+const marketInsightCards = document.querySelectorAll("[data-market-insight-card]");
 
 const defaultQuery = "找做过支付风控的 Java 后端，最好有高并发项目经验。";
 const searchCityOptions = ["城市不限", "上海", "杭州", "深圳", "北京"];
@@ -417,6 +423,47 @@ function escapeHtml(value = "") {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function renderInlineList(target, items) {
+  if (!target) return;
+  target.innerHTML = (items || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+}
+
+function setSearchAiState(state, message) {
+  searchAiCard?.classList.toggle("is-error", state === "error");
+  if (searchAiStatus) searchAiStatus.textContent = message;
+  if (searchAiAnswer) searchAiAnswer.hidden = state !== "ready";
+  if (searchAiSuggestions) searchAiSuggestions.hidden = state !== "ready";
+}
+
+function renderSearchAssistant(assistant) {
+  if (searchAiAnswer) {
+    searchAiAnswer.textContent = assistant.answer;
+  }
+  if (searchAiSuggestions) {
+    searchAiSuggestions.innerHTML = (assistant.suggestions || []).map((item) => `<span>${escapeHtml(item)}</span>`).join("");
+  }
+  setSearchAiState("ready", "已生成搜索建议。");
+}
+
+async function requestSearchAssistant(message) {
+  if (!searchAiCard || window.location.protocol === "file:") return;
+  setSearchAiState("loading", "正在理解搜索意图...");
+  try {
+    const response = await fetch("/api/ai/search-assistant", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.ok) {
+      throw new Error(data.message || "AI 服务暂不可用");
+    }
+    renderSearchAssistant(data.assistant);
+  } catch {
+    setSearchAiState("error", "AI 助手暂不可用，当前搜索结果仍可继续查看。");
+  }
 }
 
 function showSearchCapabilityDetail(type = "natural") {
@@ -994,6 +1041,7 @@ function showResults(queryText = defaultQuery) {
   sortSearchCandidates();
   applySearchResultFilters();
   refreshSearchFilterAddState();
+  requestSearchAssistant(normalizedQuery);
 }
 
 function setActiveNav(view) {
@@ -2034,6 +2082,85 @@ function copyText(text, message) {
   showToast(message);
 }
 
+function getMarketInsightCandidatePayload(candidate = getCandidateRecord()) {
+  return {
+    id: candidate.id,
+    name: candidate.name,
+    role: candidate.role || candidate.shortRole || candidate.title,
+    city: candidate.city,
+    years: candidate.years,
+    source: candidate.sourceName || candidate.source,
+    company: candidate.company,
+    project: candidate.project,
+    experience: candidate.experience,
+    stack: candidate.stack,
+    tags: candidate.tags || [],
+    summary: candidate.summary || [],
+    matchEvidence: candidate.matchEvidence || [],
+    recentExperience: candidate.recentExperience || null,
+    keyProject: candidate.keyProject || null,
+  };
+}
+
+function setMarketInsightState(state, message) {
+  marketInsightCards.forEach((card) => {
+    card.classList.toggle("is-loading", state === "loading");
+    card.classList.toggle("is-error", state === "error");
+    const status = card.querySelector("[data-market-insight-status]");
+    if (status) status.textContent = message;
+    card.querySelectorAll("[data-market-insight-result]").forEach((node) => {
+      node.hidden = state !== "ready";
+    });
+  });
+  marketInsightButtons.forEach((button) => {
+    button.disabled = state === "loading";
+    button.textContent = state === "loading" ? "生成中..." : "生成市场画像";
+  });
+}
+
+function renderMarketInsight(insight) {
+  marketInsightCards.forEach((card) => {
+    card.querySelector("[data-market-insight-position]").textContent = insight.market_position;
+    card.querySelector("[data-market-insight-level]").textContent = insight.level;
+    card.querySelector("[data-market-insight-scarcity]").textContent = insight.scarcity;
+    card.querySelector("[data-market-insight-monthly]").textContent = insight.monthly_salary_range;
+    card.querySelector("[data-market-insight-annual]").textContent = insight.annual_package_range;
+    card.querySelector("[data-market-insight-confidence]").textContent = insight.confidence;
+    renderInlineList(card.querySelector("[data-market-insight-drivers]"), insight.salary_drivers || []);
+    renderInlineList(card.querySelector("[data-market-insight-risks]"), insight.risk_factors || []);
+    card.querySelector("[data-market-insight-hr]").textContent = insight.hr_suggestion;
+    card.querySelector("[data-market-insight-boss]").textContent = insight.boss_summary;
+    card.querySelector("[data-market-insight-disclaimer]").textContent = insight.disclaimer;
+  });
+  setMarketInsightState("ready", "已生成市场画像。");
+}
+
+async function requestMarketInsight() {
+  if (window.location.protocol === "file:") {
+    setMarketInsightState("error", "AI 能力需要通过本地服务或 Docker 运行时打开。");
+    return;
+  }
+
+  setMarketInsightState("loading", "正在生成市场画像、薪资参考和沟通建议...");
+  try {
+    const response = await fetch("/api/ai/market-insight", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ candidate: getMarketInsightCandidatePayload() }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.ok) {
+      throw new Error(data.message || "AI 服务暂不可用");
+    }
+    renderMarketInsight(data.insight);
+  } catch (error) {
+    const message = error.message === "missing_api_key" || error.message === "missing_model"
+      ? "后台还没有配置大模型 API Key 或模型名称。"
+      : "AI 市场画像生成失败，请稍后重试或检查后台配置。";
+    setMarketInsightState("error", message);
+  }
+}
+
 function openCandidateResume(candidateId, options = {}) {
   const entry = normalizeCandidateResumeEntry(options.entry || "talent");
   const candidate = getCandidateRecord(candidateId);
@@ -2066,6 +2193,7 @@ function openCandidateResume(candidateId, options = {}) {
     task: "tasks",
   }[entry];
   setActiveNav(activeNav);
+  setMarketInsightState("idle", "基于当前简历估算市场定位、薪资参考和沟通建议。");
   updateCandidateResume(candidate);
 }
 
@@ -2516,6 +2644,10 @@ resumeActionButtons.forEach((button) => {
   button.addEventListener("click", () => {
     handleResumeAction(button.dataset.resumeAction);
   });
+});
+
+marketInsightButtons.forEach((button) => {
+  button.addEventListener("click", requestMarketInsight);
 });
 
 document.addEventListener("click", (event) => {

@@ -1916,6 +1916,13 @@
             <p id="currentQuery">找做过支付风控的 Java 后端，最好有高并发项目经验。</p>
           </section>
 
+          <section class="panel-card search-ai-card" data-search-ai-card>
+            <span class="label">AI 回答</span>
+            <p class="search-ai-status" data-search-ai-status>提交搜索后，小鹿会解释需求并建议下一步筛选。</p>
+            <p class="search-ai-answer" data-search-ai-answer hidden></p>
+            <div class="search-ai-suggestions" data-search-ai-suggestions hidden></div>
+          </section>
+
           <section class="panel-card condition-card">
             <span class="label">AI 条件拆解</span>
             <div class="condition-grid">
@@ -1957,6 +1964,39 @@
             </div>
           </section>
 
+          <section class="panel-card candidate-side-card market-insight-card" data-market-insight-card>
+            <div class="market-insight-head">
+              <span class="label">市场画像</span>
+              <button class="secondary-action compact-action" type="button" data-market-insight-run>生成市场画像</button>
+            </div>
+            <p class="market-insight-status" data-market-insight-status>基于当前简历估算市场定位、薪资参考和沟通建议。</p>
+            <div class="market-insight-grid" data-market-insight-result hidden>
+              <p><span>市场定位</span><strong data-market-insight-position>待生成</strong></p>
+              <p><span>层级</span><strong data-market-insight-level>待生成</strong></p>
+              <p><span>稀缺度</span><strong data-market-insight-scarcity>待生成</strong></p>
+              <p><span>月薪参考</span><strong data-market-insight-monthly>待生成</strong></p>
+              <p><span>年包参考</span><strong data-market-insight-annual>待生成</strong></p>
+              <p><span>置信度</span><strong data-market-insight-confidence>待生成</strong></p>
+            </div>
+            <div class="market-insight-section" data-market-insight-result hidden>
+              <strong>影响薪资的因素</strong>
+              <ul class="market-insight-list" data-market-insight-drivers></ul>
+            </div>
+            <div class="market-insight-section" data-market-insight-result hidden>
+              <strong>需要确认的风险</strong>
+              <ul class="market-insight-list" data-market-insight-risks></ul>
+            </div>
+            <div class="market-insight-section" data-market-insight-result hidden>
+              <strong>HR 建议</strong>
+              <p data-market-insight-hr>待生成</p>
+            </div>
+            <div class="market-insight-section" data-market-insight-result hidden>
+              <strong>老板摘要</strong>
+              <p data-market-insight-boss>待生成</p>
+            </div>
+            <small class="market-insight-disclaimer" data-market-insight-disclaimer>薪资参考由 AI 基于简历信息估算，仅供招聘沟通参考，需结合实时市场与公司薪酬策略确认。</small>
+          </section>
+
           <section class="panel-card candidate-side-card resume-hit-card">
             <span class="label">条件匹配</span>
             <p><span>Java / Spring</span><strong class="green">强匹配</strong></p>
@@ -1996,6 +2036,39 @@
             </div>
           </section>
 
+          <section class="panel-card candidate-side-card market-insight-card" data-market-insight-card>
+            <div class="market-insight-head">
+              <span class="label">市场画像</span>
+              <button class="secondary-action compact-action" type="button" data-market-insight-run>生成市场画像</button>
+            </div>
+            <p class="market-insight-status" data-market-insight-status>基于当前简历估算市场定位、薪资参考和沟通建议。</p>
+            <div class="market-insight-grid" data-market-insight-result hidden>
+              <p><span>市场定位</span><strong data-market-insight-position>待生成</strong></p>
+              <p><span>层级</span><strong data-market-insight-level>待生成</strong></p>
+              <p><span>稀缺度</span><strong data-market-insight-scarcity>待生成</strong></p>
+              <p><span>月薪参考</span><strong data-market-insight-monthly>待生成</strong></p>
+              <p><span>年包参考</span><strong data-market-insight-annual>待生成</strong></p>
+              <p><span>置信度</span><strong data-market-insight-confidence>待生成</strong></p>
+            </div>
+            <div class="market-insight-section" data-market-insight-result hidden>
+              <strong>影响薪资的因素</strong>
+              <ul class="market-insight-list" data-market-insight-drivers></ul>
+            </div>
+            <div class="market-insight-section" data-market-insight-result hidden>
+              <strong>需要确认的风险</strong>
+              <ul class="market-insight-list" data-market-insight-risks></ul>
+            </div>
+            <div class="market-insight-section" data-market-insight-result hidden>
+              <strong>HR 建议</strong>
+              <p data-market-insight-hr>待生成</p>
+            </div>
+            <div class="market-insight-section" data-market-insight-result hidden>
+              <strong>老板摘要</strong>
+              <p data-market-insight-boss>待生成</p>
+            </div>
+            <small class="market-insight-disclaimer" data-market-insight-disclaimer>薪资参考由 AI 基于简历信息估算，仅供招聘沟通参考，需结合实时市场与公司薪酬策略确认。</small>
+          </section>
+
           <section class="panel-card candidate-side-card resume-hit-card">
             <span class="label">匹配分析</span>
             <p><span>Java / Spring</span><strong class="green">强匹配</strong></p>
@@ -2033,6 +2106,39 @@
                 <p>来自解析任务的成功文件，可继续补充标签或加入短名单。</p>
               </div>
             </div>
+          </section>
+
+          <section class="panel-card candidate-side-card market-insight-card" data-market-insight-card>
+            <div class="market-insight-head">
+              <span class="label">市场画像</span>
+              <button class="secondary-action compact-action" type="button" data-market-insight-run>生成市场画像</button>
+            </div>
+            <p class="market-insight-status" data-market-insight-status>基于当前简历估算市场定位、薪资参考和沟通建议。</p>
+            <div class="market-insight-grid" data-market-insight-result hidden>
+              <p><span>市场定位</span><strong data-market-insight-position>待生成</strong></p>
+              <p><span>层级</span><strong data-market-insight-level>待生成</strong></p>
+              <p><span>稀缺度</span><strong data-market-insight-scarcity>待生成</strong></p>
+              <p><span>月薪参考</span><strong data-market-insight-monthly>待生成</strong></p>
+              <p><span>年包参考</span><strong data-market-insight-annual>待生成</strong></p>
+              <p><span>置信度</span><strong data-market-insight-confidence>待生成</strong></p>
+            </div>
+            <div class="market-insight-section" data-market-insight-result hidden>
+              <strong>影响薪资的因素</strong>
+              <ul class="market-insight-list" data-market-insight-drivers></ul>
+            </div>
+            <div class="market-insight-section" data-market-insight-result hidden>
+              <strong>需要确认的风险</strong>
+              <ul class="market-insight-list" data-market-insight-risks></ul>
+            </div>
+            <div class="market-insight-section" data-market-insight-result hidden>
+              <strong>HR 建议</strong>
+              <p data-market-insight-hr>待生成</p>
+            </div>
+            <div class="market-insight-section" data-market-insight-result hidden>
+              <strong>老板摘要</strong>
+              <p data-market-insight-boss>待生成</p>
+            </div>
+            <small class="market-insight-disclaimer" data-market-insight-disclaimer>薪资参考由 AI 基于简历信息估算，仅供招聘沟通参考，需结合实时市场与公司薪酬策略确认。</small>
           </section>
 
           <section class="panel-card candidate-side-card resume-hit-card">

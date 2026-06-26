@@ -696,12 +696,13 @@ test("candidate resume detail stays usable on narrow viewports", () => {
 test("project exposes npm scripts for Harness-compatible static delivery", () => {
   const pkg = JSON.parse(read("package.json"));
 
-  assert.equal(pkg.scripts.check, "node --check app.js && npm test");
-  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js");
+  assert.equal(pkg.scripts.check, "node --check app.js && node --check server/llm-gateway.mjs && node --check server/server.mjs && npm test");
+  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs");
   assert.equal(pkg.scripts.clean, "rm -rf dist");
   assert.equal(pkg.scripts.build, "node scripts/build-static.mjs");
   assert.equal(pkg.scripts["verify:dist"], "node scripts/verify-dist.mjs");
-  assert.equal(pkg.scripts.serve, "npx --yes http-server dist -p 8080");
+  assert.equal(pkg.scripts.serve, "npm run build && node server/server.mjs");
+  assert.equal(pkg.scripts.start, "node server/server.mjs");
 });
 
 test("project exposes desktop packaging scripts for local macOS builds", () => {
@@ -784,22 +785,15 @@ test("static dist verification rejects missing or extra runtime assets", () => {
   assert.match(script, /process\.exitCode = 1/);
 });
 
-test("docker runtime serves built dist assets with nginx", () => {
+test("docker runtime serves built dist assets and AI API with Node", () => {
   const dockerfile = read("Dockerfile");
-  const nginx = read("nginx.conf");
 
-  assert.match(dockerfile, /ARG NGINX_IMAGE=public\.ecr\.aws\/docker\/library\/nginx:1\.27-alpine/);
-  assert.match(dockerfile, /FROM \$\{NGINX_IMAGE\}/);
-  assert.match(dockerfile, /COPY nginx\.conf \/etc\/nginx\/conf\.d\/default\.conf/);
-  assert.match(dockerfile, /COPY dist\/ \/usr\/share\/nginx\/html\//);
-  assert.match(dockerfile, /EXPOSE 80/);
-
-  assert.match(nginx, /listen 80/);
-  assert.match(nginx, /try_files \$uri \$uri\/ \/index\.html/);
-  assert.match(nginx, /location ~\* \\\.\(css\|js\)\$/);
-  assert.match(nginx, /Cache-Control "no-cache, must-revalidate"/);
-  assert.match(nginx, /Cache-Control "no-store"/);
-  assert.doesNotMatch(nginx, /immutable/);
+  assert.match(dockerfile, /ARG NODE_IMAGE=public\.ecr\.aws\/docker\/library\/node:20-alpine/);
+  assert.match(dockerfile, /FROM \$\{NODE_IMAGE\}/);
+  assert.match(dockerfile, /COPY server\/ \.\/server\//);
+  assert.match(dockerfile, /COPY dist\/ \.\/dist\//);
+  assert.match(dockerfile, /EXPOSE 8080/);
+  assert.match(dockerfile, /CMD \["node", "server\/server\.mjs"\]/);
 });
 
 test("docker compose defines a single configurable DeerRecall service", () => {
@@ -810,11 +804,16 @@ test("docker compose defines a single configurable DeerRecall service", () => {
   assert.match(compose, /deerrecall:/);
   assert.match(compose, /image: \$\{DEERRECALL_IMAGE:-deerrecall:local\}/);
   assert.match(compose, /container_name: \$\{DEERRECALL_CONTAINER:-deerrecall\}/);
-  assert.match(compose, /"\$\{DEERRECALL_PORT:-8080\}:80"/);
+  assert.match(compose, /"\$\{DEERRECALL_PORT:-8080\}:8080"/);
+  assert.match(compose, /DEERRECALL_LLM_API_KEY: \$\{DEERRECALL_LLM_API_KEY:-\}/);
+  assert.match(compose, /DEERRECALL_LLM_BASE_URL: \$\{DEERRECALL_LLM_BASE_URL:-https:\/\/api\.openai\.com\/v1\}/);
+  assert.match(compose, /DEERRECALL_LLM_MODEL: \$\{DEERRECALL_LLM_MODEL:-\}/);
   assert.match(compose, /restart: unless-stopped/);
 
   assert.match(env, /DEERRECALL_IMAGE=deerrecall:local/);
   assert.match(env, /DEERRECALL_PORT=8080/);
+  assert.match(env, /DEERRECALL_LLM_API_KEY=/);
+  assert.match(env, /DEERRECALL_LLM_TIMEOUT_MS=30000/);
 });
 
 test("harness pipeline runs test, build, image, deploy, and verify stages", () => {
@@ -842,8 +841,11 @@ test("harness pipeline runs test, build, image, deploy, and verify stages", () =
   assert.match(pipeline, /test "\$\{READY\}" = "1"/);
   assert.match(pipeline, /docker exec "\$\{APP_CONTAINER\}" wget -qO-/);
   assert.doesNotMatch(pipeline, /curlimages\/curl/);
+  assert.match(pipeline, /http:\/\/127\.0\.0\.1:8080\/health/);
+  assert.match(pipeline, /http:\/\/127\.0\.0\.1:8080\/api\/ai\/status/);
   assert.match(pipeline, /grep -q "id=\\"resultsState\\""/);
   assert.match(pipeline, /grep -q "id=\\"candidateResumeState\\""/);
+  assert.match(pipeline, /grep -q "data-market-insight-run"/);
   assert.match(pipeline, /grep -qi "cache-control: no-cache, must-revalidate"/);
 });
 
@@ -876,15 +878,112 @@ test("readme documents local, compose, and Harness workflows", () => {
   assert.match(readme, /npm run build/);
   assert.match(readme, /npm run desktop:build/);
   assert.match(readme, /release\/electron\/mac-arm64\/DeerRecall\.app/);
-  assert.match(readme, /unsigned local macOS app/);
+  assert.match(readme, /未签名的本地 macOS app/);
   assert.match(readme, /docker build -t deerrecall:local \./);
   assert.match(readme, /docker compose up -d/);
   assert.match(readme, /Harness Open Source/);
   assert.match(readme, /\/var\/run\/docker\.sock/);
   assert.match(readme, /DEERRECALL_PORT/);
   assert.match(readme, /docker compose logs --tail=100 deerrecall/);
-  assert.match(readme, /Production Release Guardrails/);
-  assert.match(readme, /Build artifacts exclude design references/);
-  assert.match(readme, /Create a release tag/);
-  assert.match(readme, /JS and CSS use `no-cache, must-revalidate`/);
+  assert.match(readme, /生产发布护栏/);
+  assert.match(readme, /构建产物不包含设计参考资料/);
+  assert.match(readme, /创建 release tag/);
+  assert.match(readme, /JS 和 CSS 使用 `no-cache, must-revalidate`/);
+  assert.match(readme, /AI 市场画像 MVP/);
+  assert.match(readme, /DEERRECALL_LLM_API_KEY/);
+  assert.match(readme, /DEERRECALL_LLM_MODEL/);
+  assert.match(readme, /薪资参考/);
+});
+
+test("candidate detail exposes AI market insight controls and render targets", () => {
+  const html = read("index.html");
+  const css = read("styles.css");
+  const js = read("app.js");
+
+  assert.match(html, /data-market-insight-run/);
+  assert.match(html, /data-market-insight-status/);
+  assert.match(html, /data-market-insight-position/);
+  assert.match(html, /data-market-insight-level/);
+  assert.match(html, /data-market-insight-scarcity/);
+  assert.match(html, /data-market-insight-monthly/);
+  assert.match(html, /data-market-insight-annual/);
+  assert.match(html, /data-market-insight-confidence/);
+  assert.match(html, /data-market-insight-drivers/);
+  assert.match(html, /data-market-insight-risks/);
+  assert.match(html, /data-market-insight-hr/);
+  assert.match(html, /data-market-insight-boss/);
+  assert.match(html, /薪资参考由 AI 基于简历信息估算/);
+
+  assert.match(css, /\.market-insight-card/);
+  assert.match(css, /\.market-insight-grid/);
+  assert.match(css, /\.market-insight-list/);
+
+  assert.match(js, /const marketInsightButtons/);
+  assert.match(js, /function getMarketInsightCandidatePayload/);
+  assert.match(js, /function requestMarketInsight/);
+  assert.match(js, /function renderMarketInsight/);
+  assert.match(js, /\/api\/ai\/market-insight/);
+});
+
+test("DeerSearch exposes an AI assistant response area without replacing static results", () => {
+  const html = read("index.html");
+  const css = read("styles.css");
+  const js = read("app.js");
+
+  assert.match(html, /data-search-ai-card/);
+  assert.match(html, /data-search-ai-status/);
+  assert.match(html, /data-search-ai-answer/);
+  assert.match(html, /data-search-ai-suggestions/);
+
+  assert.match(css, /\.search-ai-card/);
+
+  assert.match(js, /function requestSearchAssistant/);
+  assert.match(js, /\/api\/ai\/search-assistant/);
+  assert.match(js, /showResults\(queryText = defaultQuery\)/);
+});
+
+test("project exposes Node AI gateway runtime scripts", () => {
+  const pkg = JSON.parse(read("package.json"));
+
+  assert.equal(pkg.scripts.start, "node server/server.mjs");
+  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs");
+  assert.match(pkg.scripts.check, /node --check server\/server\.mjs/);
+  assert.match(pkg.scripts.check, /node --check server\/llm-gateway\.mjs/);
+  assert.equal(pkg.scripts.serve, "npm run build && node server/server.mjs");
+});
+
+test("docker runtime serves static assets and AI API through Node", () => {
+  const dockerfile = read("Dockerfile");
+  const compose = read("docker-compose.yml");
+  const env = read(".env.example");
+
+  assert.match(dockerfile, /ARG NODE_IMAGE=public\.ecr\.aws\/docker\/library\/node:20-alpine/);
+  assert.match(dockerfile, /FROM \$\{NODE_IMAGE\}/);
+  assert.match(dockerfile, /COPY server\/ \.\/server\//);
+  assert.match(dockerfile, /COPY dist\/ \.\/dist\//);
+  assert.match(dockerfile, /EXPOSE 8080/);
+  assert.match(dockerfile, /CMD \["node", "server\/server\.mjs"\]/);
+
+  assert.match(compose, /"\$\{DEERRECALL_PORT:-8080\}:8080"/);
+  assert.match(compose, /DEERRECALL_LLM_API_KEY: \$\{DEERRECALL_LLM_API_KEY:-\}/);
+  assert.match(compose, /DEERRECALL_LLM_BASE_URL: \$\{DEERRECALL_LLM_BASE_URL:-https:\/\/api\.openai\.com\/v1\}/);
+  assert.match(compose, /DEERRECALL_LLM_MODEL: \$\{DEERRECALL_LLM_MODEL:-\}/);
+
+  assert.match(env, /DEERRECALL_LLM_API_KEY=/);
+  assert.match(env, /DEERRECALL_LLM_BASE_URL=https:\/\/api\.openai\.com\/v1/);
+  assert.match(env, /DEERRECALL_LLM_MODEL=/);
+  assert.match(env, /DEERRECALL_LLM_TIMEOUT_MS=30000/);
+});
+
+test("Harness verifies Node health, static shell, cache headers, and AI status", () => {
+  const pipeline = read(".harness/deerrecall-ci-cd.yaml");
+
+  assert.match(pipeline, /npm run check/);
+  assert.match(pipeline, /npm run verify:dist/);
+  assert.match(pipeline, /docker build -t \$\{DEERRECALL_IMAGE:-deerrecall:local\} \./);
+  assert.match(pipeline, /wget -qO- http:\/\/127\.0\.0\.1:8080\/health/);
+  assert.match(pipeline, /wget -qO- http:\/\/127\.0\.0\.1:8080\/api\/ai\/status/);
+  assert.match(pipeline, /configured/);
+  assert.match(pipeline, /cache-control: no-cache, must-revalidate/);
+  assert.match(pipeline, /cache-control: no-store/);
 });
