@@ -85,4 +85,7 @@ contextBridge.exposeInMainWorld("deerRecallDesktop", {
   },
   openResumeFile: (filePath) => ipcRenderer.invoke("resume:open-file", filePath),
   showResumeInFolder: (filePath) => ipcRenderer.invoke("resume:show-in-folder", filePath),
+  getAiStatus: () => ipcRenderer.invoke("ai:status"),
+  requestSearchAssistant: (payload) => ipcRenderer.invoke("ai:search-assistant", payload),
+  requestMarketInsight: (payload) => ipcRenderer.invoke("ai:market-insight", payload),
 });

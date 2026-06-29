@@ -165,6 +165,8 @@ test("DeerSearch filter bar wraps before it can overlap the assistant column", (
 test("DeerSearch AI assistant persists and restores search conversation history", () => {
   const html = read("index.html");
   const js = read("app.js");
+  const main = read("desktop/main.cjs");
+  const preload = read("desktop/preload.cjs");
 
   assert.match(html, /data-search-ai-answer-body/);
   assert.match(html, /data-search-ai-history/);
@@ -178,17 +180,27 @@ test("DeerSearch AI assistant persists and restores search conversation history"
   assert.match(js, /function renderSearchAiHistory/);
   assert.match(js, /function restoreSearchAiHistoryItem/);
   assert.match(js, /function getSearchAiContext/);
+  assert.match(js, /async function callAiApi/);
   assert.match(js, /let searchAiServiceStatus = null/);
   assert.match(js, /function getSearchAiServiceStatus/);
   assert.match(js, /\/api\/ai\/status/);
+  assert.match(js, /window\.deerRecallDesktop\?\.getAiStatus/);
+  assert.match(js, /window\.deerRecallDesktop\?\.requestSearchAssistant/);
   assert.match(js, /if \(status && !status\.configured\)/);
+  assert.doesNotMatch(js, /window\.location\.protocol === "file:"[\s\S]*当前为本地搜索模式，未连接 AI 服务/);
   assert.match(js, /localStorage\?\.getItem\(SEARCH_AI_HISTORY_KEY\)/);
   assert.match(js, /localStorage\?\.setItem\(SEARCH_AI_HISTORY_KEY/);
-  assert.match(js, /body:\s*JSON\.stringify\(\{\s*message,\s*history:\s*getSearchAiContext/);
+  assert.match(js, /callAiApi\("search-assistant",\s*\{\s*message,\s*history:\s*getSearchAiContext/);
   assert.match(js, /AI 增强排序已应用/);
   assert.match(js, /data-ai-match-summary/);
   assert.match(js, /aiMatchSummary/);
   assert.match(js, /data-search-ai-history-id/);
+
+  assert.match(main, /registerAiIpcHandlers/);
+  assert.match(main, /ipcMain\.handle\("ai:status"/);
+  assert.match(main, /ipcMain\.handle\("ai:search-assistant"/);
+  assert.match(preload, /getAiStatus:\s*\(\) => ipcRenderer\.invoke\("ai:status"\)/);
+  assert.match(preload, /requestSearchAssistant:\s*\(payload\) => ipcRenderer\.invoke\("ai:search-assistant",\s*payload\)/);
 });
 
 test("DeerSearch AI answer panel constrains long model text inside the right rail", () => {
@@ -232,6 +244,11 @@ test("resume import module exposes default, preview, loading, and finished state
 
   assert.match(js, /showImportState/);
   assert.match(js, /importStateButtons/);
+  assert.match(js, /function setImportAssistantProgress/);
+  assert.match(js, /function setImportAssistantResult/);
+  assert.match(js, /showImportState\("loading"\)/);
+  assert.match(js, /setImportAssistantProgress\(\{\s*sourceName/);
+  assert.match(js, /setImportAssistantResult\(source\)/);
 });
 
 test("resume import supports local folder selection before preview", () => {
@@ -849,8 +866,8 @@ test("candidate resume detail stays usable on narrow viewports", () => {
 test("project exposes npm scripts for Harness-compatible static delivery", () => {
   const pkg = JSON.parse(read("package.json"));
 
-  assert.equal(pkg.scripts.check, "node --check app.js && node --check server/llm-gateway.mjs && node --check server/server.mjs && npm test");
-  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/deersearch-engine.test.cjs");
+  assert.equal(pkg.scripts.check, "node --check app.js && node --check server/llm-gateway.mjs && node --check server/server.mjs && node --check desktop/ai-gateway.cjs && npm test");
+  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/desktop-ai-gateway.test.cjs tests/deersearch-engine.test.cjs");
   assert.equal(pkg.scripts.clean, "rm -rf dist");
   assert.equal(pkg.scripts.build, "node scripts/build-static.mjs");
   assert.equal(pkg.scripts["verify:dist"], "node scripts/verify-dist.mjs");
@@ -899,6 +916,7 @@ test("electron desktop wrapper reuses the static dist artifact", () => {
   assert.equal(builder.mac.identity, null);
   assert.deepEqual(builder.mac.target, ["dir", "dmg"]);
   assert.match(builder.files.join(","), /desktop\/\*\*\/\*\.cjs/);
+  assert.match(builder.files.join(","), /server\/llm-gateway\.mjs/);
   assert.match(builder.files.join(","), /node_modules\/\*\*\//);
   assert.match(builder.files.join(","), /dist\/\*\*\//);
 });
@@ -1051,7 +1069,8 @@ test("readme documents local, compose, and Harness workflows", () => {
   assert.match(readme, /第一版试用包启动时人才库为空/);
   assert.match(readme, /Library\/Application Support\/deerrecall\/talent-library\.json/);
   assert.match(readme, /PDF \/ DOCX \/ TXT \/ Markdown/);
-  assert.match(readme, /第一版桌面试用包不接云端 AI/);
+  assert.match(readme, /配置模型 Key 后，Electron 桌面端可以直接启用 DeerSearch AI 回答和候选人市场画像/);
+  assert.match(readme, /Library\/Application Support\/deerrecall\/\.env/);
   assert.match(readme, /docker build -t deerrecall:local \./);
   assert.match(readme, /docker compose up -d/);
   assert.match(readme, /Harness Open Source/);
@@ -1073,6 +1092,7 @@ test("candidate detail exposes AI market insight controls and render targets", (
   const html = read("index.html");
   const css = read("styles.css");
   const js = read("app.js");
+  const preload = read("desktop/preload.cjs");
 
   assert.match(html, /data-market-insight-run/);
   assert.match(html, /data-market-insight-status/);
@@ -1097,6 +1117,9 @@ test("candidate detail exposes AI market insight controls and render targets", (
   assert.match(js, /function requestMarketInsight/);
   assert.match(js, /function renderMarketInsight/);
   assert.match(js, /\/api\/ai\/market-insight/);
+  assert.match(js, /window\.deerRecallDesktop\?\.requestMarketInsight/);
+  assert.doesNotMatch(js, /AI 能力需要通过本地服务或 Docker 运行时打开/);
+  assert.match(preload, /requestMarketInsight:\s*\(payload\) => ipcRenderer\.invoke\("ai:market-insight",\s*payload\)/);
 });
 
 test("DeerSearch exposes an AI assistant response area without replacing static results", () => {
@@ -1121,9 +1144,10 @@ test("project exposes Node AI gateway runtime scripts", () => {
   const pkg = JSON.parse(read("package.json"));
 
   assert.equal(pkg.scripts.start, "node server/server.mjs");
-  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/deersearch-engine.test.cjs");
+  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/desktop-ai-gateway.test.cjs tests/deersearch-engine.test.cjs");
   assert.match(pkg.scripts.check, /node --check server\/server\.mjs/);
   assert.match(pkg.scripts.check, /node --check server\/llm-gateway\.mjs/);
+  assert.match(pkg.scripts.check, /node --check desktop\/ai-gateway\.cjs/);
   assert.equal(pkg.scripts.serve, "npm run build && node server/server.mjs");
 });
 

@@ -413,25 +413,25 @@
                 <path class="folder-front" d="M15 47h62c5.5 0 9.3 5.2 7.9 10.5L78 84H18c-4.2 0-7.7-3-8.4-7.1L6.3 58.1C5.3 52.3 9.7 47 15 47Z"></path>
               </svg>
             </div>
-            <h2>正在导入简历... <span>68%</span></h2>
-            <div class="progress-track large" aria-hidden="true"><span style="width: 68%"></span></div>
+            <h2>正在导入简历... <span data-import-loading-percent>68%</span></h2>
+            <div class="progress-track large" aria-hidden="true"><span data-import-loading-progress style="width: 68%"></span></div>
             <div class="processing-summary">
-              <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path></svg><span>总文件</span><strong>126</strong></div>
-              <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg><span>已完成</span><strong>86</strong></div>
-              <div><span class="spinner"></span><span>解析中</span><strong>4</strong></div>
-              <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>失败</span><strong>2</strong></div>
+              <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path></svg><span>总文件</span><strong data-import-loading-total>126</strong></div>
+              <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg><span>已完成</span><strong data-import-loading-done>86</strong></div>
+              <div><span class="spinner"></span><span>解析中</span><strong data-import-loading-active>4</strong></div>
+              <div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span>失败</span><strong data-import-loading-failed>2</strong></div>
             </div>
             <div class="processing-list">
               <span class="processing-title">正在处理</span>
               <div class="file-row">
                 <span class="file-type pdf">PDF</span>
-                <strong>张明_高级Java开发工程师.pdf</strong>
-                <em>正在解析</em>
+                <strong data-import-loading-file>张明_高级Java开发工程师.pdf</strong>
+                <em data-import-loading-status>正在解析</em>
                 <small>30 秒前</small>
               </div>
               <div class="file-row">
                 <span class="file-type docx">DOCX</span>
-                <strong>李想_后端开发工程师.docx</strong>
+                <strong data-import-loading-source>李想_后端开发工程师.docx</strong>
                 <em class="done">已完成</em>
                 <small>1 分钟前</small>
               </div>
@@ -2299,12 +2299,12 @@
             <div class="current-file">
               <span class="file-outline">PDF</span>
               <div>
-                <strong>张明_高级Java开发工程师.pdf</strong>
-                <small>2.4 MB · PDF</small>
+                <strong data-import-loading-file>张明_高级Java开发工程师.pdf</strong>
+                <small data-import-loading-file-meta>2.4 MB · PDF</small>
               </div>
             </div>
-            <div class="progress-track" aria-hidden="true"><span style="width: 58%"></span></div>
-            <p>解析中... 58%</p>
+            <div class="progress-track" aria-hidden="true"><span data-import-loading-progress style="width: 58%"></span></div>
+            <p data-import-loading-status>解析中... 58%</p>
           </section>
 
           <section class="panel-card import-side-card estimate-card">
@@ -2321,10 +2321,10 @@
           <section class="panel-card import-side-card">
             <span class="label">导入进度概览</span>
             <div class="side-stat-list compact">
-              <div><span>总文件</span><strong>126</strong></div>
-              <div class="green"><span>已完成</span><strong>86 (68%)</strong></div>
-              <div class="purple"><span>解析中</span><strong>4 (3%)</strong></div>
-              <div class="red"><span>失败</span><strong>2 (2%)</strong></div>
+              <div><span>总文件</span><strong data-import-loading-total>126</strong></div>
+              <div class="green"><span>已完成</span><strong data-import-loading-done>86 (68%)</strong></div>
+              <div class="purple"><span>解析中</span><strong data-import-loading-active>4 (3%)</strong></div>
+              <div class="red"><span>失败</span><strong data-import-loading-failed>2 (2%)</strong></div>
             </div>
           </section>
 

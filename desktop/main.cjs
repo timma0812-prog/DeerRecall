@@ -9,9 +9,20 @@ const {
 const {
   writeDroppedFilesToFolder,
 } = require("./dropped-file-import.cjs");
+const {
+  createDesktopAiGateway,
+} = require("./ai-gateway.cjs");
 
 function getDatabasePath() {
   return path.join(app.getPath("userData"), "talent-library.json");
+}
+
+function getDesktopAiConfigPaths() {
+  return [
+    path.join(__dirname, "..", ".env"),
+    path.join(process.resourcesPath || "", ".env"),
+    path.join(app.getPath("userData"), ".env"),
+  ];
 }
 
 function getReadableFilePath(filePath) {
@@ -161,7 +172,18 @@ ipcMain.handle("resume:show-in-folder", async (_event, filePath) => {
   return { ok: true };
 });
 
+function registerAiIpcHandlers() {
+  const aiGateway = createDesktopAiGateway({
+    configPaths: getDesktopAiConfigPaths(),
+  });
+
+  ipcMain.handle("ai:status", async () => aiGateway.getStatus());
+  ipcMain.handle("ai:search-assistant", async (_event, payload) => aiGateway.searchAssistant(payload));
+  ipcMain.handle("ai:market-insight", async (_event, payload) => aiGateway.marketInsight(payload));
+}
+
 app.whenReady().then(() => {
+  registerAiIpcHandlers();
   createMainWindow();
 
   app.on("activate", () => {

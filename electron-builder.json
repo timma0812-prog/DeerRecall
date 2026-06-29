@@ -6,6 +6,7 @@
   },
   "files": [
     "desktop/**/*.cjs",
+    "server/llm-gateway.mjs",
     "dist/**/*",
     "node_modules/**/*"
   ],

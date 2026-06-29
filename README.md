@@ -61,7 +61,24 @@ DEERRECALL_LLM_API_KEY=... DEERRECALL_LLM_MODEL=... npm run serve
 
 第一版试用包启动时人才库为空，不会自动展示演示候选人。用户在 Electron 客户端中选择本地简历文件夹后，应用会扫描该文件夹和子文件夹，把支持格式的简历解析为本地候选人记录。
 
-第一版桌面试用包不接云端 AI，也不要求用户安装 Electron、Node、Docker、Rust 或数据库。支持本地解析 PDF / DOCX / TXT / Markdown，并对 DOC 做 macOS `textutil` best-effort 转换；扫描版 PDF 或图片型简历需要原文件自带可提取文字，否则会进入失败任务列表。
+第一版桌面试用包默认本地优先，不要求用户安装 Electron、Node、Docker、Rust 或数据库。支持本地解析 PDF / DOCX / TXT / Markdown，并对 DOC 做 macOS `textutil` best-effort 转换；扫描版 PDF 或图片型简历需要原文件自带可提取文字，否则会进入失败任务列表。
+
+配置模型 Key 后，Electron 桌面端可以直接启用 DeerSearch AI 回答和候选人市场画像。开发环境优先读取项目根目录 `.env`；打包后的客户端可读取：
+
+```text
+~/Library/Application Support/deerrecall/.env
+```
+
+文件内容沿用同一组变量：
+
+```dotenv
+DEERRECALL_LLM_API_KEY=your-api-key
+DEERRECALL_LLM_BASE_URL=https://api.openai.com/v1
+DEERRECALL_LLM_MODEL=your-model-name
+DEERRECALL_LLM_TIMEOUT_MS=30000
+```
+
+这些配置文件已经被 `.gitignore` 和 `.dockerignore` 排除，不会进入 Git 仓库或 Docker 镜像。
 
 本地人才库保存位置：
 
@@ -93,7 +110,7 @@ npm run desktop:build:trial
 
 生成产物位于 `release/electron/DeerRecall-0.1.0-arm64.dmg`。用户不需要安装 Electron；Electron runtime、Chromium 和 DeerRecall 前端代码都会被打进 `.dmg` 内的 macOS app。用户双击 `.dmg` 后打开 DeerRecall，或拖到 Applications 目录即可。
 
-当前 Electron 目录版加载的是静态 `dist/` 页面，并通过 Electron IPC 调用 `desktop/` 下的本地解析与 JSON 持久化模块。AI API 需要通过 Node runtime 或 Docker Compose 访问 `http://localhost:8080`；第一版桌面试用包不内置云端 AI 调用。
+当前 Electron 目录版加载的是静态 `dist/` 页面，并通过 Electron IPC 调用 `desktop/` 下的本地解析、JSON 持久化和桌面 AI 网关模块。Web / Docker 运行时仍通过 Node runtime 的 `/api/ai/*` 访问 AI；Electron 打包客户端通过主进程 IPC 调用同一套模型消息构造与结果归一化逻辑，API Key 不会暴露给前端页面。
 
 Tauri 已保留为后续更小运行时的打包选项，但本地需要先安装 Rust/Cargo：
 
