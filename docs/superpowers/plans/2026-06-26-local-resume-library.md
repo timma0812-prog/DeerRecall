@@ -52,4 +52,4 @@
 - [x] Run `npm run verify:dist`.
 - [x] Run `npm run desktop:build:trial`.
 - [x] Mount and inspect the generated DMG.
-- [ ] Commit and push to `origin/main`.
+- [x] Commit and push to `origin/main`.
