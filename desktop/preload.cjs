@@ -76,6 +76,7 @@ contextBridge.exposeInMainWorld("deerRecallDesktop", {
   selectImportFolder: () => ipcRenderer.invoke("import:select-folder"),
   selectImportFiles: () => ipcRenderer.invoke("import:select-files"),
   importPaths: (paths) => ipcRenderer.invoke("import:paths", paths),
+  importDroppedFiles: (files) => ipcRenderer.invoke("import:file-copies", files),
   getDroppedFilePaths: (files) => dedupePaths([...getPathsFromFiles(files), ...lastDroppedFilePaths]),
   consumeDroppedFilePaths: () => {
     const paths = lastDroppedFilePaths.slice();

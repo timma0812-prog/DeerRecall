@@ -1244,6 +1244,108 @@ async function importDesktopDroppedPaths(paths) {
   }
 }
 
+function isSupportedDroppedResume(file) {
+  const extension = getImportFileExtension(file);
+  return importSupportedExtensions.has(extension);
+}
+
+function getEntryFile(entry) {
+  return new Promise((resolve) => {
+    entry.file(resolve, () => resolve(null));
+  });
+}
+
+function readDirectoryEntries(entry) {
+  return new Promise((resolve) => {
+    const reader = entry.createReader();
+    const entries = [];
+    const readBatch = () => {
+      reader.readEntries((batch) => {
+        if (!batch.length) {
+          resolve(entries);
+          return;
+        }
+        entries.push(...batch);
+        readBatch();
+      }, () => resolve(entries));
+    };
+    readBatch();
+  });
+}
+
+async function collectFilesFromEntry(entry, output, limit = 1000) {
+  if (!entry || output.length >= limit) return;
+  if (entry.isFile) {
+    const file = await getEntryFile(entry);
+    if (file && isSupportedDroppedResume(file)) {
+      output.push({ file, relativePath: entry.fullPath || file.name });
+    }
+    return;
+  }
+  if (entry.isDirectory) {
+    const entries = await readDirectoryEntries(entry);
+    for (const childEntry of entries) {
+      if (output.length >= limit) break;
+      await collectFilesFromEntry(childEntry, output, limit);
+    }
+  }
+}
+
+async function collectDroppedResumeFiles(dataTransfer) {
+  const entries = Array.from(dataTransfer?.items || [])
+    .map((item) => (typeof item.webkitGetAsEntry === "function" ? item.webkitGetAsEntry() : null))
+    .filter(Boolean);
+  const fileRecords = [];
+
+  if (entries.length) {
+    for (const entry of entries) {
+      await collectFilesFromEntry(entry, fileRecords);
+    }
+  } else {
+    Array.from(dataTransfer?.files || []).forEach((file) => {
+      if (isSupportedDroppedResume(file)) {
+        fileRecords.push({ file, relativePath: file.webkitRelativePath || file.name });
+      }
+    });
+  }
+
+  const payload = [];
+  for (const record of fileRecords) {
+    payload.push({
+      name: record.file.name,
+      relativePath: record.relativePath,
+      size: record.file.size,
+      type: record.file.type,
+      lastModified: record.file.lastModified,
+      buffer: await record.file.arrayBuffer(),
+    });
+  }
+  return payload;
+}
+
+async function importDesktopDroppedFiles(dataTransfer) {
+  if (!window.deerRecallDesktop?.importDroppedFiles) {
+    if (importPickerStatus) importPickerStatus.textContent = "拖拽文件读取不可用，请使用上方按钮选择文件夹或文件。";
+    showToast("拖拽文件读取不可用");
+    return;
+  }
+  if (importPickerStatus) importPickerStatus.textContent = "正在读取拖入文件夹中的简历文件。";
+  const files = await collectDroppedResumeFiles(dataTransfer);
+  if (!files.length) {
+    if (importPickerStatus) importPickerStatus.textContent = "没有读取到可导入的简历文件，请使用上方按钮选择文件夹或文件。";
+    showToast("没有读取到可导入文件");
+    return;
+  }
+  if (importPickerStatus) importPickerStatus.textContent = `正在解析拖入的 ${files.length} 个简历文件。`;
+  try {
+    const selectedImport = await window.deerRecallDesktop.importDroppedFiles(files);
+    applyDesktopImportResult(selectedImport, "没有读取到可导入文件。");
+  } catch (error) {
+    if (importPickerStatus) importPickerStatus.textContent = "拖拽导入失败，请重试。";
+    showToast("拖拽导入失败");
+  }
+}
+
 function readDesktopDroppedPaths() {
   const consumedPaths = window.deerRecallDesktop?.consumeDroppedFilePaths?.() || [];
   if (consumedPaths.length) return consumedPaths;
@@ -1540,7 +1642,8 @@ async function handleImportDrop(event) {
   importDropZone?.classList.remove("is-dragging");
   if (isDesktopLocalLibrary) {
     const paths = readDesktopDroppedPaths();
-    await importDesktopDroppedPaths(paths);
+    if (paths.length) await importDesktopDroppedPaths(paths);
+    else await importDesktopDroppedFiles(event.dataTransfer);
     return;
   }
   const files = event.dataTransfer?.files || [];

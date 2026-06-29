@@ -241,6 +241,7 @@ test("desktop renderer exposes local-library mode hooks without demo folder fall
   const html = read("index.html");
   const js = read("app.js");
   const preload = read("desktop/preload.cjs");
+  const main = read("desktop/main.cjs");
 
   assert.match(html, /data-local-library-empty/);
   assert.match(html, /data-local-candidate-list/);
@@ -258,18 +259,26 @@ test("desktop renderer exposes local-library mode hooks without demo folder fall
   assert.match(js, /window\.deerRecallDesktop\?\.selectImportFolder/);
   assert.match(js, /window\.deerRecallDesktop\?\.selectImportFiles/);
   assert.match(js, /window\.deerRecallDesktop\?\.importPaths/);
+  assert.match(js, /window\.deerRecallDesktop\?\.importDroppedFiles/);
   assert.match(js, /window\.deerRecallDesktop\?\.getDroppedFilePaths/);
   assert.match(js, /window\.deerRecallDesktop\?\.consumeDroppedFilePaths/);
   assert.match(js, /function importDesktopSelection/);
   assert.match(js, /function importDesktopDroppedPaths/);
+  assert.match(js, /function importDesktopDroppedFiles/);
+  assert.match(js, /function collectDroppedResumeFiles/);
+  assert.match(js, /webkitGetAsEntry/);
+  assert.match(js, /\.arrayBuffer\(\)/);
   assert.match(js, /requestImportSource\("desktopFiles"\)/);
   assert.match(preload, /let lastDroppedFilePaths/);
   assert.match(preload, /window\.addEventListener\("drop"/);
   assert.match(preload, /selectImportFiles/);
   assert.match(preload, /importPaths/);
+  assert.match(preload, /importDroppedFiles/);
   assert.match(preload, /getDroppedFilePaths/);
   assert.match(preload, /consumeDroppedFilePaths/);
   assert.match(preload, /text\/uri-list/);
+  assert.match(main, /import:file-copies/);
+  assert.match(main, /writeDroppedFilesToFolder/);
   assert.doesNotMatch(js, /getDroppedFilePaths\(files\)/);
   assert.doesNotMatch(js, /isDesktopLocalLibrary && mode === "files"/);
   assert.doesNotMatch(js, /请选择 Desktop 文件夹，普通浏览器预览可使用系统文件夹选择器。/);

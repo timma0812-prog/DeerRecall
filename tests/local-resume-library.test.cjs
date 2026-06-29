@@ -15,6 +15,9 @@ const {
   parseResumeFile,
   supportedResumeExtensions,
 } = require("../desktop/resume-parser.cjs");
+const {
+  writeDroppedFilesToFolder,
+} = require("../desktop/dropped-file-import.cjs");
 
 function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "deerrecall-local-library-"));
@@ -178,6 +181,46 @@ test("importPathsToLibrary imports selected files and dragged folders", async ()
   assert.ok(stored.candidates.some((candidate) => candidate.name === "黄凯" && candidate.contacts.phone === "15910660153"));
   assert.ok(stored.candidates.some((candidate) => candidate.name === "王小明"));
   assert.equal(stored.importTasks[0].importType, "拖拽导入");
+});
+
+test("writeDroppedFilesToFolder stores dragged folder payloads for local parsing", async () => {
+  const tempDir = makeTempDir();
+  const dbPath = path.join(tempDir, "talent-library.json");
+  const storageRoot = path.join(tempDir, "drag-cache");
+  const written = await writeDroppedFilesToFolder({
+    storageRoot,
+    importId: "drag-test",
+    files: [
+      {
+        name: "黄凯_产品经理.txt",
+        relativePath: "/IOT产品经理/黄凯_产品经理.txt",
+        buffer: Buffer.from("黄凯\n手机：159-1066-0153\n邮箱：huang@example.com\n求职意向：中后台产品经理\n工作经历\n魅KTV - B端产品经理"),
+      },
+      {
+        name: "escape.txt",
+        relativePath: "../escape.txt",
+        buffer: Buffer.from("王小明\n手机：13800138000\nJava 后端工程师"),
+      },
+    ],
+  });
+
+  assert.equal(written.paths.length, 2);
+  assert.ok(written.paths.every((filePath) => filePath.startsWith(written.rootPath)));
+  assert.ok(fs.existsSync(path.join(written.rootPath, "IOT产品经理", "黄凯_产品经理.txt")));
+  assert.ok(fs.existsSync(path.join(written.rootPath, "escape.txt")));
+
+  const result = await importPathsToLibrary({
+    paths: written.paths,
+    databasePath: dbPath,
+    sourceName: "拖拽导入",
+    sourcePath: written.rootPath,
+    importType: "拖拽导入",
+  });
+  const stored = loadLibrary(dbPath);
+
+  assert.equal(result.stats.parseable, 2);
+  assert.ok(stored.candidates.some((candidate) => candidate.name === "黄凯"));
+  assert.equal(stored.importTasks[0].folderPath, written.rootPath);
 });
 
 test("loadLibrary upgrades older local candidates from stored resume text", () => {

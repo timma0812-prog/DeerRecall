@@ -6,6 +6,9 @@ const {
   importPathsToLibrary,
   loadLibrary,
 } = require("./local-library.cjs");
+const {
+  writeDroppedFilesToFolder,
+} = require("./dropped-file-import.cjs");
 
 function getDatabasePath() {
   return path.join(app.getPath("userData"), "talent-library.json");
@@ -115,6 +118,26 @@ ipcMain.handle("import:paths", async (_event, droppedPaths) => {
     sourceName: paths.length === 1 ? path.basename(paths[0]) : "拖拽导入",
     sourcePath: getCommonSourcePath(paths),
     importType: "拖拽导入",
+  });
+});
+
+ipcMain.handle("import:file-copies", async (_event, droppedFiles) => {
+  const files = Array.isArray(droppedFiles) ? droppedFiles : [];
+  if (!files.length) return null;
+
+  const copied = await writeDroppedFilesToFolder({
+    files,
+    storageRoot: path.join(app.getPath("userData"), "dropped-resumes"),
+  });
+  if (!copied.paths.length) return null;
+
+  return importPathsToLibrary({
+    paths: copied.paths,
+    databasePath: getDatabasePath(),
+    sourceName: "拖拽导入",
+    sourcePath: copied.rootPath,
+    importType: "拖拽导入",
+    type: "文件夹",
   });
 });
 
