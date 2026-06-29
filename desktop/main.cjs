@@ -1,4 +1,5 @@
 const { app, BrowserWindow, dialog, ipcMain, shell } = require("electron");
+const fs = require("node:fs");
 const path = require("node:path");
 const {
   importFolderToLibrary,
@@ -7,6 +8,16 @@ const {
 
 function getDatabasePath() {
   return path.join(app.getPath("userData"), "talent-library.json");
+}
+
+function getReadableFilePath(filePath) {
+  if (!filePath || typeof filePath !== "string") return null;
+  try {
+    const stat = fs.statSync(filePath);
+    return stat.isFile() ? filePath : null;
+  } catch {
+    return null;
+  }
 }
 
 function createMainWindow() {
@@ -54,6 +65,22 @@ ipcMain.handle("import:select-folder", async (event) => {
 
 ipcMain.handle("library:get", async () => {
   return loadLibrary(getDatabasePath());
+});
+
+ipcMain.handle("resume:open-file", async (_event, filePath) => {
+  const readablePath = getReadableFilePath(filePath);
+  if (!readablePath) return { ok: false, message: "原文件不存在或不可读取" };
+  filePath = readablePath;
+  const errorMessage = await shell.openPath(filePath);
+  return errorMessage ? { ok: false, message: errorMessage } : { ok: true };
+});
+
+ipcMain.handle("resume:show-in-folder", async (_event, filePath) => {
+  const readablePath = getReadableFilePath(filePath);
+  if (!readablePath) return { ok: false, message: "原文件不存在或不可读取" };
+  filePath = readablePath;
+  shell.showItemInFolder(filePath);
+  return { ok: true };
 });
 
 app.whenReady().then(() => {

@@ -1347,7 +1347,7 @@
                 <div class="resume-card-head">
                   <h2>原始简历预览</h2>
                 </div>
-                <div class="resume-pdf-shell" aria-label="原始简历缩略预览">
+                <div class="resume-pdf-shell" aria-label="原始简历预览" data-candidate-resume-preview>
                   <div class="resume-pdf-title">
                     <strong data-candidate-file>陈屿_Java后端工程师_7年.pdf</strong>
                     <span>PDF</span>
@@ -1366,6 +1366,7 @@
                 <h2>原始文件信息</h2>
                 <div class="resume-info-list">
                   <p><span>文件名</span><strong data-candidate-file>陈屿_Java后端工程师_7年.pdf</strong></p>
+                  <p><span>本地路径</span><strong data-candidate-file-path>待补充</strong></p>
                   <p><span>来源批次</span><strong data-candidate-source>FinTech_Backend_2026</strong></p>
                   <p><span>入库时间</span><strong data-candidate-created>今天 10:32</strong></p>
                   <p><span>解析状态</span><strong class="green">已完成</strong></p>
@@ -1373,15 +1374,17 @@
               </article>
               <article class="resume-detail-card resume-raw-text-card">
                 <h2>解析文本摘录</h2>
-                <p>Java 后端开发工程师，7 年经验。长期参与支付风控、规则引擎、交易链路与服务治理工作。</p>
-                <p>熟悉 Spring Boot、Redis、Kafka、MySQL，具备高并发业务系统设计和落地经验。</p>
+                <div data-candidate-raw-text>
+                  <p>Java 后端开发工程师，7 年经验。长期参与支付风控、规则引擎、交易链路与服务治理工作。</p>
+                  <p>熟悉 Spring Boot、Redis、Kafka、MySQL，具备高并发业务系统设计和落地经验。</p>
+                </div>
               </article>
             </section>
 
             <section class="resume-tab-panel resume-experience-panel state-hidden" data-candidate-resume-panel="experience">
               <article class="resume-detail-card">
                 <h2>工作经历时间线</h2>
-                <div class="resume-timeline">
+                <div class="resume-timeline" data-candidate-work-experiences>
                   <section>
                     <time>2022.06 - 至今</time>
                     <strong data-candidate-company>某金融科技公司 · 高级后端工程师</strong>
@@ -1407,7 +1410,7 @@
             <section class="resume-tab-panel resume-projects-panel state-hidden" data-candidate-resume-panel="projects">
               <article class="resume-detail-card">
                 <h2>项目证据</h2>
-                <div class="resume-project-grid">
+                <div class="resume-project-grid" data-candidate-projects>
                   <section>
                     <strong data-candidate-project>支付风控规则引擎</strong>
                     <p data-candidate-project-summary>参与规则配置、实时计算、交易拦截与风控日志模块，支撑高并发交易场景。</p>
@@ -1438,7 +1441,7 @@
               </article>
               <article class="resume-detail-card">
                 <h2>触达建议</h2>
-                <div class="resume-info-list">
+                <div class="resume-info-list" data-candidate-contact-insights>
                   <p><span>优先方式</span><strong>手机号 / 微信</strong></p>
                   <p><span>沟通重点</span><strong>支付风控、交易平台、高并发项目</strong></p>
                   <p><span>需确认</span><strong>到岗时间、薪资预期、团队规模</strong></p>
@@ -1449,7 +1452,7 @@
             <section class="resume-tab-panel resume-source-panel state-hidden" data-candidate-resume-panel="source">
               <article class="resume-detail-card">
                 <h2>标签来源</h2>
-                <div class="resume-source-grid">
+                <div class="resume-source-grid" data-candidate-tag-sources>
                   <section><span>Java</span><strong>简历技能段</strong><em>高置信</em></section>
                   <section><span>Spring Boot</span><strong>项目经历</strong><em>高置信</em></section>
                   <section><span>支付风控</span><strong>最近工作经历</strong><em>高置信</em></section>

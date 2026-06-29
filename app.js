@@ -2532,38 +2532,223 @@ function setResumeEntryVisibility(entry) {
   });
 }
 
+function getCandidateTextExcerpt(candidate, maxParagraphs = 10) {
+  const rawText = String(candidate.resumeText || (candidate.summary || []).join("\n") || "").trim();
+  if (!rawText) return [];
+  return rawText
+    .split(/\n{1,}|(?<=。)/)
+    .map((item) => item.trim())
+    .filter((item) => item.length >= 6)
+    .filter((item) => !/^[a-z0-9_-]{24,}~*$/i.test(item))
+    .slice(0, maxParagraphs);
+}
+
+function getResumeFileUrl(filePath = "") {
+  if (!filePath) return "";
+  if (/^file:\/\//i.test(filePath)) return filePath;
+  if (!filePath.startsWith("/")) return "";
+  return `file://${filePath.split("/").map((part) => encodeURIComponent(part)).join("/")}`;
+}
+
+function renderTagRow(tags = []) {
+  const visibleTags = tags.filter(Boolean).slice(0, 6);
+  if (!visibleTags.length) return "";
+  return `<div class="resume-tag-row">${visibleTags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>`;
+}
+
+function renderCandidateArchive(candidate) {
+  const file = candidate.resumeFileName || candidate.file || "未命名简历";
+  const filePath = candidate.resumePath || "";
+  const extension = file.split(".").pop()?.toUpperCase() || "FILE";
+  const fileUrl = getResumeFileUrl(filePath);
+  const isPdf = /\.pdf$/i.test(file);
+
+  document.querySelectorAll("[data-candidate-resume-preview]").forEach((node) => {
+    if (isPdf && fileUrl) {
+      node.innerHTML = `
+        <div class="resume-pdf-title">
+          <strong>${escapeHtml(file)}</strong>
+          <span>PDF</span>
+        </div>
+        <iframe class="resume-pdf-frame" src="${escapeHtml(fileUrl)}" title="${escapeHtml(file)}"></iframe>
+      `;
+      return;
+    }
+    node.innerHTML = `
+      <div class="resume-pdf-title">
+        <strong>${escapeHtml(file)}</strong>
+        <span>${escapeHtml(extension)}</span>
+      </div>
+      <div class="resume-preview-empty">
+        <strong>${filePath ? "此格式暂无内嵌预览" : "暂无原始文件"}</strong>
+        <p>${filePath ? escapeHtml(filePath) : "导入本地简历后会显示原文件信息。"}</p>
+      </div>
+    `;
+  });
+
+  document.querySelectorAll("[data-candidate-raw-text]").forEach((node) => {
+    const paragraphs = getCandidateTextExcerpt(candidate);
+    node.innerHTML = paragraphs.length
+      ? paragraphs.map((item) => `<p>${escapeHtml(item)}</p>`).join("")
+      : "<p>暂无可复制的解析文本。</p>";
+  });
+}
+
+function renderCandidateWorkExperiences(candidate) {
+  const experiences = Array.isArray(candidate.workExperiences) ? candidate.workExperiences : [];
+  const fallback = !experiences.length && (candidate.recentExperience || candidate.experience)
+    ? [{
+        company: candidate.recentExperience?.company || candidate.company || "待补充",
+        title: candidate.recentExperience?.title || candidate.title || "待补充",
+        period: candidate.recentExperience?.period || "最近经历",
+        summary: candidate.recentExperience?.summary || candidate.experience || "暂无结构化工作经历。",
+        tags: candidate.tags || [],
+      }]
+    : [];
+
+  document.querySelectorAll("[data-candidate-work-experiences]").forEach((node) => {
+    const rows = experiences.length ? experiences : fallback;
+    node.innerHTML = rows.length
+      ? rows.map((item) => {
+          const title = [item.company, item.title].filter(Boolean).join(" · ") || "待补充";
+          return `
+            <section>
+              <time>${escapeHtml(item.period || "时间待补充")}</time>
+              <strong>${escapeHtml(title)}</strong>
+              <p>${escapeHtml(item.summary || "暂无工作内容摘要。")}</p>
+              ${renderTagRow(item.tags || candidate.tags || [])}
+            </section>
+          `;
+        }).join("")
+      : `
+        <section>
+          <time>待补充</time>
+          <strong>未识别到结构化工作经历</strong>
+          <p>已保留原始简历文本，可在“原始简历”中查看并复制。</p>
+        </section>
+      `;
+  });
+}
+
+function renderCandidateProjects(candidate) {
+  const projects = Array.isArray(candidate.projects) ? candidate.projects : [];
+  const fallback = !projects.length && candidate.keyProject?.name && candidate.keyProject.name !== "待补充"
+    ? [candidate.keyProject]
+    : [];
+
+  document.querySelectorAll("[data-candidate-projects]").forEach((node) => {
+    const rows = projects.length ? projects : fallback;
+    node.innerHTML = rows.length
+      ? rows.map((item) => `
+          <section>
+            <div>
+              <strong>${escapeHtml(item.name || "未命名项目")}</strong>
+              <p>${escapeHtml(item.summary || "暂无项目摘要。")}</p>
+            </div>
+            <div class="resume-project-meta">
+              <span>角色：${escapeHtml(item.role || "简历提及")}</span>
+              <span>证据强度：${escapeHtml(item.confidence || "中")}</span>
+            </div>
+          </section>
+        `).join("")
+      : `
+        <section>
+          <div>
+            <strong>未识别到结构化项目经历</strong>
+            <p>可在原始简历文本中查看项目相关描述，后续再人工补充。</p>
+          </div>
+          <div class="resume-project-meta"><span>角色：待补充</span><span>证据强度：待确认</span></div>
+        </section>
+      `;
+  });
+}
+
+function renderCandidateContacts(candidate) {
+  const contacts = candidate.contacts || {};
+  const rows = [
+    { label: "手机号", value: contacts.phone, status: contacts.phone ? "已识别" : "待补充", attr: "data-candidate-phone" },
+    { label: "邮箱", value: contacts.email, status: contacts.email ? "已识别" : "待补充", attr: "data-candidate-email" },
+    { label: "微信", value: contacts.wechat, status: contacts.wechat ? "已识别" : "待补充", attr: "data-candidate-wechat" },
+  ];
+  document.querySelectorAll(".resume-contact-list").forEach((node) => {
+    node.innerHTML = rows
+      .map((row) => `<p><span>${row.label}</span><strong ${row.attr}>${escapeHtml(row.value || "待补充")}</strong><em>${row.status}</em></p>`)
+      .join("");
+  });
+
+  const priority = contacts.phone ? "手机号" : contacts.email ? "邮箱" : "待补充联系方式";
+  const focus = (candidate.tags || []).slice(0, 4).join("、") || candidate.title || "简历核心经历";
+  const needConfirm = contacts.phone || contacts.email ? "到岗时间、薪资预期、最近项目细节" : "手机号、微信、到岗时间";
+  document.querySelectorAll("[data-candidate-contact-insights]").forEach((node) => {
+    node.innerHTML = `
+      <p><span>优先方式</span><strong>${escapeHtml(priority)}</strong></p>
+      <p><span>沟通重点</span><strong>${escapeHtml(focus)}</strong></p>
+      <p><span>需确认</span><strong>${escapeHtml(needConfirm)}</strong></p>
+    `;
+  });
+}
+
+function renderCandidateTagSources(candidate) {
+  const sources = Array.isArray(candidate.tagSources) && candidate.tagSources.length
+    ? candidate.tagSources
+    : (candidate.tags || []).map((tag) => ({ tag, source: "简历正文", confidence: "中", evidence: "" }));
+  document.querySelectorAll("[data-candidate-tag-sources]").forEach((node) => {
+    node.innerHTML = sources.length
+      ? sources.slice(0, 10).map((item) => `
+          <section title="${escapeHtml(item.evidence || "")}">
+            <span>${escapeHtml(item.tag)}</span>
+            <strong>${escapeHtml(item.source || "简历正文")}</strong>
+            <em>${escapeHtml(item.confidence || "中")}置信</em>
+          </section>
+        `).join("")
+      : `
+        <section>
+          <span>待补充</span>
+          <strong>未识别到标签来源</strong>
+          <em>待确认</em>
+        </section>
+      `;
+  });
+}
+
 function updateCandidateResume(candidate) {
+  const isLocalCandidate = Boolean(candidate.resumePath || candidate.resumeText || candidate.workExperiences || candidate.projects);
   const title = candidate.title || candidate.shortRole?.split(" · ")[0] || candidate.role?.split(" · ")[0] || "";
   const city = candidate.city || candidate.shortRole?.split(" · ")[1] || "";
   const years = candidate.years || Number.parseInt(candidate.shortRole?.match(/(\d+)\s*年/)?.[1] || "", 10) || "";
-  const role = candidate.role || `${title} · ${city} · ${years} 年经验`;
-  const shortRole = candidate.shortRole || `${title} · ${city} · ${years} 年`;
+  const role = candidate.role || [title, city, years ? `${years} 年经验` : ""].filter(Boolean).join(" · ");
+  const shortRole = candidate.shortRole || [title, city, years ? `${years} 年` : ""].filter(Boolean).join(" · ");
   const score = candidate.matchScore || candidate.score || 0;
   const completeness = candidate.completeness || score;
   const source = candidate.sourceName || candidate.source || "";
   const importedAt = candidate.importedAt || candidate.created || "";
   const file = candidate.resumeFileName || candidate.file || "";
-  const recentExperience = candidate.recentExperience || {
-    company: candidate.company || "最近公司",
-    title: "高级后端工程师",
+  const recentExperience = candidate.recentExperience || candidate.workExperiences?.[0] || {
+    company: candidate.company || (isLocalCandidate ? "待补充" : "最近公司"),
+    title: title || (isLocalCandidate ? "待补充" : "高级后端工程师"),
     period: "最近经历",
     summary: candidate.experience || "",
   };
-  const keyProject = candidate.keyProject || {
-    name: candidate.project || "核心项目",
-    summary: `技术栈：${candidate.stack || "待补充"}`,
+  const keyProject = candidate.keyProject || candidate.projects?.[0] || {
+    name: candidate.project || (isLocalCandidate ? "待补充" : "核心项目"),
+    summary: candidate.project ? "" : `技术栈：${candidate.stack || "待补充"}`,
   };
-  const contacts = candidate.contacts || {
-    phone: "138****5678",
-    email: "chenyu@example.com",
-    wechat: "待确认",
-  };
-  const evidence = candidate.matchEvidence || [
+  const contacts = candidate.contacts || (isLocalCandidate
+    ? { phone: "", email: "", wechat: "" }
+    : {
+        phone: "138****5678",
+        email: "chenyu@example.com",
+        wechat: "待确认",
+      });
+  const evidence = candidate.matchEvidence || (isLocalCandidate
+    ? (candidate.tags || []).slice(0, 4).map((tag) => ({ label: tag, level: "简历提及", score: "" }))
+    : [
     { label: "Java / Spring", level: "strong", score: score },
     { label: "支付风控经验", level: "strong", score: Math.max(score - 4, 0) },
     { label: "高并发项目", level: "strong", score: Math.max(score - 8, 0) },
     { label: "金融科技背景", level: "bonus", score: Math.max(score - 16, 0) },
-  ];
+  ]);
+  const status = getLocalCandidateStatus(candidate);
 
   document.querySelectorAll("[data-candidate-name]").forEach((node) => {
     node.textContent = candidate.name;
@@ -2583,6 +2768,9 @@ function updateCandidateResume(candidate) {
   document.querySelectorAll("[data-candidate-completeness]").forEach((node) => {
     node.textContent = `${completeness}%`;
   });
+  document.querySelectorAll("[data-candidate-status]").forEach((node) => {
+    node.textContent = status.label;
+  });
   document.querySelectorAll("[data-candidate-source]").forEach((node) => {
     node.textContent = source;
   });
@@ -2592,8 +2780,11 @@ function updateCandidateResume(candidate) {
   document.querySelectorAll("[data-candidate-file]").forEach((node) => {
     node.textContent = file;
   });
+  document.querySelectorAll("[data-candidate-file-path]").forEach((node) => {
+    node.textContent = candidate.resumePath || "待补充";
+  });
   document.querySelectorAll("[data-candidate-company]").forEach((node) => {
-    node.textContent = `${recentExperience.company} · ${recentExperience.title}`;
+    node.textContent = [recentExperience.company, recentExperience.title].filter(Boolean).join(" · ") || "待补充";
   });
   document.querySelectorAll("[data-candidate-project]").forEach((node) => {
     node.textContent = keyProject.name;
@@ -2602,13 +2793,13 @@ function updateCandidateResume(candidate) {
     node.textContent = keyProject.summary;
   });
   document.querySelectorAll("[data-candidate-experience]").forEach((node) => {
-    node.textContent = `${recentExperience.period}。${recentExperience.summary}`;
+    node.textContent = [recentExperience.period, recentExperience.summary].filter(Boolean).join("。") || "待补充";
   });
   document.querySelectorAll("[data-candidate-stack]").forEach((node) => {
-    node.textContent = candidate.stack;
+    node.textContent = candidate.stack || "待补充";
   });
   document.querySelectorAll("[data-candidate-match-note]").forEach((node) => {
-    node.textContent = candidate.matchNote;
+    node.textContent = candidate.matchNote || "来自当前候选人档案。";
   });
   document.querySelectorAll("[data-candidate-tags]").forEach((node) => {
     node.innerHTML = (candidate.tags || []).map((tag) => `<span>${escapeHtml(tag)}</span>`).join("");
@@ -2636,6 +2827,11 @@ function updateCandidateResume(candidate) {
   document.querySelectorAll("[data-candidate-wechat]").forEach((node) => {
     node.textContent = contacts.wechat || "待补充";
   });
+  renderCandidateArchive(candidate);
+  renderCandidateWorkExperiences(candidate);
+  renderCandidateProjects(candidate);
+  renderCandidateContacts(candidate);
+  renderCandidateTagSources(candidate);
 }
 
 function showCandidateResumePanel(viewName = "summary") {
@@ -2830,7 +3026,7 @@ function closeCandidateResume() {
   }
 }
 
-function handleResumeAction(action) {
+async function handleResumeAction(action) {
   const candidate = getCandidateRecord();
   if (!candidate) {
     showToast("请先导入本地简历");
@@ -2844,15 +3040,33 @@ function handleResumeAction(action) {
     return;
   }
   if (action === "copySummary" || action === "copyParse") {
-    copyText(`${candidate.name}：${candidate.summary.join(" ")}`, action === "copyParse" ? "解析文本已复制" : "候选人摘要已复制");
+    const summaryText = (candidate.summary || []).join(" ");
+    const text = action === "copyParse"
+      ? candidate.resumeText || summaryText || `${candidate.name}：暂无解析文本`
+      : `${candidate.name}：${summaryText || candidate.experience || "暂无摘要"}`;
+    copyText(text, action === "copyParse" ? "解析文本已复制" : "候选人摘要已复制");
     return;
   }
   if (action === "favorite") {
     showToast(`${candidate.name} 已收藏`);
     return;
   }
-  if (action === "finder" || action === "openFile") {
-    showToast("本地文件操作已模拟");
+  if (action === "openFile") {
+    if (!candidate.resumePath || !window.deerRecallDesktop?.openResumeFile) {
+      showToast("未找到可打开的本地原文件");
+      return;
+    }
+    const result = await window.deerRecallDesktop?.openResumeFile(candidate.resumePath);
+    showToast(result?.ok ? "已打开原文件" : result?.message || "原文件打开失败");
+    return;
+  }
+  if (action === "finder") {
+    if (!candidate.resumePath || !window.deerRecallDesktop?.showResumeInFolder) {
+      showToast("未找到可定位的本地原文件");
+      return;
+    }
+    const result = await window.deerRecallDesktop?.showResumeInFolder(candidate.resumePath);
+    showToast(result?.ok ? "已在 Finder 中定位" : result?.message || "Finder 定位失败");
     return;
   }
   if (action === "edit") {
@@ -2864,8 +3078,9 @@ function handleResumeAction(action) {
     return;
   }
   if (action === "similar") {
-    const role = candidate.title || candidate.shortRole || "后端候选人";
-    const similarQuery = `查找与${candidate.name}相似的 ${role}，重点关注支付风控、高并发和金融科技背景`;
+    const role = candidate.title || candidate.shortRole || "候选人";
+    const focus = (candidate.tags || []).slice(0, 4).join("、") || role;
+    const similarQuery = `查找与${candidate.name}相似的 ${role}，重点关注${focus}`;
     openSearchFilter("similar", { returnContext: { view: currentView, candidateId: candidate.id, candidateEntry: candidateResumeEntry } });
     refineSearchInput.value = similarQuery;
     showToast("已生成相似候选人条件");

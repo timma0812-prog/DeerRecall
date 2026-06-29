@@ -19,12 +19,36 @@ function createEmptyLibrary() {
   };
 }
 
+function shouldUpgradeCandidate(candidate) {
+  if (!candidate?.resumeText) return false;
+  const missingStructuredSections = !Array.isArray(candidate.workExperiences) || !Array.isArray(candidate.projects) || !Array.isArray(candidate.tagSources);
+  const missingContact = !candidate.contacts?.phone && /1[3-9](?:[-\s]?\d){9}/.test(candidate.resumeText);
+  return missingStructuredSections || missingContact;
+}
+
+function upgradeCandidate(candidate) {
+  if (!shouldUpgradeCandidate(candidate)) return candidate;
+  const inferred = inferCandidateFromText({
+    filePath: candidate.resumePath || candidate.resumeFileName || candidate.file || candidate.name || "本地简历",
+    text: candidate.resumeText,
+    sourceName: candidate.sourceName || candidate.source || "本地导入",
+  });
+  return {
+    ...candidate,
+    ...inferred,
+    id: candidate.id || inferred.id,
+    importedAt: candidate.importedAt || inferred.importedAt,
+    created: candidate.created || inferred.created,
+    updatedAt: candidate.updatedAt,
+  };
+}
+
 function normalizeLibrary(library) {
   if (!library || typeof library !== "object") return createEmptyLibrary();
   return {
     ...createEmptyLibrary(),
     ...library,
-    candidates: Array.isArray(library.candidates) ? library.candidates : [],
+    candidates: Array.isArray(library.candidates) ? library.candidates.map(upgradeCandidate) : [],
     importTasks: Array.isArray(library.importTasks) ? library.importTasks : [],
     sources: Array.isArray(library.sources) ? library.sources : [],
   };

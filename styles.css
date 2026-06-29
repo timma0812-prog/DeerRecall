@@ -5265,6 +5265,35 @@ svg {
 .resume-preview-lines i:nth-child(7) { width: 96%; }
 .resume-preview-lines i:nth-child(8) { width: 76%; }
 
+.resume-pdf-frame {
+  width: 100%;
+  min-height: 360px;
+  border: 0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.resume-preview-empty {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  min-height: 250px;
+  color: rgba(50, 32, 98, 0.74);
+}
+
+.resume-preview-empty strong {
+  color: #322062;
+  font-size: 18px;
+}
+
+.resume-preview-empty p {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .candidate-resume-workspace .resume-file-actions {
   flex-wrap: wrap;
   gap: 10px;

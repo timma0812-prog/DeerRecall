@@ -745,6 +745,12 @@ test("candidate resume detail tabs expose full content panels and switching logi
   assert.match(html, /项目证据/);
   assert.match(html, /联系方式状态/);
   assert.match(html, /标签来源/);
+  assert.match(html, /data-candidate-resume-preview/);
+  assert.match(html, /data-candidate-raw-text/);
+  assert.match(html, /data-candidate-file-path/);
+  assert.match(html, /data-candidate-work-experiences/);
+  assert.match(html, /data-candidate-projects/);
+  assert.match(html, /data-candidate-tag-sources/);
 
   assert.match(css, /\.resume-tab-panel/);
   assert.match(css, /\.resume-tab-panel\.is-active/);
@@ -752,9 +758,33 @@ test("candidate resume detail tabs expose full content panels and switching logi
   assert.match(css, /\.resume-source-grid/);
 
   assert.match(js, /const candidateResumePanels = document\.querySelectorAll\("\[data-candidate-resume-panel\]"\)/);
+  assert.match(js, /function renderCandidateArchive\(candidate/);
+  assert.match(js, /function renderCandidateWorkExperiences\(candidate/);
+  assert.match(js, /function renderCandidateProjects\(candidate/);
+  assert.match(js, /function renderCandidateContacts\(candidate/);
+  assert.match(js, /function renderCandidateTagSources\(candidate/);
   assert.match(js, /function showCandidateResumePanel\(viewName = "summary"\)/);
   assert.match(js, /panel\.classList\.toggle\("is-active"/);
   assert.match(js, /panel\.classList\.toggle\("state-hidden"/);
+});
+
+test("desktop resume file actions are wired through Electron IPC", () => {
+  const main = read("desktop/main.cjs");
+  const preload = read("desktop/preload.cjs");
+  const js = read("app.js");
+
+  assert.match(main, /ipcMain\.handle\("resume:open-file"/);
+  assert.match(main, /shell\.openPath\(filePath\)/);
+  assert.match(main, /ipcMain\.handle\("resume:show-in-folder"/);
+  assert.match(main, /shell\.showItemInFolder\(filePath\)/);
+
+  assert.match(preload, /openResumeFile:\s*\(filePath\) => ipcRenderer\.invoke\("resume:open-file",\s*filePath\)/);
+  assert.match(preload, /showResumeInFolder:\s*\(filePath\) => ipcRenderer\.invoke\("resume:show-in-folder",\s*filePath\)/);
+
+  assert.doesNotMatch(js, /本地文件操作已模拟/);
+  assert.match(js, /window\.deerRecallDesktop\?\.openResumeFile/);
+  assert.match(js, /window\.deerRecallDesktop\?\.showResumeInFolder/);
+  assert.match(js, /candidate\.resumeText/);
 });
 
 test("candidate resume detail stays usable on narrow viewports", () => {
