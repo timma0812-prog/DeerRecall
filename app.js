@@ -1244,6 +1244,14 @@ async function importDesktopDroppedPaths(paths) {
   }
 }
 
+function readDesktopDroppedPaths() {
+  const consumedPaths = window.deerRecallDesktop?.consumeDroppedFilePaths?.() || [];
+  if (consumedPaths.length) return consumedPaths;
+  return window.deerRecallDesktop?.getDroppedFilePaths
+    ? window.deerRecallDesktop.getDroppedFilePaths()
+    : [];
+}
+
 async function requestImportSource(action) {
   if (isDesktopLocalLibrary && action === "browserFolder") {
     await requestImportSource("desktopFolder");
@@ -1531,10 +1539,7 @@ async function handleImportDrop(event) {
   event.preventDefault();
   importDropZone?.classList.remove("is-dragging");
   if (isDesktopLocalLibrary) {
-    const files = event.dataTransfer?.files || [];
-    const paths = window.deerRecallDesktop?.getDroppedFilePaths
-      ? window.deerRecallDesktop.getDroppedFilePaths(files)
-      : [];
+    const paths = readDesktopDroppedPaths();
     await importDesktopDroppedPaths(paths);
     return;
   }
