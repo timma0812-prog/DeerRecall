@@ -180,11 +180,11 @@ Harness 需要访问 Docker socket，才能构建镜像并执行 Docker Compose 
 
 部署到演示环境之外前，需要遵守：
 
-- 构建产物不包含设计参考资料：`npm run build` 只会把 `index.html`、`app.js`、`styles.css` 复制到 `dist/`。
+- 构建产物不包含设计参考资料：`npm run build` 只会把 `index.html`、`deersearch-engine.js`、`app.js`、`styles.css` 复制到 `dist/`。
 - `npm run verify:dist` 会拦截缺文件、多余文件或空文件的发布产物。
-- JS 和 CSS 使用 `no-cache, must-revalidate`，因为当前文件名还没有内容 hash。
+- JS、CSS 和搜索引擎脚本使用 `no-cache, must-revalidate`，因为当前文件名还没有内容 hash。
 - SPA 入口 HTML 使用 `no-store`，确保发布检查总是拿到最新入口。
-- Harness verify 会等待 Node runtime 就绪，检查部署后的核心 SPA 和 AI 入口，检查 `/api/ai/status`，并验证 `app.js`、`styles.css`、`/` 的缓存头。
+- Harness verify 会等待 Node runtime 就绪，检查部署后的核心 SPA 和 AI 入口，检查 `/api/ai/status`，并验证 `app.js`、`deersearch-engine.js`、`styles.css`、`/` 的缓存头。
 - 生产发布前应创建 release tag，并部署不可变镜像 tag，方便回滚到上一版。
 
 Harness Open Source 本地启动示例：

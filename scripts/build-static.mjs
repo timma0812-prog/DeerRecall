@@ -9,6 +9,7 @@ const dist = path.join(root, "dist");
 
 const assets = [
   "index.html",
+  "deersearch-engine.js",
   "app.js",
   "styles.css",
 ];

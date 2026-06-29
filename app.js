@@ -107,10 +107,11 @@ const searchAiSuggestions = document.querySelector("[data-search-ai-suggestions]
 const searchAiHistoryList = document.querySelector("[data-search-ai-history]");
 const searchAiHistoryEmpty = document.querySelector("[data-search-ai-history-empty]");
 const searchAiHistoryClear = document.querySelector("[data-search-ai-history-clear]");
+const searchConversationAnswer = document.querySelector("[data-search-conversation-answer]");
 const marketInsightButtons = document.querySelectorAll("[data-market-insight-run]");
 const marketInsightCards = document.querySelectorAll("[data-market-insight-card]");
 
-const defaultQuery = "找做过支付风控的 Java 后端，最好有高并发项目经验。";
+const defaultQuery = "查看本地人才库中已解析的简历。";
 const SEARCH_AI_HISTORY_KEY = "deerrecall:searchAiHistory";
 const SEARCH_AI_HISTORY_LIMIT = 8;
 const searchCityOptions = ["城市不限", "上海", "杭州", "深圳", "北京"];
@@ -374,7 +375,7 @@ let currentTalentPanel = "overview";
 let currentTalentFilter = "all";
 let currentTalentDetailView = null;
 let currentImportAction = "searchImported";
-let currentQueryId = "payment_risk_java_backend";
+let currentQueryId = "local_default";
 let currentExportScope = "candidateList";
 let currentSearchCityIndex = 0;
 let currentSearchSortIndex = 0;
@@ -382,6 +383,7 @@ let searchExtraFilterCursor = 0;
 let searchAiHistory = loadSearchAiHistory();
 let activeSearchAiHistoryId = searchAiHistory[0]?.id || null;
 let searchAiServiceStatus = null;
+let activeSearchResult = null;
 let localTalentLibrary = null;
 let p2ReturnContext = { view: "talents", talentFilter: "all", taskId: null, searchQuery: defaultQuery };
 
@@ -507,19 +509,22 @@ function updateLocalKpis(candidates) {
   });
 }
 
-function renderLocalSearchCards(candidates) {
+function renderLocalSearchCards(candidates, options = {}) {
   if (!localSearchList) return;
   if (!candidates.length) {
+    const title = options.emptyTitle || "暂无候选人";
+    const role = options.emptyRole || "请先导入本地简历文件夹";
+    const message = options.emptyMessage || "本地人才库为空，搜索会在导入并解析简历后开始返回结果。";
     localSearchList.innerHTML = `
       <article class="candidate-card local-empty-card">
         <div class="candidate-top">
           <div>
-            <h3>暂无候选人</h3>
-            <p class="candidate-role">请先导入本地简历文件夹</p>
+            <h3>${escapeHtml(title)}</h3>
+            <p class="candidate-role">${escapeHtml(role)}</p>
           </div>
           <div class="score"><strong>0</strong><span>匹配</span></div>
         </div>
-        <p class="candidate-desc">本地人才库为空，搜索会在导入并解析简历后开始返回结果。</p>
+        <p class="candidate-desc">${escapeHtml(message)}</p>
         <div class="candidate-actions">
           <button class="resume-btn" type="button" data-import-pick="folder">选择简历文件夹</button>
         </div>
@@ -533,7 +538,7 @@ function renderLocalSearchCards(candidates) {
   localSearchList.innerHTML = candidates
     .map((candidate, index) => {
       const tags = getLocalCandidateTags(candidate);
-      const score = candidate.matchScore || candidate.score || Math.max(35, candidate.completeness || 0);
+      const score = candidate.localSearchScore || candidate.matchScore || candidate.score || Math.max(35, candidate.completeness || 0);
       return `
         <article class="candidate-card" data-candidate="${escapeHtml(candidate.name)}" data-candidate-id="${escapeHtml(candidate.id)}" data-search-score="${score}" data-search-years="${candidate.years || 0}" data-search-city="${escapeHtml(candidate.city || "")}" data-search-index="${index}">
           <div class="candidate-top">
@@ -897,22 +902,34 @@ async function getSearchAiServiceStatus() {
 async function requestSearchAssistant(message, historyId = activeSearchAiHistoryId) {
   if (!searchAiCard) return;
   if (window.location.protocol === "file:") {
-    const fallback = {
-      answer: "当前桌面预览未连接 AI 服务，但这条搜索已保存。通过 Node runtime 或 Harness 部署访问时会生成上下文回答。",
-      suggestions: ["继续调整筛选条件", "打开已保存搜索记录", "通过服务端运行 AI 能力"],
+    const fallback = activeSearchResult?.assistant || {
+      answer: "当前为本地搜索模式，未连接 AI 服务。",
+      suggestions: ["继续调整筛选条件", "打开已保存搜索记录", "配置模型 Key 后启用 AI 增强"],
     };
-    if (historyId === activeSearchAiHistoryId) renderSearchAssistant(fallback, { historyId, query: message });
+    if (historyId === activeSearchAiHistoryId) {
+      renderSearchAssistant(fallback, {
+        historyId,
+        query: message,
+        statusMessage: "本地搜索模式（未连接 AI）。",
+      });
+    }
     else upsertSearchAiHistory({ id: historyId, query: message, ...fallback, status: "ready" });
     return;
   }
   setSearchAiState("loading", "正在理解搜索意图...");
   const status = await getSearchAiServiceStatus();
   if (status && !status.configured) {
-    const fallback = {
-      answer: "AI 服务尚未配置模型 Key，当前搜索和上下文已保存。配置 DEERRECALL_LLM_API_KEY 与 DEERRECALL_LLM_MODEL 后会生成回答。",
-      suggestions: ["保留当前搜索记录", "配置模型环境变量", "继续查看静态候选人"],
+    const fallback = activeSearchResult?.assistant || {
+      answer: "AI 服务尚未配置模型 Key，当前使用本地搜索模式。",
+      suggestions: ["保留当前搜索记录", "配置模型环境变量", "继续查看本地搜索结果"],
     };
-    if (historyId === activeSearchAiHistoryId) renderSearchAssistant(fallback, { historyId, query: message });
+    if (historyId === activeSearchAiHistoryId) {
+      renderSearchAssistant(fallback, {
+        historyId,
+        query: message,
+        statusMessage: "本地搜索模式（未配置 AI Key）。",
+      });
+    }
     else upsertSearchAiHistory({ id: historyId, query: message, ...fallback, status: "ready" });
     return;
   }
@@ -920,7 +937,11 @@ async function requestSearchAssistant(message, historyId = activeSearchAiHistory
     const response = await fetch("/api/ai/search-assistant", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message, history: getSearchAiContext(historyId) }),
+      body: JSON.stringify({
+        message,
+        history: getSearchAiContext(historyId),
+        localContext: buildSearchAiLocalContext(message),
+      }),
     });
     const data = await response.json();
     if (!response.ok || !data.ok) {
@@ -1027,6 +1048,66 @@ function updateSearchResultCount(visibleCount) {
   searchResultCountLine.dataset.searchResultCount = String(visibleCount);
   const countNode = searchResultCountLine.querySelector("strong");
   if (countNode) countNode.textContent = String(visibleCount);
+}
+
+function setSearchResultCountLine(result) {
+  if (!searchResultCountLine) return;
+  const total = result?.total || 0;
+  const noun = result?.intent?.asksForList ? "份简历" : "位候选人";
+  searchResultCountLine.dataset.searchResultCount = String(total);
+  searchResultCountLine.innerHTML = `共找到 <strong>${total}</strong> ${noun}`;
+}
+
+function renderSearchFilterChips(chips = []) {
+  getSearchFilterButtons().forEach((button) => button.remove());
+  chips.forEach((chip) => {
+    if (searchFilterAddButton) searchFilterAddButton.before(createSearchFilterChip(chip));
+  });
+  refreshSearchFilterAddState();
+}
+
+function renderSearchResultState(result) {
+  const emptyOptions = result?.total
+    ? {}
+    : {
+        emptyTitle: "没有匹配结果",
+        emptyRole: "本地人才库搜索",
+        emptyMessage: result?.emptyMessage || "没有找到匹配当前条件的候选人。",
+      };
+  renderLocalSearchCards(result?.candidates || [], emptyOptions);
+  setSearchResultCountLine(result);
+  renderSearchFilterChips(result?.chips || []);
+  if (searchConversationAnswer) {
+    searchConversationAnswer.textContent = result?.assistant?.answer || "我已按当前条件搜索本地人才库。";
+  }
+}
+
+function buildLocalSearchResult(queryText) {
+  const candidates = getLocalCandidates();
+  if (window.DeerRecallSearch?.searchLocalCandidates) {
+    return window.DeerRecallSearch.searchLocalCandidates(queryText, candidates);
+  }
+  return {
+    engine: "local",
+    intent: { rawQuery: queryText, keywords: [], asksForList: false },
+    candidates,
+    total: candidates.length,
+    chips: [{ id: "local", label: "本地人才库" }],
+    assistant: { answer: "当前搜索引擎未加载，已展示本地人才库候选人。", suggestions: [] },
+    emptyMessage: "本地人才库为空，搜索会在导入并解析简历后开始返回结果。",
+  };
+}
+
+function buildSearchAiLocalContext(queryText) {
+  if (!window.DeerRecallSearch?.buildAiRerankPayload || !activeSearchResult) return null;
+  return window.DeerRecallSearch.buildAiRerankPayload(queryText, activeSearchResult);
+}
+
+function applySearchResultModel(result) {
+  activeSearchResult = result;
+  renderSearchResultState(result);
+  sortSearchCandidates();
+  applySearchResultFilters();
 }
 
 function applySearchResultFilters() {
@@ -1697,7 +1778,7 @@ function showResults(queryText = defaultQuery, options = {}) {
   const normalizedQuery = normalizeQuery(queryText);
   const restoredHistoryItem = options.restoreHistoryItem || null;
   currentView = "searchResults";
-  currentQueryId = "payment_risk_java_backend";
+  currentQueryId = `local_${encodeURIComponent(normalizedQuery).slice(0, 64)}`;
 
   emptyState.classList.add("state-hidden");
   importState.classList.add("state-hidden");
@@ -1718,10 +1799,9 @@ function showResults(queryText = defaultQuery, options = {}) {
 
   userQuery.textContent = normalizedQuery;
   currentQuery.textContent = normalizedQuery;
-  refineSearchInput.value = "只看 5 年以上、近期在金融科技公司的候选人";
-  sortSearchCandidates();
-  applySearchResultFilters();
-  refreshSearchFilterAddState();
+  refineSearchInput.value = "";
+  const localResult = buildLocalSearchResult(normalizedQuery);
+  applySearchResultModel(localResult);
 
   if (restoredHistoryItem) {
     activeSearchAiHistoryId = restoredHistoryItem.id;
@@ -1748,6 +1828,11 @@ function showResults(queryText = defaultQuery, options = {}) {
   });
   activeSearchAiHistoryId = historyItem?.id || null;
   renderSearchAiHistory();
+  renderSearchAssistant(localResult.assistant, {
+    historyId: activeSearchAiHistoryId,
+    query: normalizedQuery,
+    statusMessage: "本地搜索模式。配置模型 Key 后可启用 AI 增强解释。",
+  });
   requestSearchAssistant(normalizedQuery, activeSearchAiHistoryId);
 }
 

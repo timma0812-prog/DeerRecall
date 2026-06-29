@@ -131,3 +131,39 @@ test("buildSearchAssistantMessages includes recent DeerSearch context without ov
   assert.equal(payload.recent_context[1].query, "只看杭州");
   assert.doesNotMatch(messages[1].content, /找支付风控 Java 后端/);
 });
+
+test("buildSearchAssistantMessages includes sanitized local recall context for AI search", () => {
+  const messages = buildSearchAssistantMessages(
+    "找产品实习生文件夹里的简历",
+    [],
+    {
+      mode: "ai_rerank",
+      query: "找产品实习生文件夹里的简历",
+      intent: { sourceKeyword: "产品实习生", asksForList: true },
+      local_candidates: [
+        {
+          id: "candidate_product_001",
+          name: "陈小鹿",
+          role: "产品实习生 · 北京",
+          sourceName: "产品实习生",
+          resumeFileName: "陈小鹿_产品实习生.pdf",
+          tags: ["产品", "PRD"],
+          summary: ["用户访谈和 PRD 撰写"],
+          localSearchScore: 91,
+          resumeText: "完整简历正文不应发给搜索助手",
+          contacts: { phone: "13800000000", email: "candidate@example.com" },
+        },
+      ],
+    }
+  );
+  const payload = JSON.parse(messages[1].content);
+  const text = messages.map((message) => message.content).join("\n");
+
+  assert.equal(payload.local_search_context.mode, "ai_rerank");
+  assert.equal(payload.local_search_context.local_candidates.length, 1);
+  assert.equal(payload.local_search_context.local_candidates[0].id, "candidate_product_001");
+  assert.equal(payload.local_search_context.local_candidates[0].resumeText, undefined);
+  assert.equal(payload.local_search_context.local_candidates[0].contacts, undefined);
+  assert.deepEqual(payload.output_schema.ranked_ids, ["candidate id in best order"]);
+  assert.doesNotMatch(text, /13800000000|candidate@example\.com|完整简历正文/);
+});

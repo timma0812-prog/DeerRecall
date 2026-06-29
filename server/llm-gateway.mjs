@@ -14,6 +14,12 @@ function asList(value, fallback) {
   return items.length ? items : fallback;
 }
 
+function asIdList(value, fallback = []) {
+  if (!Array.isArray(value)) return fallback;
+  const items = value.map((item) => String(item).trim()).filter(Boolean).slice(0, 30);
+  return items.length ? items : fallback;
+}
+
 export function sanitizeCandidateForModel(candidate = {}) {
   return {
     id: asText(candidate.id, ""),
@@ -81,12 +87,46 @@ function sanitizeSearchContext(history = []) {
   })).filter((item) => item.query || item.answer);
 }
 
-export function buildSearchAssistantMessages(message, history = []) {
+function sanitizeSearchCandidate(candidate = {}) {
+  return {
+    id: asText(candidate.id, ""),
+    name: asText(candidate.name, "候选人"),
+    role: asText(candidate.role || candidate.shortRole || candidate.title),
+    city: asText(candidate.city),
+    years: candidate.years || "",
+    sourceName: asText(candidate.sourceName || candidate.source),
+    resumeFileName: asText(candidate.resumeFileName, ""),
+    tags: asList(candidate.tags, []),
+    summary: asList(candidate.summary, []),
+    matchNote: asText(candidate.matchNote, ""),
+    localSearchScore: Number(candidate.localSearchScore || candidate.matchScore || 0),
+  };
+}
+
+function sanitizeLocalSearchContext(localContext = null) {
+  if (!localContext || typeof localContext !== "object") return null;
+  const localCandidates = Array.isArray(localContext.local_candidates)
+    ? localContext.local_candidates
+    : localContext.candidates;
+  return {
+    mode: asText(localContext.mode, "ai_rerank"),
+    query: asText(localContext.query, "").slice(0, 500),
+    intent: {
+      sourceKeyword: asText(localContext.intent?.sourceKeyword, ""),
+      keywords: asList(localContext.intent?.keywords, []),
+      asksForList: Boolean(localContext.intent?.asksForList),
+    },
+    local_candidates: (localCandidates || []).slice(0, 30).map(sanitizeSearchCandidate),
+  };
+}
+
+export function buildSearchAssistantMessages(message, history = [], localContext = null) {
+  const localSearchContext = sanitizeLocalSearchContext(localContext);
   return [
     {
       role: "system",
       content:
-        "你是 DeerSearch 招聘搜索助手。你只围绕招聘搜索、候选人筛选、人才库查询和下一步筛选建议回答。可参考 recent_context 理解连续对话，但不要复述历史。输出合法 JSON，不要输出 Markdown。",
+        "你是 DeerSearch 招聘搜索助手。你只围绕招聘搜索、候选人筛选、人才库查询和下一步筛选建议回答。优先基于 local_search_context.local_candidates 中的本地召回结果分析，不要编造不在本地召回列表里的候选人。可参考 recent_context 理解连续对话，但不要复述历史。输出合法 JSON，不要输出 Markdown。",
     },
     {
       role: "user",
@@ -95,7 +135,9 @@ export function buildSearchAssistantMessages(message, history = []) {
           task: "解释用户搜索意图，并给出可执行的后续筛选建议。",
           user_message: String(message || "").slice(0, 1000),
           recent_context: sanitizeSearchContext(history),
+          local_search_context: localSearchContext,
           output_schema: {
+            ranked_ids: ["candidate id in best order"],
             answer: "一句到两句中文解释",
             suggestions: ["后续筛选建议 1", "后续筛选建议 2", "后续筛选建议 3"],
           },
@@ -136,6 +178,7 @@ export function normalizeSearchAssistant(raw = {}) {
   return {
     answer: asText(raw.answer, "我已理解你的搜索需求，可以继续补充岗位、城市、年限或行业条件来缩小范围。"),
     suggestions: asList(raw.suggestions, ["补充城市偏好", "补充经验年限", "说明必须具备的业务场景"]),
+    ranked_ids: asIdList(raw.ranked_ids || raw.rankedIds, []),
   };
 }
 

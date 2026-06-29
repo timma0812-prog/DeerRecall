@@ -78,10 +78,12 @@ spec:
                 grep -q "id=\"exportCenterState\"" /tmp/deerrecall-index.html
                 grep -q "id=\"searchFilterState\"" /tmp/deerrecall-index.html
                 grep -q "data-market-insight-run" /tmp/deerrecall-index.html
+                grep -q "deersearch-engine.js" /tmp/deerrecall-index.html
 
                 docker exec "${APP_CONTAINER}" wget -qO- http://127.0.0.1:8080/api/ai/status > /tmp/deerrecall-ai-status.json
                 grep -q '"configured"' /tmp/deerrecall-ai-status.json
 
                 docker exec "${APP_CONTAINER}" wget -qS --spider http://127.0.0.1:8080/app.js 2>&1 | grep -qi "cache-control: no-cache, must-revalidate"
+                docker exec "${APP_CONTAINER}" wget -qS --spider http://127.0.0.1:8080/deersearch-engine.js 2>&1 | grep -qi "cache-control: no-cache, must-revalidate"
                 docker exec "${APP_CONTAINER}" wget -qS --spider http://127.0.0.1:8080/styles.css 2>&1 | grep -qi "cache-control: no-cache, must-revalidate"
                 docker exec "${APP_CONTAINER}" wget -qS --spider http://127.0.0.1:8080/ 2>&1 | grep -qi "cache-control: no-store"

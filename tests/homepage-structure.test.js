@@ -15,7 +15,7 @@ test("main page contains finalized DeerSearch empty and results states", () => {
   assert.match(html, /id="emptyState"/);
   assert.match(html, /id="resultsState"/);
   assert.match(html, /让小鹿帮你找人/);
-  assert.match(html, /共找到 <strong>4<\/strong> 位候选人/);
+  assert.match(html, /共找到 <strong>0<\/strong> 位候选人/);
   assert.match(html, /AI 条件拆解/);
 });
 
@@ -77,11 +77,30 @@ test("primary navigation exposes the active module to assistive technology", () 
 
 test("main script switches from empty state to results state on search", () => {
   const js = read("app.js");
+  const html = read("index.html");
 
   assert.match(js, /emptyState/);
   assert.match(js, /resultsState/);
   assert.match(js, /showResults/);
   assert.match(js, /shortlistCount/);
+  assert.match(html, /<script src="deersearch-engine\.js"><\/script>/);
+  assert.match(js, /DeerRecallSearch\.searchLocalCandidates/);
+  assert.match(js, /DeerRecallSearch\.buildAiRerankPayload/);
+  assert.match(js, /localContext/);
+  assert.match(js, /function renderSearchResultState/);
+  assert.match(js, /function applySearchResultModel/);
+  assert.doesNotMatch(js, /currentQueryId = "payment_risk_java_backend"/);
+});
+
+test("DeerSearch default state does not seed a Java payment risk query", () => {
+  const html = read("index.html");
+  const js = read("app.js");
+
+  assert.match(js, /const defaultQuery = "查看本地人才库中已解析的简历。"/);
+  assert.doesNotMatch(js, /const defaultQuery = "找做过支付风控的 Java 后端/);
+  assert.match(html, /id="userQuery">等待搜索本地人才库<\/div>/);
+  assert.match(html, /data-search-conversation-answer>输入岗位、来源文件夹或能力关键词后，我会先在本地人才库中筛选。<\/div>/);
+  assert.match(html, /data-search-result-count="0">共找到 <strong>0<\/strong> 位候选人<\/p>/);
 });
 
 test("DeerSearch onboarding explains capabilities and search tips inline", () => {
@@ -826,7 +845,7 @@ test("project exposes npm scripts for Harness-compatible static delivery", () =>
   const pkg = JSON.parse(read("package.json"));
 
   assert.equal(pkg.scripts.check, "node --check app.js && node --check server/llm-gateway.mjs && node --check server/server.mjs && npm test");
-  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs");
+  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/deersearch-engine.test.cjs");
   assert.equal(pkg.scripts.clean, "rm -rf dist");
   assert.equal(pkg.scripts.build, "node scripts/build-static.mjs");
   assert.equal(pkg.scripts["verify:dist"], "node scripts/verify-dist.mjs");
@@ -903,6 +922,7 @@ test("static build script copies runtime assets and excludes development-only fo
   assert.match(script, /const dist = path\.join\(root, "dist"\)/);
   assert.match(script, /"index\.html"/);
   assert.match(script, /"app\.js"/);
+  assert.match(script, /"deersearch-engine\.js"/);
   assert.match(script, /"styles\.css"/);
   assert.match(script, /path\.basename\(src\) !== "\.DS_Store"/);
   assert.doesNotMatch(script, /"demos"/);
@@ -918,6 +938,7 @@ test("static dist verification rejects missing or extra runtime assets", () => {
   assert.match(script, /const expectedAssets = new Set/);
   assert.match(script, /"index\.html"/);
   assert.match(script, /"app\.js"/);
+  assert.match(script, /"deersearch-engine\.js"/);
   assert.match(script, /"styles\.css"/);
   assert.match(script, /missingAssets/);
   assert.match(script, /extraAssets/);
@@ -985,6 +1006,7 @@ test("harness pipeline runs test, build, image, deploy, and verify stages", () =
   assert.match(pipeline, /grep -q "id=\\"resultsState\\""/);
   assert.match(pipeline, /grep -q "id=\\"candidateResumeState\\""/);
   assert.match(pipeline, /grep -q "data-market-insight-run"/);
+  assert.match(pipeline, /deersearch-engine\.js/);
   assert.match(pipeline, /grep -qi "cache-control: no-cache, must-revalidate"/);
 });
 
@@ -1033,8 +1055,9 @@ test("readme documents local, compose, and Harness workflows", () => {
   assert.match(readme, /docker compose logs --tail=100 deerrecall/);
   assert.match(readme, /生产发布护栏/);
   assert.match(readme, /构建产物不包含设计参考资料/);
+  assert.match(readme, /deersearch-engine\.js/);
   assert.match(readme, /创建 release tag/);
-  assert.match(readme, /JS 和 CSS 使用 `no-cache, must-revalidate`/);
+  assert.match(readme, /JS、CSS 和搜索引擎脚本使用 `no-cache, must-revalidate`/);
   assert.match(readme, /AI 市场画像 MVP/);
   assert.match(readme, /DEERRECALL_LLM_API_KEY/);
   assert.match(readme, /DEERRECALL_LLM_MODEL/);
@@ -1093,7 +1116,7 @@ test("project exposes Node AI gateway runtime scripts", () => {
   const pkg = JSON.parse(read("package.json"));
 
   assert.equal(pkg.scripts.start, "node server/server.mjs");
-  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs");
+  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/deersearch-engine.test.cjs");
   assert.match(pkg.scripts.check, /node --check server\/server\.mjs/);
   assert.match(pkg.scripts.check, /node --check server\/llm-gateway\.mjs/);
   assert.equal(pkg.scripts.serve, "npm run build && node server/server.mjs");
@@ -1131,6 +1154,7 @@ test("Harness verifies Node health, static shell, cache headers, and AI status",
   assert.match(pipeline, /wget -qO- http:\/\/127\.0\.0\.1:8080\/health/);
   assert.match(pipeline, /wget -qO- http:\/\/127\.0\.0\.1:8080\/api\/ai\/status/);
   assert.match(pipeline, /configured/);
+  assert.match(pipeline, /wget -qS --spider http:\/\/127\.0\.0\.1:8080\/deersearch-engine\.js/);
   assert.match(pipeline, /cache-control: no-cache, must-revalidate/);
   assert.match(pipeline, /cache-control: no-store/);
 });

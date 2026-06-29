@@ -9,6 +9,7 @@ const dist = path.join(root, "dist");
 
 const expectedAssets = new Set([
   "index.html",
+  "deersearch-engine.js",
   "app.js",
   "styles.css",
 ]);

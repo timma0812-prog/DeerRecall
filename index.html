@@ -167,7 +167,7 @@
 
           <section class="conversation" aria-label="搜索对话">
             <div class="bubble-row user">
-              <div class="bubble" id="userQuery">找做过支付风控的 Java 后端，最好有高并发项目经验。</div>
+              <div class="bubble" id="userQuery">等待搜索本地人才库</div>
               <div class="user-avatar">你</div>
             </div>
 
@@ -180,10 +180,10 @@
                   <path d="M34 14.2 40 9" />
                 </svg>
               </div>
-              <div class="bubble">我先按 Java、支付风控、高并发 3 个条件筛选，以下是当前匹配度最高的候选人。</div>
+              <div class="bubble" data-search-conversation-answer>输入岗位、来源文件夹或能力关键词后，我会先在本地人才库中筛选。</div>
             </div>
 
-            <p class="found-line" data-search-result-count="4">共找到 <strong>4</strong> 位候选人（匹配度 ≥ 75%）</p>
+            <p class="found-line" data-search-result-count="0">共找到 <strong>0</strong> 位候选人</p>
 
             <div class="filter-bar" aria-label="筛选条件" data-search-filter-bar>
               <button class="filter-chip" type="button" data-search-filter-chip="experience" data-filter-label="只看 5 年以上" aria-label="移除筛选：只看 5 年以上">只看 5 年以上 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
@@ -292,7 +292,7 @@
                 id="refineSearchInput"
                 name="search"
                 autocomplete="off"
-                value="只看 5 年以上、近期在金融科技公司的候选人"
+                value=""
               />
             </div>
             <button class="send-button" type="submit" aria-label="继续搜索">
@@ -2866,6 +2866,7 @@
 
     <div class="app-toast" id="appToast" role="status" aria-live="polite"></div>
 
+    <script src="deersearch-engine.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

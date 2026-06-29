@@ -6,7 +6,7 @@
   "description": "Static DeerRecall MVP prototype with Harness-compatible Docker Compose delivery.",
   "scripts": {
     "check": "node --check app.js && node --check server/llm-gateway.mjs && node --check server/server.mjs && npm test",
-    "test": "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs",
+    "test": "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/deersearch-engine.test.cjs",
     "clean": "rm -rf dist",
     "build": "node scripts/build-static.mjs",
     "verify:dist": "node scripts/verify-dist.mjs",
