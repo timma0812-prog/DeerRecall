@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const {
   importFolderToLibrary,
+  importPathsToLibrary,
   loadLibrary,
 } = require("./local-library.cjs");
 
@@ -18,6 +19,25 @@ function getReadableFilePath(filePath) {
   } catch {
     return null;
   }
+}
+
+function getExistingImportPath(filePath) {
+  if (!filePath || typeof filePath !== "string") return null;
+  try {
+    const stat = fs.statSync(filePath);
+    return stat.isFile() || stat.isDirectory() ? filePath : null;
+  } catch {
+    return null;
+  }
+}
+
+function getCommonSourcePath(paths) {
+  if (!paths.length) return app.getPath("home");
+  if (paths.length === 1) {
+    const stat = fs.statSync(paths[0]);
+    return stat.isDirectory() ? paths[0] : path.dirname(paths[0]);
+  }
+  return path.dirname(paths[0]);
 }
 
 function createMainWindow() {
@@ -60,6 +80,41 @@ ipcMain.handle("import:select-folder", async (event) => {
   return importFolderToLibrary({
     folderPath,
     databasePath: getDatabasePath(),
+  });
+});
+
+ipcMain.handle("import:select-files", async (event) => {
+  const result = await dialog.showOpenDialog(BrowserWindow.fromWebContents(event.sender), {
+    title: "选择简历文件",
+    properties: ["openFile", "multiSelections"],
+    filters: [
+      { name: "简历文件", extensions: ["pdf", "doc", "docx", "txt", "md", "markdown"] },
+      { name: "所有文件", extensions: ["*"] },
+    ],
+  });
+  if (result.canceled || !result.filePaths.length) return null;
+
+  const paths = result.filePaths.map(getExistingImportPath).filter(Boolean);
+  if (!paths.length) return null;
+  return importPathsToLibrary({
+    paths,
+    databasePath: getDatabasePath(),
+    sourceName: paths.length === 1 ? path.basename(paths[0]) : "本地选择文件",
+    sourcePath: getCommonSourcePath(paths),
+    importType: "文件导入",
+    type: "文件",
+  });
+});
+
+ipcMain.handle("import:paths", async (_event, droppedPaths) => {
+  const paths = Array.isArray(droppedPaths) ? droppedPaths.map(getExistingImportPath).filter(Boolean) : [];
+  if (!paths.length) return null;
+  return importPathsToLibrary({
+    paths,
+    databasePath: getDatabasePath(),
+    sourceName: paths.length === 1 ? path.basename(paths[0]) : "拖拽导入",
+    sourcePath: getCommonSourcePath(paths),
+    importType: "拖拽导入",
   });
 });
 

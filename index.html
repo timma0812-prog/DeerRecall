@@ -339,21 +339,7 @@
               </button>
             </div>
             <p class="format-note">支持 PDF / Word / TXT / Markdown，支持批量导入与子文件夹扫描</p>
-            <div class="import-source-picker state-hidden" data-import-picker-card aria-label="本地导入来源选择">
-              <div>
-                <span class="label">本地测试</span>
-                <h3>选择导入来源</h3>
-                <p>Electron 内会连接 Desktop 打开系统文件夹选择器；普通浏览器环境会使用原生文件夹上传作为兜底。</p>
-              </div>
-              <div class="import-source-actions">
-                <button class="primary-action" type="button" data-import-source-action="desktopFolder">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path></svg>
-                  连接 Desktop 选择文件夹
-                </button>
-                <button class="secondary-action" type="button" data-import-source-action="browserFolder">浏览器选择文件夹</button>
-              </div>
-              <p class="import-picker-status" data-import-picker-status>还未选择本地来源。</p>
-            </div>
+            <p class="import-picker-status" data-import-picker-status>还未选择本地来源。</p>
             <input type="file" hidden webkitdirectory directory multiple data-import-folder-input />
             <input type="file" hidden multiple accept=".pdf,.doc,.docx,.txt,.md,.markdown" data-import-file-input />
           </section>

@@ -1160,29 +1160,92 @@ function getSeedImportSource(overrides = {}) {
 }
 
 function openImportPickerCard(mode = "folder") {
-  if (isDesktopLocalLibrary && mode === "files") {
-    if (importPickerStatus) importPickerStatus.textContent = "请使用 Desktop 文件夹选择器解析并入库。";
-    requestImportSource("desktopFolder");
-    return;
-  }
-
+  importPickerCard?.classList.add("state-hidden");
   if (mode === "files") {
-    if (importPickerCard) importPickerCard.classList.add("state-hidden");
+    if (isDesktopLocalLibrary) {
+      requestImportSource("desktopFiles");
+      return;
+    }
     if (importPickerStatus) importPickerStatus.textContent = "请选择一个或多个简历文件。";
     importFileInput?.click();
     return;
   }
 
-  if (!importPickerCard) return;
-  importPickerCard.classList.remove("state-hidden");
+  if (isDesktopLocalLibrary) {
+    requestImportSource("desktopFolder");
+    return;
+  }
+
+  if (importPickerStatus) importPickerStatus.textContent = "请选择本地简历文件夹。";
+  importFolderInput?.click();
+}
+
+function applyDesktopImportResult(selectedImport, fallbackMessage = "已取消选择。") {
+  if (!selectedImport) {
+    if (importPickerStatus) importPickerStatus.textContent = fallbackMessage;
+    return false;
+  }
+  const sourceStats = selectedImport.stats || selectedImport.task?.stats || {};
+  const source = {
+    type: selectedImport.type || "文件夹",
+    name: selectedImport.name,
+    path: selectedImport.path,
+    files: selectedImport.files || [],
+    rawStats: sourceStats,
+    stats: deriveImportStats(sourceStats),
+    task: selectedImport.task,
+  };
+  updateImportPreview(source);
+  if (selectedImport.library) applyLocalTalentLibrary(selectedImport.library);
   if (importPickerStatus) {
-    importPickerStatus.textContent = "请选择 Desktop 文件夹，普通浏览器预览可使用系统文件夹选择器。";
+    importPickerStatus.textContent = `已解析 ${source.stats?.total || 0} 个文件，${source.stats?.parseable || 0} 个已入库。`;
+  }
+  showImportState("finished");
+  showToast("本地简历解析完成");
+  return true;
+}
+
+async function importDesktopSelection(action) {
+  const isFileAction = action === "desktopFiles";
+  if (importPickerStatus) importPickerStatus.textContent = isFileAction ? "正在打开文件选择器。" : "正在打开文件夹选择器。";
+  const selectImport = isFileAction ? window.deerRecallDesktop?.selectImportFiles : window.deerRecallDesktop?.selectImportFolder;
+  if (!selectImport) {
+    if (importPickerStatus) importPickerStatus.textContent = "本机选择器不可用，请重新打开客户端。";
+    showToast("本机选择器不可用");
+    return;
+  }
+  try {
+    const selectedImport = await selectImport();
+    applyDesktopImportResult(selectedImport, isFileAction ? "已取消文件选择。" : "已取消文件夹选择。");
+  } catch (error) {
+    if (importPickerStatus) importPickerStatus.textContent = "本机选择器打开失败，请重试。";
+    showToast("本机选择器打开失败");
+  }
+}
+
+async function importDesktopDroppedPaths(paths) {
+  if (!paths.length) {
+    if (importPickerStatus) importPickerStatus.textContent = "没有读取到拖拽路径，请使用上方按钮选择文件夹或文件。";
+    showToast("没有读取到拖拽路径");
+    return;
+  }
+  if (!window.deerRecallDesktop?.importPaths) {
+    if (importPickerStatus) importPickerStatus.textContent = "拖拽导入不可用，请重新打开客户端。";
+    showToast("拖拽导入不可用");
+    return;
+  }
+  if (importPickerStatus) importPickerStatus.textContent = "正在解析拖入的本地文件。";
+  try {
+    const selectedImport = await window.deerRecallDesktop.importPaths(paths);
+    applyDesktopImportResult(selectedImport, "没有读取到可导入文件。");
+  } catch (error) {
+    if (importPickerStatus) importPickerStatus.textContent = "拖拽导入失败，请重试。";
+    showToast("拖拽导入失败");
   }
 }
 
 async function requestImportSource(action) {
   if (isDesktopLocalLibrary && action === "browserFolder") {
-    if (importPickerStatus) importPickerStatus.textContent = "请使用 Desktop 文件夹选择器解析并入库。";
     await requestImportSource("desktopFolder");
     return;
   }
@@ -1193,38 +1256,19 @@ async function requestImportSource(action) {
     return;
   }
 
+  if (action === "browserFiles") {
+    if (importPickerStatus) importPickerStatus.textContent = "正在打开文件选择器。";
+    importFileInput?.click();
+    return;
+  }
+
+  if (action === "desktopFiles") {
+    await importDesktopSelection("desktopFiles");
+    return;
+  }
+
   if (action === "desktopFolder") {
-    if (importPickerStatus) importPickerStatus.textContent = "正在连接 Desktop 文件夹选择器。";
-    if (window.deerRecallDesktop?.selectImportFolder) {
-      try {
-        const selectedFolder = await window.deerRecallDesktop?.selectImportFolder();
-        if (!selectedFolder) {
-          if (importPickerStatus) importPickerStatus.textContent = "已取消文件夹选择。";
-          return;
-        }
-        const sourceStats = selectedFolder.stats || selectedFolder.task?.stats || {};
-        const source = {
-          type: selectedFolder.type || "文件夹",
-          name: selectedFolder.name,
-          path: selectedFolder.path,
-          files: selectedFolder.files || [],
-          rawStats: sourceStats,
-          stats: deriveImportStats(sourceStats),
-          task: selectedFolder.task,
-        };
-        updateImportPreview(source);
-        if (selectedFolder.library) applyLocalTalentLibrary(selectedFolder.library);
-        if (importPickerStatus) {
-          importPickerStatus.textContent = `已解析 ${source.stats?.total || 0} 个文件，${source.stats?.parseable || 0} 个已入库。`;
-        }
-        showImportState("finished");
-        showToast("本地简历解析完成");
-        return;
-      } catch (error) {
-        if (importPickerStatus) importPickerStatus.textContent = "Desktop 选择器不可用，已切换到浏览器文件夹选择。";
-      }
-    }
-    importFolderInput?.click();
+    await importDesktopSelection("desktopFolder");
   }
 }
 
@@ -1462,8 +1506,8 @@ function persistImportTask(source = currentImportSource) {
 
 function handleImportFiles(fileList, options = {}) {
   if (isDesktopLocalLibrary) {
-    if (importPickerStatus) importPickerStatus.textContent = "请使用 Desktop 文件夹选择器解析并入库。";
-    showToast("请使用 Desktop 文件夹选择器解析并入库");
+    if (importPickerStatus) importPickerStatus.textContent = "请使用上方按钮选择文件夹或文件。";
+    showToast("请使用上方按钮选择本地来源");
     return;
   }
 
@@ -1483,12 +1527,15 @@ function handleImportFiles(fileList, options = {}) {
   showImportState("preview");
 }
 
-function handleImportDrop(event) {
+async function handleImportDrop(event) {
   event.preventDefault();
   importDropZone?.classList.remove("is-dragging");
   if (isDesktopLocalLibrary) {
-    if (importPickerStatus) importPickerStatus.textContent = "请使用 Desktop 文件夹选择器解析并入库。";
-    showToast("请使用 Desktop 文件夹选择器解析并入库");
+    const files = event.dataTransfer?.files || [];
+    const paths = window.deerRecallDesktop?.getDroppedFilePaths
+      ? window.deerRecallDesktop.getDroppedFilePaths(files)
+      : [];
+    await importDesktopDroppedPaths(paths);
     return;
   }
   const files = event.dataTransfer?.files || [];

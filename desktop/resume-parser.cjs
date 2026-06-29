@@ -1,6 +1,7 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { execFile } = require("node:child_process");
+const crypto = require("node:crypto");
 const { promisify } = require("node:util");
 const mammoth = require("mammoth");
 const { PDFParse } = require("pdf-parse");
@@ -467,7 +468,7 @@ function inferCandidateFromText({ filePath, text, sourceName = "本地导入" })
   const email = extractEmail(normalizedText);
 
   return {
-    id: `local_${Buffer.from(`${filePath}:${name}`).toString("base64url").slice(0, 18)}`,
+    id: `local_${crypto.createHash("sha256").update(`${filePath}:${name}`).digest("base64url").slice(0, 22)}`,
     name,
     initial: name.slice(0, 1),
     title: role,

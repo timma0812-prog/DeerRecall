@@ -104,14 +104,70 @@ async function walkResumeFiles(folderPath, options = {}) {
   return files;
 }
 
-function getFileInfo(filePath, folderPath) {
+async function collectResumeFilesFromPaths(inputPaths, options = {}) {
+  const maxFiles = options.maxFiles || 1000;
+  const files = [];
+  const seen = new Set();
+  const paths = Array.isArray(inputPaths) ? inputPaths : [inputPaths].filter(Boolean);
+
+  async function addFile(filePath) {
+    const resolved = path.resolve(filePath);
+    if (seen.has(resolved) || files.length >= maxFiles) return;
+    seen.add(resolved);
+    files.push(resolved);
+  }
+
+  for (const inputPath of paths) {
+    if (files.length >= maxFiles) break;
+    if (!inputPath || typeof inputPath !== "string") continue;
+    let stat = null;
+    try {
+      stat = await fsp.stat(inputPath);
+    } catch {
+      continue;
+    }
+    if (stat.isDirectory()) {
+      const walked = await walkResumeFiles(inputPath, { maxFiles: maxFiles - files.length });
+      for (const filePath of walked) {
+        await addFile(filePath);
+        if (files.length >= maxFiles) break;
+      }
+      continue;
+    }
+    if (stat.isFile()) await addFile(inputPath);
+  }
+
+  return files;
+}
+
+function getImportTypeFromPaths(inputPaths, fallbackType = "本地导入") {
+  const paths = Array.isArray(inputPaths) ? inputPaths : [inputPaths].filter(Boolean);
+  let files = 0;
+  let directories = 0;
+  for (const inputPath of paths) {
+    try {
+      const stat = fs.statSync(inputPath);
+      if (stat.isDirectory()) directories += 1;
+      if (stat.isFile()) files += 1;
+    } catch {
+      // Ignore missing drag entries.
+    }
+  }
+  if (files && directories) return "混合导入";
+  if (directories) return "文件夹";
+  if (files) return "文件";
+  return fallbackType;
+}
+
+function getFileInfo(filePath, rootPath = path.dirname(filePath)) {
   const stat = fs.statSync(filePath);
   const extension = path.extname(filePath).toLowerCase();
+  const relativePath = path.relative(rootPath, filePath);
   return {
     id: `file_${Buffer.from(filePath).toString("base64url").slice(0, 18)}`,
     name: path.basename(filePath),
     path: filePath,
-    relativePath: path.relative(folderPath, filePath),
+    relativePath: relativePath && !relativePath.startsWith("..") ? relativePath : path.basename(filePath),
     size: stat.size,
     updatedAt: stat.mtime.toISOString(),
     extension,
@@ -162,11 +218,25 @@ function upsertCandidate(candidates, candidate) {
 
 async function importFolderToLibrary({ folderPath, databasePath }) {
   if (!folderPath) throw new Error("folderPath is required");
+  return importPathsToLibrary({
+    paths: [folderPath],
+    databasePath,
+    sourceName: path.basename(folderPath),
+    sourcePath: folderPath,
+    importType: "文件夹导入",
+    type: "文件夹",
+  });
+}
+
+async function importPathsToLibrary({ paths, databasePath, sourceName, sourcePath, importType = "本地导入", type }) {
+  if (!Array.isArray(paths) || !paths.length) throw new Error("paths is required");
   if (!databasePath) throw new Error("databasePath is required");
 
   const library = loadLibrary(databasePath);
-  const sourceName = path.basename(folderPath);
-  const filePaths = await walkResumeFiles(folderPath);
+  const sourceType = type || getImportTypeFromPaths(paths, importType);
+  const sourceRoot = sourcePath || (paths.length === 1 ? paths[0] : path.dirname(paths[0]));
+  const resolvedSourceName = sourceName || (paths.length === 1 ? path.basename(paths[0]) : "本地批量导入");
+  const filePaths = await collectResumeFilesFromPaths(paths);
   const taskFiles = [];
   let parseable = 0;
   let failed = 0;
@@ -175,7 +245,7 @@ async function importFolderToLibrary({ folderPath, databasePath }) {
   let updatedProfiles = 0;
 
   for (const filePath of filePaths) {
-    const fileInfo = getFileInfo(filePath, folderPath);
+    const fileInfo = getFileInfo(filePath, sourceRoot);
     const supported = supportedResumeExtensions.has(fileInfo.extension);
     const parsed = supported
       ? await parseResumeFile(filePath)
@@ -183,7 +253,7 @@ async function importFolderToLibrary({ folderPath, databasePath }) {
 
     let candidate = null;
     if (parsed.ok) {
-      candidate = inferCandidateFromText({ filePath, text: parsed.text, sourceName });
+      candidate = inferCandidateFromText({ filePath, text: parsed.text, sourceName: resolvedSourceName });
       const result = upsertCandidate(library.candidates, candidate);
       if (result.type === "new") newProfiles += 1;
       else updatedProfiles += 1;
@@ -199,9 +269,9 @@ async function importFolderToLibrary({ folderPath, databasePath }) {
   const now = new Date().toISOString();
   const task = {
     id: `import_${Date.now()}`,
-    source: sourceName,
-    importType: "文件夹导入",
-    folderPath,
+    source: resolvedSourceName,
+    importType,
+    folderPath: sourceRoot,
     time: now,
     status: failed || unsupported ? "partial_failed" : "completed",
     total: filePaths.length,
@@ -226,10 +296,10 @@ async function importFolderToLibrary({ folderPath, databasePath }) {
   };
 
   const source = {
-    id: `source_${Buffer.from(folderPath).toString("base64url").slice(0, 18)}`,
-    name: sourceName,
-    path: folderPath,
-    type: "文件夹",
+    id: `source_${Buffer.from(sourceRoot).toString("base64url").slice(0, 18)}`,
+    name: resolvedSourceName,
+    path: sourceRoot,
+    type: sourceType,
     importedAt: now,
     total: task.total,
     parseable,
@@ -238,7 +308,7 @@ async function importFolderToLibrary({ folderPath, databasePath }) {
   };
 
   library.importTasks.unshift(task);
-  library.sources = [source, ...library.sources.filter((item) => item.path !== folderPath)].slice(0, 20);
+  library.sources = [source, ...library.sources.filter((item) => item.path !== sourceRoot)].slice(0, 20);
   const saved = saveLibrary(databasePath, library);
 
   return {
@@ -253,8 +323,10 @@ async function importFolderToLibrary({ folderPath, databasePath }) {
 }
 
 module.exports = {
+  collectResumeFilesFromPaths,
   createEmptyLibrary,
   importFolderToLibrary,
+  importPathsToLibrary,
   loadLibrary,
   saveLibrary,
   walkResumeFiles,

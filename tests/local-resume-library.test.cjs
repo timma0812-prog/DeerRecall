@@ -7,6 +7,7 @@ const assert = require("node:assert/strict");
 const {
   createEmptyLibrary,
   importFolderToLibrary,
+  importPathsToLibrary,
   loadLibrary,
 } = require("../desktop/local-library.cjs");
 const {
@@ -143,6 +144,40 @@ test("importFolderToLibrary persists parsed local candidates without demo record
   assert.equal(stored.importTasks[0].stats.parseable, 1);
   assert.equal(stored.importTasks[0].stats.unsupported, 1);
   assert.doesNotMatch(JSON.stringify(stored), /陈屿|FinTech_Backend_2026|客户A_后端简历包/);
+});
+
+test("importPathsToLibrary imports selected files and dragged folders", async () => {
+  const tempDir = makeTempDir();
+  const dbPath = path.join(tempDir, "talent-library.json");
+  const resumeDir = path.join(tempDir, "resumes");
+  fs.mkdirSync(resumeDir);
+  fs.writeFileSync(
+    path.join(resumeDir, "黄凯_产品经理.txt"),
+    "黄凯\n手机：159-1066-0153\n邮箱：huang@example.com\n求职意向：中后台产品经理\n工作经历\n魅KTV - B端产品经理\n2023.05 - 至今\n负责总部中后台管理系统与门店助手 APP。"
+  );
+  fs.writeFileSync(
+    path.join(tempDir, "王小明_Java后端工程师.txt"),
+    "王小明\n手机：13800138000\n邮箱：wang@example.com\n7 年 Java 后端工程师，熟悉 Spring Boot。"
+  );
+  fs.writeFileSync(path.join(tempDir, "notes.pages"), "unsupported");
+
+  const result = await importPathsToLibrary({
+    paths: [resumeDir, path.join(tempDir, "王小明_Java后端工程师.txt"), path.join(tempDir, "notes.pages")],
+    databasePath: dbPath,
+    sourceName: "拖拽导入",
+    sourcePath: tempDir,
+    importType: "拖拽导入",
+  });
+  const stored = loadLibrary(dbPath);
+
+  assert.equal(result.type, "混合导入");
+  assert.equal(result.stats.total, 3);
+  assert.equal(result.stats.parseable, 2);
+  assert.equal(result.stats.unsupported, 1);
+  assert.equal(stored.candidates.length, 2);
+  assert.ok(stored.candidates.some((candidate) => candidate.name === "黄凯" && candidate.contacts.phone === "15910660153"));
+  assert.ok(stored.candidates.some((candidate) => candidate.name === "王小明"));
+  assert.equal(stored.importTasks[0].importType, "拖拽导入");
 });
 
 test("loadLibrary upgrades older local candidates from stored resume text", () => {

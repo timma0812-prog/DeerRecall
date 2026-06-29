@@ -218,17 +218,17 @@ test("resume import supports local folder selection before preview", () => {
   assert.match(html, /data-import-drop-zone/);
   assert.match(html, /data-import-pick="folder"/);
   assert.match(html, /data-import-pick="files"/);
-  assert.match(html, /data-import-picker-card/);
-  assert.match(html, /连接 Desktop 选择文件夹/);
-  assert.match(html, /data-import-source-action="desktopFolder"/);
-  assert.match(html, /data-import-source-action="browserFolder"/);
+  assert.match(html, /data-import-picker-status/);
+  assert.doesNotMatch(html, /data-import-picker-card/);
+  assert.doesNotMatch(html, /连接 Desktop 选择文件夹/);
+  assert.doesNotMatch(html, /data-import-source-action="desktopFolder"/);
+  assert.doesNotMatch(html, /data-import-source-action="browserFolder"/);
   assert.doesNotMatch(html, /data-import-source-action="demoFolder"/);
   assert.match(html, /data-import-folder-input/);
   assert.match(html, /webkitdirectory/);
   assert.match(html, /data-import-file-input/);
 
   assert.match(css, /\.import-panel\.is-dragging/);
-  assert.match(css, /\.import-source-picker/);
 
   assert.match(js, /const importFolderInput/);
   assert.match(js, /function openImportPickerCard/);
@@ -256,9 +256,18 @@ test("desktop renderer exposes local-library mode hooks without demo folder fall
   assert.match(js, /function renderLocalImportTasks/);
   assert.match(js, /window\.deerRecallDesktop\?\.getTalentLibrary/);
   assert.match(js, /window\.deerRecallDesktop\?\.selectImportFolder/);
-  assert.match(js, /isDesktopLocalLibrary && action === "browserFolder"/);
-  assert.match(js, /isDesktopLocalLibrary && mode === "files"/);
-  assert.match(js, /if \(isDesktopLocalLibrary\) \{\s*if \(importPickerStatus\) importPickerStatus\.textContent = "请使用 Desktop 文件夹选择器解析并入库。"/);
+  assert.match(js, /window\.deerRecallDesktop\?\.selectImportFiles/);
+  assert.match(js, /window\.deerRecallDesktop\?\.importPaths/);
+  assert.match(js, /window\.deerRecallDesktop\?\.getDroppedFilePaths/);
+  assert.match(js, /function importDesktopSelection/);
+  assert.match(js, /function importDesktopDroppedPaths/);
+  assert.match(js, /requestImportSource\("desktopFiles"\)/);
+  assert.match(preload, /selectImportFiles/);
+  assert.match(preload, /importPaths/);
+  assert.match(preload, /getDroppedFilePaths/);
+  assert.doesNotMatch(js, /isDesktopLocalLibrary && mode === "files"/);
+  assert.doesNotMatch(js, /请选择 Desktop 文件夹，普通浏览器预览可使用系统文件夹选择器。/);
+  assert.doesNotMatch(js, /请使用 Desktop 文件夹选择器解析并入库/);
   assert.doesNotMatch(js, /requestImportSource\("demoFolder"\)/);
 
   assert.match(preload, /getTalentLibrary/);
