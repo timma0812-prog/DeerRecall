@@ -2,6 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 
 const {
+  applyAiRerankResult,
   buildAiRerankPayload,
   parseSearchQuery,
   searchLocalCandidates,
@@ -82,4 +83,40 @@ test("buildAiRerankPayload sends sanitized local recall candidates only", () => 
   assert.equal(payload.local_candidates[0].id, "candidate_product_intern_001");
   assert.equal(payload.local_candidates[0].resumeText, undefined);
   assert.equal(payload.local_candidates[0].contacts, undefined);
+});
+
+test("applyAiRerankResult reorders local candidates and attaches AI explanations", () => {
+  const localResult = searchLocalCandidates("找产品实习生或 Java 后端", candidates);
+  const result = applyAiRerankResult(localResult, {
+    answer: "AI 已按真实岗位相关性重排。",
+    suggestions: ["优先看产品实习经历"],
+    ranked_ids: ["candidate_java_001", "candidate_product_intern_001", "missing_candidate"],
+    candidate_insights: [
+      {
+        id: "candidate_java_001",
+        match_summary: "有后端经验，但和产品实习生目标较弱。",
+        strengths: ["有工程背景"],
+        concerns: ["没有产品实习经历"],
+        score: 62,
+      },
+      {
+        id: "candidate_product_intern_001",
+        match_summary: "简历体现产品实习、PRD 和用户访谈经历。",
+        strengths: ["产品实习", "PRD"],
+        concerns: ["经验年限较短"],
+        score: 91,
+      },
+    ],
+  });
+
+  assert.equal(result.engine, "ai");
+  assert.deepEqual(result.candidates.map((candidate) => candidate.id), [
+    "candidate_java_001",
+    "candidate_product_intern_001",
+  ]);
+  assert.equal(result.candidates[0].matchScore, 62);
+  assert.equal(result.candidates[0].aiMatchSummary, "有后端经验，但和产品实习生目标较弱。");
+  assert.deepEqual(result.candidates[1].aiStrengths, ["产品实习", "PRD"]);
+  assert.deepEqual(result.candidates[1].aiConcerns, ["经验年限较短"]);
+  assert.ok(result.chips.some((chip) => chip.label === "AI 增强排序"));
 });

@@ -20,6 +20,12 @@ function asIdList(value, fallback = []) {
   return items.length ? items : fallback;
 }
 
+function asScore(value) {
+  const score = Number(value);
+  if (!Number.isFinite(score)) return null;
+  return Math.min(100, Math.max(0, Math.round(score)));
+}
+
 export function sanitizeCandidateForModel(candidate = {}) {
   return {
     id: asText(candidate.id, ""),
@@ -138,6 +144,15 @@ export function buildSearchAssistantMessages(message, history = [], localContext
           local_search_context: localSearchContext,
           output_schema: {
             ranked_ids: ["candidate id in best order"],
+            candidate_insights: [
+              {
+                id: "candidate id",
+                match_summary: "匹配理由和简历证据",
+                strengths: ["明确匹配点"],
+                concerns: ["待确认点或风险"],
+                score: "0-100",
+              },
+            ],
             answer: "一句到两句中文解释",
             suggestions: ["后续筛选建议 1", "后续筛选建议 2", "后续筛选建议 3"],
           },
@@ -179,7 +194,26 @@ export function normalizeSearchAssistant(raw = {}) {
     answer: asText(raw.answer, "我已理解你的搜索需求，可以继续补充岗位、城市、年限或行业条件来缩小范围。"),
     suggestions: asList(raw.suggestions, ["补充城市偏好", "补充经验年限", "说明必须具备的业务场景"]),
     ranked_ids: asIdList(raw.ranked_ids || raw.rankedIds, []),
+    candidate_insights: normalizeCandidateInsights(raw.candidate_insights || raw.candidateInsights),
   };
+}
+
+function normalizeCandidateInsights(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      const id = asText(item?.id, "");
+      if (!id) return null;
+      return {
+        id,
+        match_summary: asText(item.match_summary || item.matchSummary || item.summary, "AI 已给出候选人匹配判断。"),
+        strengths: asList(item.strengths, []),
+        concerns: asList(item.concerns || item.risks || item.questions, []),
+        score: asScore(item.score),
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 30);
 }
 
 export function getLlmConfig(env = process.env) {

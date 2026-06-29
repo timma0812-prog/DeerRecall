@@ -1294,6 +1294,33 @@ svg {
   line-height: 1.5;
 }
 
+.ai-match-note {
+  display: grid;
+  gap: 5px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(244, 103, 255, 0.22);
+  border-radius: 8px;
+  background: rgba(244, 103, 255, 0.08);
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.ai-match-note strong {
+  color: #fff;
+  font-size: 13px;
+}
+
+.ai-match-note p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.ai-match-note span {
+  color: rgba(211, 199, 246, 0.9);
+}
+
 .tag-row {
   display: flex;
   flex-wrap: wrap;

@@ -86,7 +86,9 @@ test("main script switches from empty state to results state on search", () => {
   assert.match(html, /<script src="deersearch-engine\.js"><\/script>/);
   assert.match(js, /DeerRecallSearch\.searchLocalCandidates/);
   assert.match(js, /DeerRecallSearch\.buildAiRerankPayload/);
+  assert.match(js, /DeerRecallSearch\.applyAiRerankResult/);
   assert.match(js, /localContext/);
+  assert.match(js, /function applyAiSearchAssistantResult/);
   assert.match(js, /function renderSearchResultState/);
   assert.match(js, /function applySearchResultModel/);
   assert.doesNotMatch(js, /currentQueryId = "payment_risk_java_backend"/);
@@ -183,6 +185,9 @@ test("DeerSearch AI assistant persists and restores search conversation history"
   assert.match(js, /localStorage\?\.getItem\(SEARCH_AI_HISTORY_KEY\)/);
   assert.match(js, /localStorage\?\.setItem\(SEARCH_AI_HISTORY_KEY/);
   assert.match(js, /body:\s*JSON\.stringify\(\{\s*message,\s*history:\s*getSearchAiContext/);
+  assert.match(js, /AI 增强排序已应用/);
+  assert.match(js, /data-ai-match-summary/);
+  assert.match(js, /aiMatchSummary/);
   assert.match(js, /data-search-ai-history-id/);
 });
 

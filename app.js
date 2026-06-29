@@ -492,6 +492,22 @@ function getLocalCandidateSummary(candidate) {
   return candidate.experience || candidate.matchNote || "已从本地简历提取正文，等待补充结构化信息。";
 }
 
+function renderAiCandidateInsight(candidate) {
+  if (!candidate.aiMatchSummary && !candidate.aiStrengths?.length && !candidate.aiConcerns?.length) return "";
+  const strengths = Array.isArray(candidate.aiStrengths) ? candidate.aiStrengths.slice(0, 3) : [];
+  const concerns = Array.isArray(candidate.aiConcerns) ? candidate.aiConcerns.slice(0, 2) : [];
+  const strengthText = strengths.length ? `匹配点：${strengths.map(escapeHtml).join("、")}` : "";
+  const concernText = concerns.length ? `待确认：${concerns.map(escapeHtml).join("、")}` : "";
+  return `
+    <div class="ai-match-note" data-ai-match-summary>
+      <strong>AI 判断</strong>
+      <p>${escapeHtml(candidate.aiMatchSummary || "AI 已基于本地召回结果给出匹配判断。")}</p>
+      ${strengthText ? `<span>${strengthText}</span>` : ""}
+      ${concernText ? `<span>${concernText}</span>` : ""}
+    </div>
+  `;
+}
+
 function updateLocalKpis(candidates) {
   const pending = candidates.filter((candidate) => getLocalCandidateStatus(candidate).label === "待完善").length;
   const counts = {
@@ -549,6 +565,7 @@ function renderLocalSearchCards(candidates, options = {}) {
             <div class="score"><strong>${score}</strong><span>匹配</span></div>
           </div>
           <p class="candidate-desc">${escapeHtml(getLocalCandidateSummary(candidate))}</p>
+          ${renderAiCandidateInsight(candidate)}
           <div class="tag-row">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
           <div class="candidate-actions">
             <button class="resume-btn candidate-resume-open" type="button" data-candidate-id="${escapeHtml(candidate.id)}" data-candidate-resume-entry="search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path><path d="M9 15h6"></path><path d="M9 18h4"></path></svg> 查看简历</button>
@@ -948,7 +965,12 @@ async function requestSearchAssistant(message, historyId = activeSearchAiHistory
       throw new Error(data.message || "AI 服务暂不可用");
     }
     if (historyId === activeSearchAiHistoryId) {
-      renderSearchAssistant(data.assistant, { historyId, query: message });
+      const appliedAiRanking = applyAiSearchAssistantResult(data.assistant);
+      renderSearchAssistant(data.assistant, {
+        historyId,
+        query: message,
+        statusMessage: appliedAiRanking ? "AI 增强排序已应用。" : "已生成搜索建议。",
+      });
     } else {
       upsertSearchAiHistory({ id: historyId, query: message, ...data.assistant, status: "ready" });
     }
@@ -1101,6 +1123,16 @@ function buildLocalSearchResult(queryText) {
 function buildSearchAiLocalContext(queryText) {
   if (!window.DeerRecallSearch?.buildAiRerankPayload || !activeSearchResult) return null;
   return window.DeerRecallSearch.buildAiRerankPayload(queryText, activeSearchResult);
+}
+
+function applyAiSearchAssistantResult(assistant) {
+  const rankedIds = assistant?.ranked_ids || assistant?.rankedIds || [];
+  const insights = assistant?.candidate_insights || assistant?.candidateInsights || [];
+  const hasAiResult = (Array.isArray(rankedIds) && rankedIds.length) || (Array.isArray(insights) && insights.length);
+  if (!hasAiResult || !activeSearchResult || !window.DeerRecallSearch?.applyAiRerankResult) return false;
+  const aiResult = window.DeerRecallSearch.applyAiRerankResult(activeSearchResult, assistant);
+  applySearchResultModel(aiResult);
+  return true;
 }
 
 function applySearchResultModel(result) {

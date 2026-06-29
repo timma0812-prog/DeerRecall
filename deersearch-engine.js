@@ -317,11 +317,105 @@
         ranked_ids: ["candidate id in best order"],
         answer: "一句中文解释",
         suggestions: ["后续筛选建议"],
+        candidate_insights: [
+          {
+            id: "candidate id",
+            match_summary: "匹配理由",
+            strengths: ["匹配点"],
+            concerns: ["待确认点"],
+            score: "0-100",
+          },
+        ],
       },
     };
   }
 
+  function toTextList(value) {
+    if (!Array.isArray(value)) return [];
+    return value.map((item) => String(item || "").trim()).filter(Boolean).slice(0, 5);
+  }
+
+  function toAiScore(value) {
+    const score = Number(value);
+    if (!Number.isFinite(score)) return null;
+    return Math.min(99, Math.max(0, Math.round(score)));
+  }
+
+  function normalizeAiInsight(insight = {}) {
+    const id = String(insight.id || "").trim();
+    if (!id) return null;
+    return {
+      id,
+      match_summary: String(insight.match_summary || insight.matchSummary || "").trim(),
+      strengths: toTextList(insight.strengths),
+      concerns: toTextList(insight.concerns || insight.risks || insight.questions),
+      score: toAiScore(insight.score),
+    };
+  }
+
+  function getAssistantRankedIds(assistant = {}) {
+    const ids = assistant.ranked_ids || assistant.rankedIds || [];
+    if (!Array.isArray(ids)) return [];
+    return ids.map((id) => String(id || "").trim()).filter(Boolean);
+  }
+
+  function applyAiRerankResult(localResult = {}, assistant = {}) {
+    const candidates = Array.isArray(localResult.candidates) ? localResult.candidates : [];
+    const byId = new Map(candidates.map((candidate) => [candidate.id, candidate]));
+    const seen = new Set();
+    const ordered = [];
+
+    getAssistantRankedIds(assistant).forEach((id) => {
+      const candidate = byId.get(id);
+      if (!candidate || seen.has(id)) return;
+      seen.add(id);
+      ordered.push(candidate);
+    });
+
+    candidates.forEach((candidate) => {
+      if (!seen.has(candidate.id)) ordered.push(candidate);
+    });
+
+    const insightById = new Map(
+      (assistant.candidate_insights || assistant.candidateInsights || [])
+        .map(normalizeAiInsight)
+        .filter(Boolean)
+        .map((insight) => [insight.id, insight])
+    );
+
+    const enriched = ordered.map((candidate, index) => {
+      const insight = insightById.get(candidate.id);
+      if (!insight) return { ...candidate, aiRank: index + 1 };
+      const aiScore = insight.score;
+      return {
+        ...candidate,
+        aiRank: index + 1,
+        aiMatchSummary: insight.match_summary,
+        aiStrengths: insight.strengths,
+        aiConcerns: insight.concerns,
+        aiSearchScore: aiScore,
+        localSearchScore: aiScore ?? candidate.localSearchScore,
+        matchScore: aiScore ?? candidate.matchScore,
+      };
+    });
+
+    const chips = Array.isArray(localResult.chips) ? localResult.chips.slice() : [];
+    if (!chips.some((chip) => chip.id === "ai-rerank")) {
+      chips.unshift({ id: "ai-rerank", label: "AI 增强排序" });
+    }
+
+    return {
+      ...localResult,
+      engine: "ai",
+      candidates: enriched,
+      total: enriched.length,
+      chips,
+      assistant,
+    };
+  }
+
   return {
+    applyAiRerankResult,
     buildAiRerankPayload,
     parseSearchQuery,
     searchLocalCandidates,

@@ -73,10 +73,32 @@ test("normalizeMarketInsight fills required safe defaults", () => {
 });
 
 test("normalizeSearchAssistant fills assistant defaults", () => {
-  const normalized = normalizeSearchAssistant({ answer: "建议先看支付风控经验。" });
+  const normalized = normalizeSearchAssistant({
+    answer: "建议先看支付风控经验。",
+    ranked_ids: ["candidate_a", "", "candidate_b"],
+    candidate_insights: [
+      {
+        id: "candidate_a",
+        match_summary: "支付风控经验强。",
+        strengths: ["规则引擎", "高并发"],
+        concerns: ["薪资待确认"],
+        score: 88,
+      },
+    ],
+  });
 
   assert.equal(normalized.answer, "建议先看支付风控经验。");
   assert.deepEqual(normalized.suggestions, ["补充城市偏好", "补充经验年限", "说明必须具备的业务场景"]);
+  assert.deepEqual(normalized.ranked_ids, ["candidate_a", "candidate_b"]);
+  assert.deepEqual(normalized.candidate_insights, [
+    {
+      id: "candidate_a",
+      match_summary: "支付风控经验强。",
+      strengths: ["规则引擎", "高并发"],
+      concerns: ["薪资待确认"],
+      score: 88,
+    },
+  ]);
 });
 
 test("getLlmConfig reports missing backend configuration without exposing secrets", () => {
@@ -165,5 +187,7 @@ test("buildSearchAssistantMessages includes sanitized local recall context for A
   assert.equal(payload.local_search_context.local_candidates[0].resumeText, undefined);
   assert.equal(payload.local_search_context.local_candidates[0].contacts, undefined);
   assert.deepEqual(payload.output_schema.ranked_ids, ["candidate id in best order"]);
+  assert.equal(payload.output_schema.candidate_insights[0].id, "candidate id");
+  assert.match(payload.output_schema.candidate_insights[0].match_summary, /匹配理由/);
   assert.doesNotMatch(text, /13800000000|candidate@example\.com|完整简历正文/);
 });
