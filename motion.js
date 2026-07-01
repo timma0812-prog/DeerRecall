@@ -68,24 +68,38 @@
     return true;
   }
 
+  function runMutation(mutator) {
+    mutator();
+    return true;
+  }
+
   function flipContainer(container, mutator, targetsSelector) {
     if (!container || typeof mutator !== "function") return false;
     if (!gsap || !Flip || prefersReducedMotion()) {
-      mutator();
-      return false;
+      return runMutation(mutator);
     }
 
-    const targets = targetsSelector ? toArray(targetsSelector, container) : Array.from(container.children);
-    const state = Flip.getState(targets);
+    let state;
+    try {
+      const targets = targetsSelector ? toArray(targetsSelector, container) : Array.from(container.children);
+      state = Flip.getState(targets);
+    } catch (error) {
+      return runMutation(mutator);
+    }
+
     mutator();
-    Flip.from(state, {
-      duration: 0.42,
-      ease: "power2.inOut",
-      absolute: false,
-      nested: true,
-      prune: true,
-      stagger: 0.025,
-    });
+    try {
+      Flip.from(state, {
+        duration: 0.42,
+        ease: "power2.inOut",
+        absolute: false,
+        nested: true,
+        prune: true,
+        stagger: 0.025,
+      });
+    } catch (error) {
+      // DOM mutation has already completed; animation failures must not break product logic.
+    }
     return true;
   }
 

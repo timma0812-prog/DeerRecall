@@ -2,11 +2,91 @@ const fs = require("node:fs");
 const path = require("node:path");
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "..");
 
 function read(file) {
   return fs.readFileSync(path.join(root, file), "utf8");
+}
+
+function createGsapStub(overrides = {}) {
+  return {
+    registerPlugin() {},
+    defaults() {},
+    fromTo() {},
+    to() {},
+    timeline() {
+      return {
+        fromTo() {
+          return this;
+        },
+        to() {
+          return this;
+        },
+      };
+    },
+    ...overrides,
+  };
+}
+
+function createFlipStub(overrides = {}) {
+  return {
+    getState(targets) {
+      return { targets };
+    },
+    from() {},
+    ...overrides,
+  };
+}
+
+function createMotionTestEnvironment({ gsap = null, Flip = null, reduceMotion = false } = {}) {
+  class TestElement {
+    constructor({ children = [], connected = true, hidden = false, selectorMap = {} } = {}) {
+      this.children = children;
+      this.isConnected = connected;
+      this.hidden = hidden;
+      this.selectorMap = selectorMap;
+      this.classList = {
+        values: [],
+        add: (...values) => {
+          this.classList.values.push(...values);
+        },
+      };
+    }
+
+    querySelector(selector) {
+      return this.querySelectorAll(selector)[0] || null;
+    }
+
+    querySelectorAll(selector) {
+      if (this.selectorMap[selector]) return this.selectorMap[selector];
+      return this.children;
+    }
+
+    closest(selector) {
+      return selector === ".state-hidden" && this.stateHidden ? this : null;
+    }
+  }
+
+  const document = {
+    documentElement: new TestElement(),
+    querySelectorAll() {
+      return [];
+    },
+  };
+  const window = {
+    gsap,
+    Flip,
+    matchMedia() {
+      return { matches: reduceMotion };
+    },
+  };
+  const context = { window, document, Element: TestElement };
+
+  vm.runInNewContext(read("motion.js"), context);
+
+  return { window, document, TestElement };
 }
 
 test("main page contains finalized DeerSearch empty and results states", () => {
@@ -994,6 +1074,67 @@ test("motion runtime exposes safe progressive enhancement hooks", () => {
   assert.match(css, /@media \(prefers-reduced-motion:\s*reduce\)/);
   assert.match(css, /\.motion-scan-layer/);
   assert.match(css, /pointer-events:\s*none/);
+});
+
+test("motion Flip hooks execute DOM mutations exactly once without depending on animation", () => {
+  const noAnimation = createMotionTestEnvironment();
+  const fallbackContainer = new noAnimation.TestElement();
+  let fallbackMutations = 0;
+
+  assert.equal(
+    noAnimation.window.DeerRecallMotion.flipSearchCards(fallbackContainer, () => {
+      fallbackMutations += 1;
+    }),
+    true,
+  );
+  assert.equal(fallbackMutations, 1);
+
+  const reducedMotion = createMotionTestEnvironment({
+    gsap: createGsapStub(),
+    Flip: createFlipStub(),
+    reduceMotion: true,
+  });
+  const reducedContainer = new reducedMotion.TestElement();
+  let reducedMutations = 0;
+
+  assert.equal(
+    reducedMotion.window.DeerRecallMotion.flipFilterChips(reducedContainer, () => {
+      reducedMutations += 1;
+    }),
+    true,
+  );
+  assert.equal(reducedMutations, 1);
+
+  const flipFailure = createMotionTestEnvironment({
+    gsap: createGsapStub(),
+    Flip: createFlipStub({
+      getState() {
+        throw new Error("Flip state unavailable");
+      },
+    }),
+  });
+  const failureContainer = new flipFailure.TestElement({
+    children: [new flipFailure.TestElement()],
+  });
+  let failureMutations = 0;
+
+  assert.doesNotThrow(() => {
+    assert.equal(
+      flipFailure.window.DeerRecallMotion.flipSearchCards(failureContainer, () => {
+        failureMutations += 1;
+      }),
+      true,
+    );
+  });
+  assert.equal(failureMutations, 1);
+});
+
+test("motion scan layer is scoped to the search results surface", () => {
+  const css = read("styles.css");
+
+  assert.match(css, /\.results-main\s*{[^}]*position:\s*relative/s);
+  assert.match(css, /\.results-main\s*{[^}]*isolation:\s*isolate/s);
+  assert.match(css, /\.results-main > :not\(\.motion-scan-layer\)\s*{[^}]*z-index:\s*1/s);
 });
 
 test("project exposes local motion runtime assets for static delivery", () => {

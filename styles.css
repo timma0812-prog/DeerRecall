@@ -1023,10 +1023,17 @@ svg {
 }
 
 .results-main {
+  position: relative;
+  isolation: isolate;
   height: 100%;
   display: flex;
   flex-direction: column;
   padding: 26px 36px 24px;
+}
+
+.results-main > :not(.motion-scan-layer) {
+  position: relative;
+  z-index: 1;
 }
 
 .results-header {
