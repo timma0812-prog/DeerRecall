@@ -1065,7 +1065,10 @@ function refreshSearchFilterAddState() {
 
 function removeSearchFilterChip(button) {
   const label = button?.dataset.filterLabel || button?.textContent?.trim() || "筛选条件";
-  button?.remove();
+  const removeChip = () => button?.remove();
+  if (!window.DeerRecallMotion?.flipFilterChips?.(searchFilterBar, removeChip)) {
+    removeChip();
+  }
   refreshSearchFilterAddState();
   showToast(`已移除筛选：${label}`);
 }
@@ -1077,7 +1080,10 @@ function addSearchFilterChip() {
     showToast("当前可添加的快速筛选已全部启用");
     return;
   }
-  searchFilterAddButton.before(createSearchFilterChip(nextFilter));
+  const addChip = () => searchFilterAddButton.before(createSearchFilterChip(nextFilter));
+  if (!window.DeerRecallMotion?.flipFilterChips?.(searchFilterBar, addChip)) {
+    addChip();
+  }
   refreshSearchFilterAddState();
   showToast(`已添加筛选：${nextFilter.label}`);
 }
@@ -1189,7 +1195,14 @@ function sortSearchCandidates() {
     if (bValue !== aValue) return bValue - aValue;
     return Number(a.dataset.searchIndex || 0) - Number(b.dataset.searchIndex || 0);
   });
-  sortedCards.forEach((card) => searchCandidateGrid.append(card));
+
+  const applySort = () => {
+    sortedCards.forEach((card) => searchCandidateGrid.append(card));
+  };
+
+  if (!window.DeerRecallMotion?.flipSearchCards?.(searchCandidateGrid, applySort)) {
+    applySort();
+  }
 }
 
 function cycleSearchSort() {
@@ -1961,6 +1974,7 @@ function showResults(queryText = defaultQuery, options = {}) {
   refineSearchInput.value = "";
   const localResult = buildLocalSearchResult(normalizedQuery);
   applySearchResultModel(localResult);
+  window.DeerRecallMotion?.enterSearchResults?.(resultsState);
 
   if (restoredHistoryItem) {
     activeSearchAiHistoryId = restoredHistoryItem.id;

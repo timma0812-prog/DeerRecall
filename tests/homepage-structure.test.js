@@ -174,6 +174,19 @@ test("main script switches from empty state to results state on search", () => {
   assert.doesNotMatch(js, /currentQueryId = "payment_risk_java_backend"/);
 });
 
+test("DeerSearch wires motion hooks without replacing search logic", () => {
+  const html = read("index.html");
+  const js = read("app.js");
+
+  assert.match(html, /<div class="motion-scan-layer" aria-hidden="true"><\/div>/);
+  assert.match(js, /DeerRecallMotion\?\.enterSearchResults/);
+  assert.match(js, /DeerRecallMotion\?\.flipSearchCards/);
+  assert.match(js, /DeerRecallMotion\?\.flipFilterChips/);
+  assert.match(js, /function sortSearchCandidates\(\)/);
+  assert.match(js, /DeerRecallSearch\.searchLocalCandidates/);
+  assert.match(js, /DeerRecallSearch\.applyAiRerankResult/);
+});
+
 test("DeerSearch default state does not seed a Java payment risk query", () => {
   const html = read("index.html");
   const js = read("app.js");
