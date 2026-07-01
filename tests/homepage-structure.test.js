@@ -971,6 +971,31 @@ test("main page loads local motion runtime before application scripts", () => {
   assert.ok(appIndex > searchIndex);
 });
 
+test("motion runtime exposes safe progressive enhancement hooks", () => {
+  const js = read("motion.js");
+  const css = read("styles.css");
+
+  assert.match(js, /window\.DeerRecallMotion/);
+  assert.match(js, /prefers-reduced-motion: reduce/);
+  assert.match(js, /window\.gsap/);
+  assert.match(js, /window\.Flip/);
+  assert.match(js, /registerPlugin\(window\.Flip\)/);
+  assert.match(js, /function canAnimate/);
+  assert.match(js, /enterSearchResults/);
+  assert.match(js, /flipSearchCards/);
+  assert.match(js, /flipFilterChips/);
+  assert.match(js, /enterImportState/);
+  assert.match(js, /updateImportProgress/);
+  assert.match(js, /enterTalentView/);
+  assert.match(js, /pulseTalentSelection/);
+  assert.match(js, /enterResumeDetail/);
+  assert.match(js, /enterResumePanel/);
+  assert.match(js, /enterMarketInsight/);
+  assert.match(css, /@media \(prefers-reduced-motion:\s*reduce\)/);
+  assert.match(css, /\.motion-scan-layer/);
+  assert.match(css, /pointer-events:\s*none/);
+});
+
 test("project exposes local motion runtime assets for static delivery", () => {
   const pkg = JSON.parse(read("package.json"));
   const build = read("scripts/build-static.mjs");

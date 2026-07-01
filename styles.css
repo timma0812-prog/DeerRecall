@@ -292,6 +292,43 @@
   line-height: 1.45;
 }
 
+.motion-scan-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.motion-scan-layer::before {
+  content: "";
+  position: absolute;
+  left: -24%;
+  top: 8%;
+  width: 68%;
+  height: 84%;
+  transform: rotate(-9deg);
+  background: linear-gradient(90deg, transparent, rgba(100, 239, 155, 0.16), rgba(255, 79, 216, 0.18), transparent);
+  filter: blur(18px);
+}
+
+.motion-ready .resume-profile-hero,
+.motion-ready .resume-detail-card,
+.motion-ready .resume-tab-panel {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
