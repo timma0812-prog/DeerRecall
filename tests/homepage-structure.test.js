@@ -1171,6 +1171,42 @@ test("motion Flip hooks execute DOM mutations exactly once without depending on 
   assert.equal(failureMutations, 1);
 });
 
+test("motion entry hooks skip empty animation targets cleanly", () => {
+  let fromToCalls = 0;
+  let timelineFromToCalls = 0;
+  const gsap = createGsapStub({
+    fromTo() {
+      fromToCalls += 1;
+    },
+    timeline() {
+      return {
+        fromTo() {
+          timelineFromToCalls += 1;
+          return this;
+        },
+        to() {
+          return this;
+        },
+      };
+    },
+  });
+  const { window, TestElement } = createMotionTestEnvironment({ gsap });
+  const emptyRoot = new TestElement();
+  const emptyImportPanel = new TestElement();
+  const importRoot = new TestElement({
+    selectorMap: {
+      '[data-import-state="finished"]': [emptyImportPanel],
+    },
+  });
+
+  assert.equal(window.DeerRecallMotion.enterSearchResults(emptyRoot), false);
+  assert.equal(window.DeerRecallMotion.enterImportState("finished", importRoot), false);
+  assert.equal(window.DeerRecallMotion.enterTalentView(emptyRoot), false);
+  assert.equal(window.DeerRecallMotion.enterMarketInsight(emptyRoot), false);
+  assert.equal(fromToCalls, 0);
+  assert.equal(timelineFromToCalls, 0);
+});
+
 test("motion scan layer is scoped to the search results surface", () => {
   const css = read("styles.css");
 

@@ -45,6 +45,8 @@
     if (!canAnimate(root)) return false;
     const cards = toArray(".candidate-card[data-search-score]:not([hidden])", root);
     const scan = root.querySelector(".motion-scan-layer");
+    if (!cards.length && !scan) return false;
+
     const timeline = gsap.timeline({ defaults: { duration: 0.34, ease: "power2.out" } });
 
     if (scan) {
@@ -53,18 +55,20 @@
         .to(scan, { autoAlpha: 0, duration: 0.18 }, ">");
     }
 
-    timeline.fromTo(
-      cards,
-      { autoAlpha: 0, y: 18, scale: 0.985 },
-      {
-        autoAlpha: 1,
-        y: 0,
-        scale: 1,
-        stagger: 0.055,
-        clearProps: "transform,opacity,visibility",
-      },
-      scan ? 0.12 : 0,
-    );
+    if (cards.length) {
+      timeline.fromTo(
+        cards,
+        { autoAlpha: 0, y: 18, scale: 0.985 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          stagger: 0.055,
+          clearProps: "transform,opacity,visibility",
+        },
+        scan ? 0.12 : 0,
+      );
+    }
     return true;
   }
 
@@ -116,6 +120,8 @@
     const panel = root.querySelector(`[data-import-state="${state}"]`);
     if (!panel) return false;
     const targets = toArray(".import-hero-icon, h2, .import-muted, .import-metric, .result-stat, .import-actions", panel);
+    if (!targets.length) return false;
+
     gsap.fromTo(
       targets,
       { autoAlpha: 0, y: 14 },
@@ -145,6 +151,8 @@
   function enterTalentView(root) {
     if (!canAnimate(root)) return false;
     const rows = toArray("[data-talent-item]", root).filter((row) => !row.closest(".state-hidden"));
+    if (!rows.length) return false;
+
     gsap.fromTo(
       rows,
       { autoAlpha: 0, y: 12 },
@@ -213,6 +221,8 @@
   function enterMarketInsight(root) {
     if (!canAnimate(root)) return false;
     const targets = toArray("[data-market-insight-result]", root).filter((node) => !node.hidden);
+    if (!targets.length) return false;
+
     gsap.fromTo(
       targets,
       { autoAlpha: 0, y: 10 },
