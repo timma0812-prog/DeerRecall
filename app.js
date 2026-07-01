@@ -1693,9 +1693,12 @@ function setImportAssistantProgress({
   document.querySelectorAll("[data-import-loading-percent]").forEach((node) => {
     node.textContent = `${safePercent}%`;
   });
-  document.querySelectorAll("[data-import-loading-progress]").forEach((node) => {
-    node.style.width = `${safePercent}%`;
-  });
+  const progressNodes = document.querySelectorAll("[data-import-loading-progress]");
+  if (!window.DeerRecallMotion?.updateImportProgress?.(progressNodes, safePercent)) {
+    progressNodes.forEach((node) => {
+      node.style.width = `${safePercent}%`;
+    });
+  }
   document.querySelectorAll("[data-import-loading-total]").forEach((node) => {
     node.textContent = String(safeTotal);
   });
@@ -2071,6 +2074,7 @@ function showImportState(nextState = currentImportState) {
     importPickerCard?.classList.add("state-hidden");
   }
   setActiveNav("import");
+  window.DeerRecallMotion?.enterImportState?.(nextState, importState);
 }
 
 function getTaskRecord(taskId = selectedTaskId) {
@@ -2404,6 +2408,7 @@ function setTalentFilter(filter) {
   showTalentPanel(panelName);
   const firstItem = document.querySelector(`[data-talent-view="${filter}"] [data-talent-item]`);
   selectTalentItem(firstItem);
+  window.DeerRecallMotion?.enterTalentView?.(talentState);
 }
 
 function showTalentState(filter = currentTalentFilter) {
@@ -2424,6 +2429,7 @@ function showTalentState(filter = currentTalentFilter) {
   talentState.classList.remove("state-hidden");
   setTalentFilter(filter);
   setActiveNav("talents");
+  window.DeerRecallMotion?.enterTalentView?.(talentState);
 }
 
 function showTalentDetailShell(detailView) {
@@ -2887,6 +2893,7 @@ function handleTalentDetailAction(action) {
 function selectTalentItem(item) {
   if (!item) return;
   talentItems.forEach((talentItem) => talentItem.classList.toggle("is-selected", talentItem === item));
+  window.DeerRecallMotion?.pulseTalentSelection?.(item);
 }
 
 function toggleShortlistButton(button) {

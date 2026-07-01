@@ -187,6 +187,20 @@ test("DeerSearch wires motion hooks without replacing search logic", () => {
   assert.match(js, /DeerRecallSearch\.applyAiRerankResult/);
 });
 
+test("import and talent library wire motion hooks to existing state functions", () => {
+  const js = read("app.js");
+
+  assert.match(js, /DeerRecallMotion\?\.enterImportState/);
+  assert.match(js, /DeerRecallMotion\?\.updateImportProgress/);
+  assert.match(js, /DeerRecallMotion\?\.enterTalentView/);
+  assert.match(js, /DeerRecallMotion\?\.pulseTalentSelection/);
+  assert.match(js, /function showImportState/);
+  assert.match(js, /function setImportAssistantProgress/);
+  assert.match(js, /function showTalentState/);
+  assert.match(js, /function setTalentFilter/);
+  assert.match(js, /function selectTalentItem/);
+});
+
 test("DeerSearch default state does not seed a Java payment risk query", () => {
   const html = read("index.html");
   const js = read("app.js");
