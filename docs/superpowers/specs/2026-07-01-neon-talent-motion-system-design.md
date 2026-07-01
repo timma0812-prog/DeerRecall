@@ -1,55 +1,55 @@
-# Neon Talent Motion System Design
+# Neon Talent 动效系统设计
 
-## Summary
+## 摘要
 
-DeerRecall will add a product-wide motion system that makes the static recruiting workspace feel younger, more dynamic, and more AI-native while staying compatible with the current frontend architecture.
+DeerRecall 将新增一套产品级动效系统，让当前静态招聘工作台更年轻、更灵动、更有 AI 产品感，同时保持现有前端架构兼容。
 
-The selected direction is **Level 2: Neon Talent OS**:
+已确认的方向是 **Level 2: Neon Talent OS**：
 
-- Visual thesis: AI command-center energy with neon signal light, dark glass surfaces, and controlled scanning moments.
-- Interaction thesis: candidate cards and operational rows move like a kinetic talent flow, especially during search, filtering, sorting, importing, and detail transitions.
-- Product boundary: motion should make the product feel intelligent and alive without reducing recruiting information density or breaking the existing desktop/static runtime.
+- 视觉主张：AI 控制台气质，使用霓虹信号光、暗色玻璃质感、克制的扫描瞬间。
+- 交互主张：候选人卡片和任务行像人才流一样运动，重点体现在搜索、筛选、排序、导入和详情切换。
+- 产品边界：动效要让产品显得智能、有生命力，但不能降低招聘信息密度，也不能破坏现有桌面端和静态运行时。
 
-This design covers DeerSearch, resume import, talent library, and candidate resume detail. It does not redesign the app shell, change the product information architecture, or introduce React/Vite.
+本设计覆盖 DeerSearch、简历导入、人才库、候选人简历详情四条核心体验。不重做应用外壳，不改变产品信息架构，不引入 React/Vite。
 
-## Goals
+## 目标
 
-- Make the product feel more attractive to young individual users through polished, visible motion.
-- Keep the existing static frontend system: `index.html`, `styles.css`, `app.js`, and `deersearch-engine.js`.
-- Add GSAP as a local static runtime dependency, not a CDN dependency.
-- Keep Electron, Tauri, Docker, Node static serving, and Harness delivery compatible.
-- Make motion progressive enhancement: the product must remain fully usable when GSAP is missing or reduced motion is requested.
-- Add visual QA criteria so animation cannot cause border mismatch, overflow, layout jumping, overlap, or clipped content.
+- 通过有质感、可感知的动效，让产品更吸引年轻个人用户。
+- 保持现有静态前端系统：`index.html`、`styles.css`、`app.js`、`deersearch-engine.js`。
+- 以本地静态资源方式接入 GSAP，不使用 CDN。
+- 保持 Electron、Tauri、Docker、Node 静态服务和 Harness 发布链路兼容。
+- 动效必须是渐进增强：缺少 GSAP 或用户开启 reduced motion 时，产品仍然完整可用。
+- 建立视觉 QA 标准，防止边框不协调、出框、布局跳动、重叠或裁切。
 
-## Non-Goals
+## 非目标
 
-- No React, Vue, Vite, Next.js, or bundler migration.
-- No CDN-hosted animation library.
-- No full app-shell layout redesign.
-- No animation that changes business logic, search ranking, import results, local persistence, AI requests, or Electron IPC behavior.
-- No marketing-page style scroll storytelling inside the recruiting workspace.
-- No always-on decorative motion that distracts from repeated recruiting work.
+- 不迁移到 React、Vue、Vite、Next.js 或其他构建体系。
+- 不使用 CDN 托管的动画库。
+- 不做完整应用外壳重设计。
+- 动效不改变业务逻辑、搜索排序、导入结果、本地持久化、AI 请求或 Electron IPC 行为。
+- 不在招聘工作台里做营销页式滚动叙事。
+- 不加入干扰高频招聘工作的常驻装饰动画。
 
-## Current Frontend Constraints
+## 当前前端约束
 
-DeerRecall is currently a static browser app with desktop wrappers:
+DeerRecall 当前是静态浏览器应用，并带有桌面端包装：
 
-- `index.html` loads relative static scripts.
-- `styles.css` owns all visual styling.
-- `app.js` owns UI state, event handling, local library rendering, AI requests, and desktop IPC calls.
-- `deersearch-engine.js` owns local search and AI rerank helpers.
-- `scripts/build-static.mjs` copies a strict set of runtime assets into `dist`.
-- `scripts/verify-dist.mjs` rejects missing, extra, empty, or invalid runtime assets.
-- Electron loads `dist/index.html` through `file://`.
-- Tauri points at `../dist`.
-- Docker serves prebuilt `dist`.
-- Harness runs `npm run check`, `npm run build`, and `npm run verify:dist`.
+- `index.html` 加载相对路径静态脚本。
+- `styles.css` 负责全部视觉样式。
+- `app.js` 负责 UI 状态、事件处理、本地人才库渲染、AI 请求和桌面端 IPC 调用。
+- `deersearch-engine.js` 负责本地搜索和 AI rerank 辅助逻辑。
+- `scripts/build-static.mjs` 将严格限定的运行时资源复制到 `dist`。
+- `scripts/verify-dist.mjs` 会拒绝缺失、多余、空文件或非法运行时资源。
+- Electron 通过 `file://` 加载 `dist/index.html`。
+- Tauri 指向 `../dist`。
+- Docker 服务预构建的 `dist`。
+- Harness 运行 `npm run check`、`npm run build`、`npm run verify:dist`。
 
-Any motion implementation must respect that contract.
+任何动效实现都必须遵守这套契约。
 
-## Architecture
+## 架构
 
-Add a thin static motion layer:
+新增一层很薄的静态动效层：
 
 ```text
 vendor/gsap.min.js
@@ -57,7 +57,7 @@ vendor/Flip.min.js
 motion.js
 ```
 
-Recommended script order:
+建议脚本加载顺序：
 
 ```html
 <script src="vendor/gsap.min.js"></script>
@@ -67,7 +67,7 @@ Recommended script order:
 <script src="app.js"></script>
 ```
 
-`motion.js` exposes a browser global:
+`motion.js` 暴露一个浏览器全局对象：
 
 ```javascript
 window.DeerRecallMotion = {
@@ -85,35 +85,35 @@ window.DeerRecallMotion = {
 };
 ```
 
-The API is intentionally small. `app.js` remains the source of truth for state. `motion.js` only animates DOM elements that already exist or have just been rendered.
+API 保持小而明确。`app.js` 仍是状态事实来源。`motion.js` 只对已经存在或刚渲染出的 DOM 做动画。
 
-All calls from `app.js` use optional chaining:
+`app.js` 中所有调用都使用 optional chaining：
 
 ```javascript
 window.DeerRecallMotion?.enterSearchResults?.(resultsState);
 ```
 
-All motion methods are safe no-ops when:
+所有动效方法在以下情况必须安全 no-op：
 
-- `window.gsap` is missing.
-- `prefers-reduced-motion: reduce` is active.
-- The target element is missing.
-- The target element is hidden or detached.
+- `window.gsap` 缺失。
+- 用户启用 `prefers-reduced-motion: reduce`。
+- 目标元素不存在。
+- 目标元素已隐藏或已脱离 DOM。
 
-## GSAP Usage Rules
+## GSAP 使用规则
 
-Use GSAP for timeline sequencing, staggered entrances, progress tweening, and Flip layout transitions.
+GSAP 用于时间线编排、分批入场、进度数值补间和 Flip 布局转场。
 
-Use GSAP properties that stay on compositor layers:
+优先使用不会触发布局重排的属性：
 
 - `x`
 - `y`
 - `scale`
 - `autoAlpha`
 - `opacity`
-- CSS variables used only for light intensity or transform-safe visuals
+- 只用于光效强度或 transform-safe 视觉的 CSS 变量
 
-Avoid animating:
+避免动画这些属性：
 
 - `width`
 - `height`
@@ -121,10 +121,10 @@ Avoid animating:
 - `left`
 - `margin`
 - `padding`
-- grid template values
-- scroll container dimensions
+- grid template 值
+- 滚动容器尺寸
 
-Register `Flip` once inside `motion.js` only if it is available:
+只在 `motion.js` 中注册一次 `Flip`，并且仅在插件存在时注册：
 
 ```javascript
 if (window.gsap && window.Flip) {
@@ -132,70 +132,70 @@ if (window.gsap && window.Flip) {
 }
 ```
 
-Do not monkey-patch existing global functions. Prefer explicit hooks inside existing state functions in `app.js`.
+不要 monkey-patch 现有全局函数。优先在 `app.js` 的现有状态函数里加入显式 hook。
 
-## Visual Language
+## 视觉语言
 
-The system should read as **AI command center plus kinetic candidate flow**.
+整体气质应是 **AI 控制台 + 动态候选人流**。
 
-Use these visual motifs sparingly:
+可以克制使用这些视觉母题：
 
-- Scan light on DeerSearch transitions.
-- Neon edge glow on active candidate or active import state.
-- Staggered candidate card arrival.
-- Smooth Flip movement for card and row reordering.
-- Short completion pulse on import success.
-- Layered reveal for resume detail.
+- DeerSearch 转场中的扫描光。
+- 活跃候选人或活跃导入状态上的霓虹边缘光。
+- 候选人卡片分批入场。
+- 卡片和行重排时使用平滑 Flip。
+- 导入完成时短促完成 pulse。
+- 简历详情分层 reveal。
 
-Avoid:
+避免：
 
-- Permanent animated backgrounds.
-- Multiple competing neon colors in one panel.
-- Large decorative objects floating above operational UI.
-- Motion that blocks clicks or covers candidate data.
-- Uncoordinated border, radius, or shadow styles.
+- 永久在线的动态背景。
+- 一个面板里出现多个互相竞争的霓虹色。
+- 悬浮在操作 UI 上方的大型装饰物。
+- 会挡住点击或覆盖候选人信息的动效。
+- 不统一的边框、圆角或阴影。
 
-## Design System Constraints
+## 设计系统约束
 
-Motion must preserve the existing shell and visual discipline:
+动效必须保持现有工作台结构和视觉纪律：
 
-- Do not change the main three-column workspace proportions as part of this motion feature.
-- Do not add cards inside cards.
-- Do not introduce inconsistent border radii.
-- Keep card radii at or below existing product patterns unless a current component already uses a larger radius.
-- Keep line weights visually consistent with the current glass UI.
-- Animated elements must stay inside their parent clipping and layout bounds.
-- No animation may create horizontal overflow.
-- No text may overlap previous or following content during animation.
-- Buttons and interactive controls must stay clickable throughout.
-- Decorative animated layers use `pointer-events: none`.
-- Strong neon effects are reserved for active or transitional states, not every card.
-- Search, import, talent, and resume surfaces should share timing and easing so motion feels like one system.
+- 本次动效功能不改变主三栏工作台比例。
+- 不添加卡片套卡片。
+- 不引入不一致的圆角。
+- 卡片圆角不超过现有产品模式，除非当前组件已经使用更大圆角。
+- 线宽要与当前玻璃 UI 视觉一致。
+- 动画元素必须留在父容器裁切和布局边界内。
+- 动画不得制造横向 overflow。
+- 动画过程中，文本不得覆盖前后内容。
+- 按钮和交互控件在动画期间仍必须可点击。
+- 装饰性动画层使用 `pointer-events: none`。
+- 强霓虹效果只用于活跃或转场状态，不铺满每张卡。
+- 搜索、导入、人才库、简历详情使用统一时长和缓动，让动效像同一套系统。
 
-## Core Experience 1: DeerSearch
+## 核心体验 1：DeerSearch
 
-### User Feel
+### 用户感受
 
-Submitting a query should feel like asking an AI system to scan the local talent universe. Results should appear as if they are being identified, ranked, and locked into place.
+提交查询应该像让 AI 系统扫描本地人才宇宙。结果出现时，要像系统正在识别、排序并锁定候选人。
 
-### Motion Sequence
+### 动效顺序
 
-1. Search submit:
-   - Query bubble appears quickly.
-   - AI answer area fades and slides into place.
-   - A restrained scan light passes across the results area.
+1. 提交搜索：
+   - Query bubble 快速出现。
+   - AI 回答区域淡入并轻微滑入。
+   - 结果区出现一道克制扫描光。
 
-2. Result render:
-   - Candidate cards enter with a stagger.
-   - Score badges pulse once on high-match candidates.
-   - Tags appear after card body text, not before.
+2. 渲染结果：
+   - 候选人卡片分批入场。
+   - 高匹配候选人的分数徽标 pulse 一次。
+   - 标签在卡片主体文本之后出现。
 
-3. Sort and filter:
-   - Existing candidate cards use GSAP Flip to move to their new positions.
-   - Hidden cards fade and compress visually only if this can be done without fighting the `hidden` attribute. Otherwise, use enter/reorder only.
-   - Filter chips use Flip when added, removed, or re-rendered.
+3. 排序和筛选：
+   - 已存在候选人卡片使用 GSAP Flip 移动到新位置。
+   - 如果不和 `hidden` 属性冲突，隐藏卡片可做淡出和轻微压缩；否则只做入场和重排。
+   - 筛选 chip 在新增、移除、重新渲染时使用 Flip。
 
-### Technical Hooks
+### 技术 Hook
 
 - `showResults(queryText, options)`
 - `applySearchResultModel(result)`
@@ -206,7 +206,7 @@ Submitting a query should feel like asking an AI system to scan the local talent
 - `removeSearchFilterChip(button)`
 - `renderSearchFilterChips(chips)`
 
-### Stable Selectors
+### 稳定选择器
 
 - `#resultsState`
 - `[data-local-search-list]`
@@ -217,50 +217,50 @@ Submitting a query should feel like asking an AI system to scan the local talent
 - `[data-search-city-toggle]`
 - `[data-search-conversation-answer]`
 
-### Guardrails
+### 护栏
 
-- Do not delay the actual search result render for animation.
-- Do not make AI loading appear as if the ranking is done before data is ready.
-- Do not animate long AI answer text in a way that causes right-rail overflow.
+- 不为了动画延迟真实搜索结果渲染。
+- AI 还未完成时，不制造“排序已经完成”的误导。
+- 不用会导致右侧栏 overflow 的方式动画长 AI 文本。
 
-## Core Experience 2: Resume Import
+## 核心体验 2：简历导入
 
-### User Feel
+### 用户感受
 
-Import should feel like a visible AI processing pipeline: local source selected, files inspected, text parsed, candidates added, and issues surfaced.
+导入流程应该像可见的 AI 处理管线：选择本地来源、检查文件、解析文本、加入候选人、暴露问题。
 
-### Motion Sequence
+### 动效顺序
 
-1. Default state:
-   - Drop zone reacts to drag with a small border/light lift.
-   - Import method buttons get immediate hover/press feedback.
+1. 默认状态：
+   - 拖拽区域在 drag 状态下做轻微边框/光感抬升。
+   - 导入方式按钮给出即时 hover/press 反馈。
 
-2. Preview state:
-   - Source name and path reveal first.
-   - Metric cards count in with short numeric tweens.
-   - Supported/duplicate/failed values remain readable and stable.
+2. 预检状态：
+   - 来源名称和路径先 reveal。
+   - 指标卡做短促数值补间。
+   - 支持、重复、失败等数值保持可读且稳定。
 
-3. Loading state:
-   - Progress bar animates between real values.
-   - Active file rows enter vertically with light stagger.
-   - Existing CSS spinner and import icon float remain unless they conflict with GSAP.
+3. Loading 状态：
+   - 进度条在真实值之间补间。
+   - 当前文件行纵向分批进入。
+   - 保留现有 CSS spinner 和导入图标浮动，除非它们与 GSAP 冲突。
 
-4. Finished state:
-   - Completion badge pulses once.
-   - Result stats reveal as a group.
-   - Primary next action receives a short focus cue.
+4. 完成状态：
+   - 完成 badge pulse 一次。
+   - 结果统计整体 reveal。
+   - 主下一步操作给一个短促焦点提示。
 
-### Technical Hooks
+### 技术 Hook
 
 - `showImportState(nextState)`
 - `openImportPickerCard(mode)`
-- `handleImportFiles(...)`
+- `handleImportFiles(fileList, options)`
 - `applyDesktopImportResult(selectedImport, fallbackMessage)`
 - `setImportAssistantProgress(payload)`
 - `setImportAssistantResult(source)`
 - `updateImportPreview(source)`
 
-### Stable Selectors
+### 稳定选择器
 
 - `#importState`
 - `[data-import-state]`
@@ -271,40 +271,40 @@ Import should feel like a visible AI processing pipeline: local source selected,
 - `[data-import-loading-file]`
 - `[data-import-open]`
 
-### Guardrails
+### 护栏
 
-- Do not animate file counts so slowly that users distrust progress.
-- Do not move the drop zone while the user is dragging over it.
-- Do not block Electron file picker calls with animation.
-- Do not introduce fake progress beyond values supplied by app state.
+- 不把文件数量动画做得太慢，避免用户不信任进度。
+- 用户拖拽时，不移动拖拽区域本体。
+- 不用动画阻塞 Electron 文件选择器调用。
+- 不在状态值之外制造假进度。
 
-## Core Experience 3: Talent Library
+## 核心体验 3：人才库
 
-### User Feel
+### 用户感受
 
-The talent library should feel like a living candidate flow. Filtering and selecting candidates should keep spatial continuity so users understand what changed.
+人才库应该像动态候选人流。筛选和选择候选人时，要保持空间连续性，让用户理解发生了什么变化。
 
-### Motion Sequence
+### 动效顺序
 
-1. Opening talent library:
-   - KPI row reveals quickly.
-   - Active list rows enter with a controlled stagger.
-   - Right assistant panel fades in after list context appears.
+1. 打开人才库：
+   - KPI 行快速 reveal。
+   - 当前列表行做克制分批入场。
+   - 右侧 assistant panel 在列表上下文出现后淡入。
 
-2. Switching talent tabs:
-   - Active tab changes immediately.
-   - New list rows reveal in place.
-   - Right panel content crossfades or reveals vertically.
+2. 切换人才 tab：
+   - Tab 状态立即变化。
+   - 新列表行原地 reveal。
+   - 右侧 panel 内容交叉淡入或纵向 reveal。
 
-3. Selecting a candidate:
-   - Selected row gets a neon edge pulse.
-   - Right panel updates with a short reveal.
+3. 选择候选人：
+   - 选中行出现霓虹边缘 pulse。
+   - 右侧 panel 做短促 reveal。
 
-4. Sorting or moving task rows:
-   - Use Flip where existing elements are appended or moved.
-   - Use simple stagger where `innerHTML` rebuilds element identity.
+4. 排序或移动任务行：
+   - 现有元素 append 或 move 时使用 Flip。
+   - `innerHTML` 重建导致元素身份丢失时，使用简单分批入场。
 
-### Technical Hooks
+### 技术 Hook
 
 - `showTalentState(filter)`
 - `setTalentFilter(filter)`
@@ -315,7 +315,7 @@ The talent library should feel like a living candidate flow. Filtering and selec
 - `renderLocalImportTasks(library)`
 - `updateImportTaskRow(task)`
 
-### Stable Selectors
+### 稳定选择器
 
 - `#talentState`
 - `[data-talent-view]`
@@ -326,36 +326,36 @@ The talent library should feel like a living candidate flow. Filtering and selec
 - `[data-local-source-list]`
 - `[data-local-task-list]`
 
-### Guardrails
+### 护栏
 
-- Do not animate rows outside the scroll container.
-- Do not increase row height during selection pulse.
-- Do not reduce density of candidate tags or source metadata.
-- Use keyed data attributes such as `data-candidate-id` and `data-task-id` when available.
+- 不让行元素动画到滚动容器外。
+- 选中 pulse 不增加行高。
+- 不降低候选人标签或来源元数据的信息密度。
+- 可用时使用 `data-candidate-id` 和 `data-task-id` 这样的 key。
 
-## Core Experience 4: Candidate Resume Detail
+## 核心体验 4：候选人简历详情
 
-### User Feel
+### 用户感受
 
-Opening a candidate should feel like zooming into a focused profile. The hero, match score, tags, tabs, and detail cards should reveal in a clear hierarchy.
+打开候选人详情应该像聚焦进入一个候选人画像。Hero、匹配分、标签、tab 和详情卡片按清晰层级展开。
 
-### Motion Sequence
+### 动效顺序
 
-1. Open detail:
-   - Resume hero enters first.
-   - Avatar, name, status, match score, and actions reveal in sequence.
-   - Detail cards reveal with a short stagger.
+1. 打开详情：
+   - 简历 hero 最先进入。
+   - 头像、姓名、状态、匹配分和操作按钮按顺序 reveal。
+   - 详情卡片做短促 stagger。
 
-2. Switch detail tab:
-   - Tab state changes immediately.
-   - New panel reveals with `autoAlpha` and small `y`.
-   - Existing panel is hidden by current state logic without waiting on long exit animation.
+2. 切换详情 tab：
+   - Tab 状态立即变化。
+   - 新 panel 使用 `autoAlpha` 和小幅 `y` reveal。
+   - 旧 panel 由现有状态逻辑隐藏，不等待长离场动画。
 
-3. Market insight:
-   - Loading state uses subtle pulse.
-   - Completed result sections reveal top to bottom.
+3. 市场画像：
+   - Loading 状态使用轻微 pulse。
+   - 完成后结果区从上到下 reveal。
 
-### Technical Hooks
+### 技术 Hook
 
 - `openCandidateResume(candidateId, options)`
 - `showCandidateResumePanel(viewName)`
@@ -363,7 +363,7 @@ Opening a candidate should feel like zooming into a focused profile. The hero, m
 - `setMarketInsightState(state, message)`
 - `renderMarketInsight(insight)`
 
-### Stable Selectors
+### 稳定选择器
 
 - `#candidateResumeState`
 - `[data-candidate-resume-panel]`
@@ -373,36 +373,36 @@ Opening a candidate should feel like zooming into a focused profile. The hero, m
 - `[data-market-insight-card]`
 - `[data-market-insight-result]`
 
-### Guardrails
+### 护栏
 
-- Replace or disable existing `resumeRise` CSS animation when GSAP owns resume detail motion.
-- Do not animate resume document preview in a way that affects scroll readability.
-- Do not hide focusable controls before focus/ARIA state updates.
+- 当 GSAP 接管简历详情动效时，替换或禁用现有 `resumeRise` CSS 动画。
+- 不用影响滚动阅读的方式动画简历文档预览。
+- 不在 focus/ARIA 状态更新前隐藏可聚焦控件。
 
-## Reduced Motion and Fallback
+## Reduced Motion 与降级
 
-`motion.js` must check reduced motion once and expose a helper:
+`motion.js` 必须检测 reduced motion：
 
 ```javascript
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 ```
 
-When reduced motion is enabled:
+当 reduced motion 开启时：
 
-- Page and panel transitions become instant.
-- Flip reordering is skipped.
-- Progress values update immediately.
-- Existing CSS animations that remain should be disabled or kept minimal through a CSS reduced-motion block.
+- 页面和 panel 转场即时完成。
+- 跳过 Flip 重排动画。
+- 进度值立即更新。
+- 保留的 CSS 动画通过 CSS reduced-motion block 禁用或最小化。
 
-If GSAP or Flip fails to load:
+如果 GSAP 或 Flip 加载失败：
 
-- All app functions continue.
-- No errors are thrown.
-- Existing CSS layout and state classes continue to work.
+- 所有应用函数继续运行。
+- 不抛出错误。
+- 现有 CSS 布局和状态 class 继续工作。
 
-## Build and Runtime Asset Contract
+## 构建与运行时资源契约
 
-Update runtime asset handling to include:
+运行时资源需要更新为：
 
 ```text
 index.html
@@ -414,75 +414,75 @@ vendor/gsap.min.js
 vendor/Flip.min.js
 ```
 
-Required updates:
+必须更新：
 
-- `index.html`: add script tags in the approved order.
-- `scripts/build-static.mjs`: copy `motion.js` and `vendor/`.
-- `scripts/verify-dist.mjs`: verify top-level files and recursive vendor files.
-- `package.json`: add `node --check motion.js` to `npm run check`.
-- `tests/homepage-structure.test.js`: assert script order, asset contract, reduced motion guard, and static delivery updates.
-- `README.md`: document local motion runtime assets and offline behavior.
-- `.harness/deerrecall-ci-cd.yaml`: add smoke/cache checks for `motion.js` and vendor scripts.
+- `index.html`：按确认顺序加入脚本。
+- `scripts/build-static.mjs`：复制 `motion.js` 和 `vendor/`。
+- `scripts/verify-dist.mjs`：校验顶层文件和递归 vendor 文件。
+- `package.json`：给 `npm run check` 加上 `node --check motion.js`。
+- `tests/homepage-structure.test.js`：断言脚本顺序、资源契约、reduced motion 护栏、静态发布更新。
+- `README.md`：记录本地动效运行时资源和离线行为。
+- `.harness/deerrecall-ci-cd.yaml`：增加 `motion.js` 和 vendor 脚本的 smoke/cache 检查。
 
-Do not rely on `npm install gsap` alone. A package dependency does not place GSAP into the static browser runtime without a bundler.
+不能只依赖 `npm install gsap`。没有 bundler 时，npm 依赖不会自动进入静态浏览器运行时。
 
-## Harness Requirements
+## Harness 要求
 
-Harness must continue to run the existing pipeline order:
+Harness 必须继续运行现有 pipeline 顺序：
 
 ```text
 npm run check -> npm run build -> npm run verify:dist -> docker build -> docker compose up -d -> release smoke checks
 ```
 
-New release smoke checks must include:
+新增发布 smoke check：
 
 - `/motion.js`
 - `/vendor/gsap.min.js`
 - `/vendor/Flip.min.js`
 
-All JS and CSS runtime assets should continue to use the existing no-cache policy unless the app later adds hashed filenames.
+所有 JS 和 CSS 运行时资源继续沿用现有 no-cache 策略，直到未来引入 hash 文件名。
 
-## Worktree and Subagent Development Process
+## Worktree 与 Subagent 开发流程
 
-Development happens in an isolated worktree:
+开发在隔离 worktree 中进行：
 
 ```text
 .worktrees/codex/neon-talent-motion-system
 ```
 
-Branch:
+分支：
 
 ```text
 codex/neon-talent-motion-system
 ```
 
-The main workspace remains clean except for the already committed ignore-rule setup.
+主工作区除了已经提交的 ignore 规则外保持干净。
 
-The implementation plan should use subagent-driven development:
+实施计划使用 subagent-driven development：
 
-1. Build/static asset contract worker.
-2. Motion runtime API worker.
-3. DeerSearch and Flip worker.
-4. Import and talent library worker.
-5. Candidate resume detail and market insight worker.
-6. Final compatibility and visual QA reviewer.
+1. 构建/静态资源契约 worker。
+2. 动效运行时 API worker。
+3. DeerSearch 与 Flip worker。
+4. 导入与人才库 worker。
+5. 候选人详情与市场画像 worker。
+6. 最终兼容性和视觉 QA reviewer。
 
-Workers must receive disjoint file ownership where possible and must not revert one another's edits.
+Worker 尽量拥有互不重叠的文件范围，并且不能回滚其他 worker 的修改。
 
-## ROPE Operating Model
+## ROPE 工作模型
 
-For this project, "rope" is treated as the operating discipline for keeping design and implementation tied together:
+本项目将 “rope” 作为把设计和实现绑在一起的工作纪律：
 
-- **R**equirements: young-user, Level 2 Neon Talent OS, four core flows, existing frontend compatibility.
-- **O**ptions: local vendor GSAP, isolated `motion.js`, explicit app hooks, reduced-motion fallback.
-- **P**lan: write a task-level implementation plan before code changes.
-- **E**xecute: use worktree, Harness gates, and subagent review loops.
+- **R**equirements：年轻用户、Level 2 Neon Talent OS、四条核心流程、现有前端兼容。
+- **O**ptions：本地 vendor GSAP、独立 `motion.js`、显式 app hook、reduced-motion 降级。
+- **P**lan：写任务级实施计划后再改代码。
+- **E**xecute：使用 worktree、Harness 门禁和 subagent review loop 执行。
 
-If a separate concrete ROPE tool or framework is required later, it should be added to the implementation plan only after confirming its local availability and compatibility with the current static app.
+如果后续需要某个具体 ROPE 工具或框架，必须先确认本地可用且兼容当前静态应用，再加入实施计划。
 
-## Testing Strategy
+## 测试策略
 
-Required automated checks:
+必须运行的自动化检查：
 
 ```bash
 npm test
@@ -491,102 +491,101 @@ npm run build
 npm run verify:dist
 ```
 
-Add or update tests for:
+需要新增或更新测试：
 
-- `index.html` script order.
-- `motion.js` exists and is syntax-checked.
-- Build script copies `motion.js` and `vendor/`.
-- Dist verification expects and validates vendor assets.
-- Harness checks new static assets.
-- Reduced-motion fallback exists in JS and CSS.
-- Motion hooks are optional and do not replace business logic.
+- `index.html` 脚本顺序。
+- `motion.js` 存在且被语法检查。
+- build script 复制 `motion.js` 和 `vendor/`。
+- dist verification 期望并校验 vendor 资源。
+- Harness 检查新增静态资源。
+- JS 和 CSS 存在 reduced-motion 降级。
+- 动效 hook 是可选增强，不替换业务逻辑。
 
-Required manual or browser-assisted QA:
+必须做手动或浏览器辅助 QA：
 
-- Desktop wide viewport: three-column shell stays aligned.
-- Standard desktop viewport: cards, panels, and right rail do not overlap.
-- Narrow viewport: no animation-created horizontal overflow.
-- DeerSearch: submit, sort, filter, city filter, AI answer history restore.
-- Import: default, preview, loading, finished, cancel, drag/drop.
-- Talent library: tabs, row selection, source view, pending and duplicate views.
-- Candidate detail: open from search and talent, switch tabs, run market insight.
-- Reduced motion: all flows remain usable with animation disabled.
-- Electron file loading: `vendor/` and `motion.js` load from `file://`.
+- 桌面宽屏：三栏 shell 保持对齐。
+- 常规桌面：卡片、面板、右侧栏不重叠。
+- 窄屏：动画不制造横向 overflow。
+- DeerSearch：提交、排序、筛选、城市筛选、AI 回答历史恢复。
+- 导入：默认、预检、loading、完成、取消、拖拽。
+- 人才库：tab、行选择、来源视图、待完善和疑似重复视图。
+- 候选人详情：从搜索和人才库打开、切换 tab、运行市场画像。
+- Reduced motion：所有流程在动效关闭时仍可用。
+- Electron 文件加载：`vendor/` 和 `motion.js` 可从 `file://` 加载。
 
-## Visual QA Checklist
+## 视觉 QA 清单
 
-Before completion, verify:
+完成前必须验证：
 
-- No component moves outside its parent container during animation.
-- No new horizontal scrollbar appears.
-- No text overlaps adjacent content while animating.
-- No button is hidden behind an animated overlay.
-- Animated overlays use `pointer-events: none`.
-- Border radii and borders match existing DeerRecall surfaces.
-- Hover, focus, and active states remain visible.
-- Candidate cards keep stable dimensions during hover, filtering, sorting, and entry.
-- Talent rows keep stable heights during selection pulse.
-- Import progress and metrics do not resize their parent panel.
-- Resume detail cards do not fight the existing scroll container.
+- 动画过程中，没有组件移出父容器。
+- 没有新增横向滚动条。
+- 动画过程中，文本不覆盖相邻内容。
+- 按钮不被动画 overlay 遮挡。
+- 动画 overlay 使用 `pointer-events: none`。
+- 边框、圆角与 DeerRecall 现有表面一致。
+- Hover、focus、active 状态仍清晰可见。
+- 候选人卡片在 hover、筛选、排序、入场时尺寸稳定。
+- 人才行选中 pulse 不改变行高。
+- 导入进度和指标不撑大父面板。
+- 简历详情卡片不和现有滚动容器冲突。
 
-## Risks and Mitigations
+## 风险与缓解
 
-### Risk: `.state-hidden` uses `display: none !important`
+### 风险：`.state-hidden` 使用 `display: none !important`
 
-GSAP cannot animate elements once display-none is applied.
+GSAP 无法在元素已经 display-none 后做动画。
 
-Mitigation:
+缓解：
 
-- First phase focuses on enter animations after reveal.
-- Use Flip only around functions where element identity exists before and after mutation.
-- Avoid complex exit animations until state visibility is centralized.
+- 第一阶段聚焦 reveal 后的入场动画。
+- 只在元素变化前后都存在身份时使用 Flip。
+- 复杂离场动画等状态显示逻辑集中化后再做。
 
-### Risk: `hidden` attribute defeats Flip exits
+### 风险：`hidden` 属性影响 Flip 离场
 
-Search city filtering hides cards through `hidden`.
+搜索城市筛选通过 `hidden` 隐藏卡片。
 
-Mitigation:
+缓解：
 
-- Capture Flip state before hiding when feasible.
-- Prefer reordering and enter animation over exit animation if hidden state conflicts.
+- 可行时在隐藏前捕获 Flip state。
+- 如果 hidden 状态冲突，优先做重排和入场动画，不强做离场。
 
-### Risk: `innerHTML` rebuilds list identity
+### 风险：`innerHTML` 重建列表导致元素身份丢失
 
-Several render functions rebuild lists and lose DOM identity.
+多个 render 函数会重建列表，导致 DOM 身份不可保留。
 
-Mitigation:
+缓解：
 
-- Use staggered enter for rebuilt lists.
-- Use Flip only where existing nodes are moved, such as sort and task row movement.
+- 重建列表使用分批入场。
+- 只在节点被移动的场景使用 Flip，例如排序和任务行移动。
 
-### Risk: GSAP conflicts with CSS `resumeRise`
+### 风险：GSAP 与 CSS `resumeRise` 冲突
 
-Existing resume detail CSS animation uses opacity and transform.
+现有简历详情 CSS 动画使用 opacity 和 transform。
 
-Mitigation:
+缓解：
 
-- Disable or scope out `resumeRise` when GSAP owns resume detail motion.
-- Keep a CSS fallback for missing GSAP if needed.
+- GSAP 接管简历详情动效时，禁用或隔离 `resumeRise`。
+- 如果 GSAP 缺失，保留 CSS fallback。
 
-### Risk: offline desktop runtime misses vendor asset
+### 风险：离线桌面运行时缺少 vendor 资源
 
-Electron and Tauri load from static files.
+Electron 和 Tauri 从静态文件加载。
 
-Mitigation:
+缓解：
 
-- Commit vendor files.
-- Verify `dist/vendor/gsap.min.js` and `dist/vendor/Flip.min.js`.
-- Smoke-check vendor files in Harness.
+- 提交 vendor 文件。
+- 校验 `dist/vendor/gsap.min.js` 和 `dist/vendor/Flip.min.js`。
+- Harness smoke-check vendor 文件。
 
-## Acceptance Criteria
+## 验收标准
 
-The feature is acceptable when:
+功能可验收的条件：
 
-- DeerRecall has a local, progressive GSAP motion layer.
-- DeerSearch, import, talent library, and candidate detail each have Level 2 motion.
-- Existing frontend architecture remains static and desktop-compatible.
-- All automated tests and static build verification pass.
-- Harness asset checks include the new runtime files.
-- Reduced motion works.
-- Visual QA finds no overflow, inconsistent borders, out-of-frame animation, or interaction-blocking overlays.
-
+- DeerRecall 拥有本地、渐进增强的 GSAP 动效层。
+- DeerSearch、导入、人才库、候选人详情都具备 Level 2 动效。
+- 现有前端架构仍保持静态且桌面端兼容。
+- 所有自动化测试和静态构建校验通过。
+- Harness 资源检查包含新增运行时文件。
+- Reduced motion 可用。
+- 视觉 QA 未发现 overflow、边框不一致、出框动画或遮挡交互的 overlay。
