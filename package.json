@@ -5,7 +5,7 @@
   "main": "desktop/main.cjs",
   "description": "Static DeerRecall MVP prototype with Harness-compatible Docker Compose delivery.",
   "scripts": {
-    "check": "node --check app.js && node --check server/llm-gateway.mjs && node --check server/server.mjs && node --check desktop/ai-gateway.cjs && npm test",
+    "check": "node --check app.js && node --check motion.js && node --check server/llm-gateway.mjs && node --check server/server.mjs && node --check desktop/ai-gateway.cjs && npm test",
     "test": "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/desktop-ai-gateway.test.cjs tests/deersearch-engine.test.cjs",
     "clean": "rm -rf dist",
     "build": "node scripts/build-static.mjs",
@@ -26,6 +26,7 @@
     "electron-builder": "^26.15.3"
   },
   "dependencies": {
+    "gsap": "3.15.0",
     "mammoth": "^1.12.0",
     "pdf-parse": "^2.4.5"
   }

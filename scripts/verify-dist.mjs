@@ -7,36 +7,74 @@ const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, "..");
 const dist = path.join(root, "dist");
 
-const expectedAssets = new Set([
+const expectedRuntimeAssets = new Set([
   "index.html",
   "deersearch-engine.js",
   "app.js",
+  "motion.js",
   "styles.css",
+  "vendor/gsap.min.js",
+  "vendor/Flip.min.js",
 ]);
 
-let entries = [];
+const expectedRuntimeDirectories = new Set(["vendor"]);
 
+async function listRuntimeEntries(dir, prefix = "") {
+  const entries = await readdir(dir, { withFileTypes: true });
+  const files = [];
+  const directories = [];
+  const nonFileAssets = [];
+
+  for (const entry of entries) {
+    if (entry.name === ".DS_Store") continue;
+
+    const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
+    const fullPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      directories.push(relativePath);
+      const nested = await listRuntimeEntries(fullPath, relativePath);
+      files.push(...nested.files);
+      directories.push(...nested.directories);
+      nonFileAssets.push(...nested.nonFileAssets);
+    } else if (entry.isFile()) {
+      files.push(relativePath);
+    } else {
+      nonFileAssets.push(relativePath);
+    }
+  }
+
+  return { files, directories, nonFileAssets };
+}
+
+let runtimeEntries = { files: [], directories: [], nonFileAssets: [] };
 try {
-  entries = await readdir(dist, { withFileTypes: true });
+  runtimeEntries = await listRuntimeEntries(dist);
 } catch (error) {
   console.error(`Unable to read static artifact directory: ${path.relative(root, dist)}`);
   console.error(error.message);
   process.exitCode = 1;
 }
 
-const actualAssets = entries
-  .map((entry) => entry.name)
-  .filter((name) => name !== ".DS_Store")
-  .sort();
+const actualRuntimeAssets = runtimeEntries.files.sort();
+const actualRuntimeDirectories = runtimeEntries.directories.sort();
+const specialNonFileAssets = runtimeEntries.nonFileAssets.sort();
 
-const missingAssets = [...expectedAssets].filter((asset) => !actualAssets.includes(asset));
-const extraAssets = actualAssets.filter((asset) => !expectedAssets.has(asset));
-const nonFileAssets = entries
-  .filter((entry) => expectedAssets.has(entry.name) && !entry.isFile())
-  .map((entry) => entry.name);
+const missingAssets = [...expectedRuntimeAssets].filter((asset) => !actualRuntimeAssets.includes(asset));
+const extraAssets = [
+  ...actualRuntimeAssets.filter((asset) => !expectedRuntimeAssets.has(asset)),
+  ...actualRuntimeDirectories.filter(
+    (asset) => !expectedRuntimeDirectories.has(asset) && !expectedRuntimeAssets.has(asset),
+  ),
+  ...specialNonFileAssets.filter((asset) => !expectedRuntimeAssets.has(asset)),
+].sort();
+const nonFileAssets = [
+  ...actualRuntimeDirectories.filter((asset) => expectedRuntimeAssets.has(asset)),
+  ...specialNonFileAssets.filter((asset) => expectedRuntimeAssets.has(asset)),
+].sort();
 const emptyAssets = [];
 
-for (const asset of expectedAssets) {
+for (const asset of expectedRuntimeAssets) {
   if (missingAssets.includes(asset)) continue;
 
   const assetStat = await stat(path.join(dist, asset));
@@ -52,5 +90,5 @@ if (missingAssets.length || extraAssets.length || nonFileAssets.length || emptyA
   if (emptyAssets.length) console.error(`Runtime assets are empty: ${emptyAssets.join(", ")}`);
   process.exitCode = 1;
 } else {
-  console.log(`Verified DeerRecall static artifact: ${actualAssets.join(", ")}`);
+  console.log(`Verified DeerRecall static artifact: ${actualRuntimeAssets.join(", ")}`);
 }

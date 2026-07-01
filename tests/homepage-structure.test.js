@@ -866,7 +866,7 @@ test("candidate resume detail stays usable on narrow viewports", () => {
 test("project exposes npm scripts for Harness-compatible static delivery", () => {
   const pkg = JSON.parse(read("package.json"));
 
-  assert.equal(pkg.scripts.check, "node --check app.js && node --check server/llm-gateway.mjs && node --check server/server.mjs && node --check desktop/ai-gateway.cjs && npm test");
+  assert.equal(pkg.scripts.check, "node --check app.js && node --check motion.js && node --check server/llm-gateway.mjs && node --check server/server.mjs && node --check desktop/ai-gateway.cjs && npm test");
   assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/desktop-ai-gateway.test.cjs tests/deersearch-engine.test.cjs");
   assert.equal(pkg.scripts.clean, "rm -rf dist");
   assert.equal(pkg.scripts.build, "node scripts/build-static.mjs");
@@ -955,16 +955,57 @@ test("static build script copies runtime assets and excludes development-only fo
   assert.doesNotMatch(script, /"output"/);
 });
 
+test("main page loads local motion runtime before application scripts", () => {
+  const html = read("index.html");
+
+  const gsapIndex = html.indexOf('<script src="vendor/gsap.min.js"></script>');
+  const flipIndex = html.indexOf('<script src="vendor/Flip.min.js"></script>');
+  const motionIndex = html.indexOf('<script src="motion.js"></script>');
+  const searchIndex = html.indexOf('<script src="deersearch-engine.js"></script>');
+  const appIndex = html.indexOf('<script src="app.js"></script>');
+
+  assert.ok(gsapIndex > -1);
+  assert.ok(flipIndex > gsapIndex);
+  assert.ok(motionIndex > flipIndex);
+  assert.ok(searchIndex > motionIndex);
+  assert.ok(appIndex > searchIndex);
+});
+
+test("project exposes local motion runtime assets for static delivery", () => {
+  const pkg = JSON.parse(read("package.json"));
+  const build = read("scripts/build-static.mjs");
+  const verify = read("scripts/verify-dist.mjs");
+  const harness = read(".harness/deerrecall-ci-cd.yaml");
+  const readme = read("README.md");
+
+  assert.match(pkg.scripts.check, /node --check motion\.js/);
+  assert.match(build, /"motion\.js"/);
+  assert.match(build, /"vendor"/);
+  assert.match(verify, /"motion\.js"/);
+  assert.match(verify, /"vendor\/gsap\.min\.js"/);
+  assert.match(verify, /"vendor\/Flip\.min\.js"/);
+  assert.match(harness, /http:\/\/127\.0\.0\.1:8080\/motion\.js/);
+  assert.match(harness, /http:\/\/127\.0\.0\.1:8080\/vendor\/gsap\.min\.js/);
+  assert.match(harness, /http:\/\/127\.0\.0\.1:8080\/vendor\/Flip\.min\.js/);
+  assert.match(readme, /motion\.js/);
+  assert.match(readme, /vendor\/gsap\.min\.js/);
+});
+
 test("static dist verification rejects missing or extra runtime assets", () => {
   const script = read("scripts/verify-dist.mjs");
 
-  assert.match(script, /const expectedAssets = new Set/);
+  assert.match(script, /const expectedRuntimeAssets = new Set/);
   assert.match(script, /"index\.html"/);
   assert.match(script, /"app\.js"/);
   assert.match(script, /"deersearch-engine\.js"/);
+  assert.match(script, /"motion\.js"/);
   assert.match(script, /"styles\.css"/);
+  assert.match(script, /"vendor\/gsap\.min\.js"/);
+  assert.match(script, /"vendor\/Flip\.min\.js"/);
+  assert.match(script, /listRuntimeEntries/);
   assert.match(script, /missingAssets/);
   assert.match(script, /extraAssets/);
+  assert.match(script, /nonFileAssets/);
   assert.match(script, /process\.exitCode = 1/);
 });
 
@@ -1029,6 +1070,9 @@ test("harness pipeline runs test, build, image, deploy, and verify stages", () =
   assert.match(pipeline, /grep -q "id=\\"resultsState\\""/);
   assert.match(pipeline, /grep -q "id=\\"candidateResumeState\\""/);
   assert.match(pipeline, /grep -q "data-market-insight-run"/);
+  assert.match(pipeline, /motion\.js/);
+  assert.match(pipeline, /vendor\/gsap\.min\.js/);
+  assert.match(pipeline, /vendor\/Flip\.min\.js/);
   assert.match(pipeline, /deersearch-engine\.js/);
   assert.match(pipeline, /grep -qi "cache-control: no-cache, must-revalidate"/);
 });
@@ -1184,6 +1228,9 @@ test("Harness verifies Node health, static shell, cache headers, and AI status",
   assert.match(pipeline, /wget -qO- http:\/\/127\.0\.0\.1:8080\/api\/ai\/status/);
   assert.match(pipeline, /configured/);
   assert.match(pipeline, /wget -qS --spider http:\/\/127\.0\.0\.1:8080\/deersearch-engine\.js/);
+  assert.match(pipeline, /wget -qS --spider http:\/\/127\.0\.0\.1:8080\/motion\.js/);
+  assert.match(pipeline, /wget -qS --spider http:\/\/127\.0\.0\.1:8080\/vendor\/gsap\.min\.js/);
+  assert.match(pipeline, /wget -qS --spider http:\/\/127\.0\.0\.1:8080\/vendor\/Flip\.min\.js/);
   assert.match(pipeline, /cache-control: no-cache, must-revalidate/);
   assert.match(pipeline, /cache-control: no-store/);
 });

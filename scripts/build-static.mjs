@@ -11,7 +11,9 @@ const assets = [
   "index.html",
   "deersearch-engine.js",
   "app.js",
+  "motion.js",
   "styles.css",
+  "vendor",
 ];
 
 await rm(dist, { recursive: true, force: true });

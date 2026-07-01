@@ -34,6 +34,18 @@ npm run verify:dist
 npm run serve
 ```
 
+## 前端动效运行时
+
+DeerRecall 前端动效运行时由本地文件提供：`motion.js` 负责挂载渐进增强的 `window.DeerRecallMotion` 安全壳，`vendor/gsap.min.js` 和 `vendor/Flip.min.js` 固定为本地 GSAP runtime。`npm run build` 会把 `motion.js`、`vendor/gsap.min.js`、`vendor/Flip.min.js` 连同主页面和应用脚本复制到 `dist/`，Electron、Tauri、Docker 和 Harness 都只从 `dist/` 加载这些资源，不依赖 CDN。
+
+动效资源发布前使用同一组本地门禁：
+
+```bash
+npm run check
+npm run build
+npm run verify:dist
+```
+
 ## AI 市场画像 MVP
 
 DeerRecall 现在包含后台 AI 网关，用于候选人市场画像、薪资参考和 DeerSearch AI 回答。API Key 只在后台运行时配置，不会写入前端资源，也不会打包到浏览器代码里。
@@ -197,11 +209,12 @@ Harness 需要访问 Docker socket，才能构建镜像并执行 Docker Compose 
 
 部署到演示环境之外前，需要遵守：
 
-- 构建产物不包含设计参考资料：`npm run build` 只会把 `index.html`、`deersearch-engine.js`、`app.js`、`styles.css` 复制到 `dist/`。
+- 构建产物不包含设计参考资料：`npm run build` 只会把 `index.html`、`deersearch-engine.js`、`app.js`、`motion.js`、`styles.css` 和 `vendor/` 复制到 `dist/`。
 - `npm run verify:dist` 会拦截缺文件、多余文件或空文件的发布产物。
 - JS、CSS 和搜索引擎脚本使用 `no-cache, must-revalidate`，因为当前文件名还没有内容 hash。
+- 前端动效运行时 `motion.js`、`vendor/gsap.min.js`、`vendor/Flip.min.js` 同样使用 `no-cache, must-revalidate`，确保静态发布后所有入口一致刷新。
 - SPA 入口 HTML 使用 `no-store`，确保发布检查总是拿到最新入口。
-- Harness verify 会等待 Node runtime 就绪，检查部署后的核心 SPA 和 AI 入口，检查 `/api/ai/status`，并验证 `app.js`、`deersearch-engine.js`、`styles.css`、`/` 的缓存头。
+- Harness verify 会等待 Node runtime 就绪，检查部署后的核心 SPA、动效运行时和 AI 入口，检查 `/api/ai/status`，并验证 `app.js`、`motion.js`、`deersearch-engine.js`、`vendor/gsap.min.js`、`vendor/Flip.min.js`、`styles.css`、`/` 的缓存头。
 - 生产发布前应创建 release tag，并部署不可变镜像 tag，方便回滚到上一版。
 
 Harness Open Source 本地启动示例：
