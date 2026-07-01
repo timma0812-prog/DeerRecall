@@ -3340,6 +3340,10 @@ function setMarketInsightState(state, message) {
   });
 }
 
+function getActiveCandidateResumeAssistant() {
+  return Array.from(candidateResumeAssistants).find((panel) => !panel.classList.contains("state-hidden")) || null;
+}
+
 function renderMarketInsight(insight) {
   marketInsightCards.forEach((card) => {
     card.querySelector("[data-market-insight-position]").textContent = insight.market_position;
@@ -3355,7 +3359,7 @@ function renderMarketInsight(insight) {
     card.querySelector("[data-market-insight-disclaimer]").textContent = insight.disclaimer;
   });
   setMarketInsightState("ready", "已生成市场画像。");
-  window.DeerRecallMotion?.enterMarketInsight?.(candidateResumeState);
+  window.DeerRecallMotion?.enterMarketInsight?.(getActiveCandidateResumeAssistant() || candidateResumeState);
 }
 
 async function requestMarketInsight() {
