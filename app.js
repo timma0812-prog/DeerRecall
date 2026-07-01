@@ -2429,7 +2429,6 @@ function showTalentState(filter = currentTalentFilter) {
   talentState.classList.remove("state-hidden");
   setTalentFilter(filter);
   setActiveNav("talents");
-  window.DeerRecallMotion?.enterTalentView?.(talentState);
 }
 
 function showTalentDetailShell(detailView) {
@@ -4066,6 +4065,5 @@ if (isDesktopLocalLibrary) {
   loadLocalTalentLibrary();
 } else {
   setTaskFilter("all");
-  setTalentFilter("all");
   showTalentState("all");
 }

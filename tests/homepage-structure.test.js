@@ -201,6 +201,18 @@ test("import and talent library wire motion hooks to existing state functions", 
   assert.match(js, /function selectTalentItem/);
 });
 
+test("talent state change does not trigger duplicate enter animations", () => {
+  const js = read("app.js");
+  const setTalentFilterBody = js.match(/function setTalentFilter\(filter\) \{[\s\S]*?\n\}/)?.[0] || "";
+  const showTalentStateBody = js.match(/function showTalentState\(filter = currentTalentFilter\) \{[\s\S]*?\n\}/)?.[0] || "";
+  const staticStartupBody = js.match(/else \{\n  setTaskFilter\("all"\);[\s\S]*?\n\}/)?.[0] || "";
+
+  assert.match(setTalentFilterBody, /DeerRecallMotion\?\.enterTalentView\?\.?\(talentState\)/);
+  assert.doesNotMatch(showTalentStateBody, /DeerRecallMotion\?\.enterTalentView/);
+  assert.doesNotMatch(staticStartupBody, /setTalentFilter\("all"\)/);
+  assert.match(staticStartupBody, /showTalentState\("all"\)/);
+});
+
 test("candidate detail motion replaces resumeRise conflicts safely", () => {
   const js = read("app.js");
   const css = read("styles.css");
