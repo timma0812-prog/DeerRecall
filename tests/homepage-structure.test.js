@@ -201,6 +201,19 @@ test("import and talent library wire motion hooks to existing state functions", 
   assert.match(js, /function selectTalentItem/);
 });
 
+test("candidate detail motion replaces resumeRise conflicts safely", () => {
+  const js = read("app.js");
+  const css = read("styles.css");
+
+  assert.match(js, /DeerRecallMotion\?\.enterResumeDetail/);
+  assert.match(js, /DeerRecallMotion\?\.enterResumePanel/);
+  assert.match(js, /DeerRecallMotion\?\.enterMarketInsight/);
+  assert.match(css, /\.motion-ready \.resume-profile-hero/);
+  assert.match(css, /\.motion-ready \.resume-detail-card/);
+  assert.match(css, /\.motion-ready \.resume-tab-panel/);
+  assert.match(css, /animation:\s*none/);
+});
+
 test("DeerSearch default state does not seed a Java payment risk query", () => {
   const html = read("index.html");
   const js = read("app.js");

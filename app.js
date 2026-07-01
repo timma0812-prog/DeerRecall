@@ -3264,6 +3264,7 @@ function showCandidateResumePanel(viewName = "summary") {
     panel.classList.toggle("is-active", isActive);
     panel.classList.toggle("state-hidden", !isActive);
   });
+  window.DeerRecallMotion?.enterResumePanel?.(candidateResumeState);
 }
 
 function showToast(message) {
@@ -3354,6 +3355,7 @@ function renderMarketInsight(insight) {
     card.querySelector("[data-market-insight-disclaimer]").textContent = insight.disclaimer;
   });
   setMarketInsightState("ready", "已生成市场画像。");
+  window.DeerRecallMotion?.enterMarketInsight?.(candidateResumeState);
 }
 
 async function requestMarketInsight() {
@@ -3407,6 +3409,7 @@ function openCandidateResume(candidateId, options = {}) {
   setActiveNav(activeNav);
   setMarketInsightState("idle", "基于当前简历估算市场定位、薪资参考和沟通建议。");
   updateCandidateResume(candidate);
+  window.DeerRecallMotion?.enterResumeDetail?.(candidateResumeState);
 }
 
 function closeCandidateResume() {
