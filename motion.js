@@ -86,6 +86,7 @@
     let state;
     try {
       const targets = targetsSelector ? toArray(targetsSelector, container) : Array.from(container.children);
+      if (!targets.length) return runMutation(mutator);
       state = Flip.getState(targets);
     } catch (error) {
       return runMutation(mutator);
@@ -187,6 +188,8 @@
   function enterResumeDetail(root) {
     if (!canAnimate(root)) return false;
     const targets = toArray(".resume-profile-hero, .resume-tabs, .resume-detail-card", root);
+    if (!targets.length) return false;
+
     gsap.fromTo(
       targets,
       { autoAlpha: 0, y: 16 },

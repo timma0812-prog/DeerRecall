@@ -1202,9 +1202,39 @@ test("motion entry hooks skip empty animation targets cleanly", () => {
   assert.equal(window.DeerRecallMotion.enterSearchResults(emptyRoot), false);
   assert.equal(window.DeerRecallMotion.enterImportState("finished", importRoot), false);
   assert.equal(window.DeerRecallMotion.enterTalentView(emptyRoot), false);
+  assert.equal(window.DeerRecallMotion.enterResumeDetail(emptyRoot), false);
   assert.equal(window.DeerRecallMotion.enterMarketInsight(emptyRoot), false);
   assert.equal(fromToCalls, 0);
   assert.equal(timelineFromToCalls, 0);
+});
+
+test("motion Flip hooks skip empty animation targets without replaying mutations", () => {
+  let getStateCalls = 0;
+  let fromCalls = 0;
+  const { window, TestElement } = createMotionTestEnvironment({
+    gsap: createGsapStub(),
+    Flip: createFlipStub({
+      getState(targets) {
+        getStateCalls += 1;
+        return { targets };
+      },
+      from() {
+        fromCalls += 1;
+      },
+    }),
+  });
+  const emptyContainer = new TestElement();
+  let mutations = 0;
+
+  assert.equal(
+    window.DeerRecallMotion.flipSearchCards(emptyContainer, () => {
+      mutations += 1;
+    }),
+    true,
+  );
+  assert.equal(mutations, 1);
+  assert.equal(getStateCalls, 0);
+  assert.equal(fromCalls, 0);
 });
 
 test("motion scan layer is scoped to the search results surface", () => {
