@@ -1,0 +1,4077 @@
+const emptyState = document.querySelector("#emptyState");
+const resultsState = document.querySelector("#resultsState");
+const importState = document.querySelector("#importState");
+const taskState = document.querySelector("#taskState");
+const talentState = document.querySelector("#talentState");
+const talentSourceDetailState = document.querySelector("#talentSourceDetailState");
+const talentDuplicateDetailState = document.querySelector("#talentDuplicateDetailState");
+const talentPendingCompleteState = document.querySelector("#talentPendingCompleteState");
+const importActionState = document.querySelector("#importActionState");
+const talentAdvancedFilterState = document.querySelector("#talentAdvancedFilterState");
+const talentCandidateActionsState = document.querySelector("#talentCandidateActionsState");
+const settingsState = document.querySelector("#settingsState");
+const candidateResumeState = document.querySelector("#candidateResumeState");
+const exportCenterState = document.querySelector("#exportCenterState");
+const shortlistState = document.querySelector("#shortlistState");
+const tagManagerState = document.querySelector("#tagManagerState");
+const taskFailureDetailState = document.querySelector("#taskFailureDetailState");
+const searchFilterState = document.querySelector("#searchFilterState");
+const emptySide = document.querySelector("#emptySide");
+const resultsSide = document.querySelector("#resultsSide");
+const emptySearchForm = document.querySelector("#emptySearchForm");
+const refineSearchForm = document.querySelector("#refineSearchForm");
+const emptySearchInput = document.querySelector("#emptySearchInput");
+const refineSearchInput = document.querySelector("#refineSearchInput");
+const userQuery = document.querySelector("#userQuery");
+const currentQuery = document.querySelector("#currentQuery");
+const shortlistCount = document.querySelector("#shortlistCount");
+const shortlistText = document.querySelector("#shortlistText");
+const selectedCandidates = new Set();
+const navButtons = document.querySelectorAll("[data-nav-view]");
+const importPanels = document.querySelectorAll("[data-import-state]");
+const importSidePanels = document.querySelectorAll("[data-import-side]");
+const importStateButtons = document.querySelectorAll("[data-target-state]");
+const importOpenButtons = document.querySelectorAll("[data-import-open]");
+const importActionCards = document.querySelectorAll("[data-import-action-card]");
+const importPickButtons = document.querySelectorAll("[data-import-pick]");
+const importSourceButtons = document.querySelectorAll("[data-import-source-action]");
+const importDropZone = document.querySelector("[data-import-drop-zone]");
+const importPickerCard = document.querySelector("[data-import-picker-card]");
+const importPickerStatus = document.querySelector("[data-import-picker-status]");
+const importFolderInput = document.querySelector("[data-import-folder-input]");
+const importFileInput = document.querySelector("[data-import-file-input]");
+const importSettingInputs = document.querySelectorAll("[data-import-setting]");
+const importTaskOpenButtons = document.querySelectorAll("[data-import-task-open]");
+const taskAssistantPanels = document.querySelectorAll("[data-task-panel]");
+const taskFilterButtons = document.querySelectorAll("[data-task-filter]");
+const taskPanelButtons = document.querySelectorAll("[data-task-panel-target]");
+let taskRows = document.querySelectorAll("[data-task-item]");
+const taskViews = document.querySelectorAll("[data-task-view]");
+const taskOpenButtons = document.querySelectorAll("[data-task-open]");
+const taskReturnButtons = document.querySelectorAll("[data-task-return]");
+const taskResolveButtons = document.querySelectorAll("[data-task-resolve]");
+const taskIssueList = document.querySelector("[data-task-issue-list]");
+const taskDetailList = document.querySelector("[data-task-detail-list]");
+const talentAssistantPanels = document.querySelectorAll("[data-talent-panel]");
+const talentFilterButtons = document.querySelectorAll("[data-talent-filter]");
+const talentPanelButtons = document.querySelectorAll("[data-talent-panel-target]");
+const talentViews = document.querySelectorAll("[data-talent-view]");
+let talentItems = document.querySelectorAll("[data-talent-item]");
+const talentStars = document.querySelectorAll(".talent-star");
+const talentOpenButtons = document.querySelectorAll("[data-talent-open]");
+const talentDetailReturnButtons = document.querySelectorAll("[data-talent-detail-return]");
+const talentDetailActionButtons = document.querySelectorAll("[data-talent-detail-action]");
+const talentDetailAssistants = document.querySelectorAll(".talent-detail-assistant");
+const p1Assistants = document.querySelectorAll(".p1-detail-assistant");
+const p1ReturnButtons = document.querySelectorAll("[data-p1-return]");
+const p1ActionButtons = document.querySelectorAll("[data-p1-action]");
+const importActionRunButtons = document.querySelectorAll("[data-import-action-run]");
+const p2Assistants = document.querySelectorAll(".p2-detail-assistant");
+const p2ReturnButtons = document.querySelectorAll("[data-p2-return]");
+const p2ActionButtons = document.querySelectorAll("[data-p2-action]");
+const exportOpenButtons = document.querySelectorAll("[data-export-open]");
+const exportScopeButtons = document.querySelectorAll("[data-export-scope-option]");
+const shortlistOpenButtons = document.querySelectorAll("[data-shortlist-open]");
+const tagOpenButtons = document.querySelectorAll("[data-tag-open]");
+const taskFailureOpenButtons = document.querySelectorAll("[data-task-failure-open]");
+const searchFilterOpenButtons = document.querySelectorAll("[data-search-filter-open]");
+const candidateResumeAssistants = document.querySelectorAll(".candidate-resume-assistant");
+const candidateResumeTabs = document.querySelectorAll("[data-candidate-resume-tab]");
+const candidateResumePanels = document.querySelectorAll("[data-candidate-resume-panel]");
+const candidateResumeReturnButtons = document.querySelectorAll("[data-candidate-resume-return]");
+const resumeActionButtons = document.querySelectorAll("[data-resume-action]");
+const searchCapabilityButtons = document.querySelectorAll("[data-search-capability]");
+const searchCapabilityDetail = document.querySelector("[data-search-capability-detail]");
+const searchTipsToggle = document.querySelector("[data-search-tips-toggle]");
+const searchTipsGuide = document.querySelector("#searchTipsGuide");
+const searchFilterBar = document.querySelector("[data-search-filter-bar]");
+const searchFilterAddButton = document.querySelector("[data-search-filter-add]");
+const searchCityToggle = document.querySelector("[data-search-city-toggle]");
+const searchCityLabel = document.querySelector("[data-search-city-label]");
+const searchSortToggle = document.querySelector("[data-search-sort-toggle]");
+const searchSortLabel = document.querySelector("[data-search-sort-label]");
+const searchResultCountLine = document.querySelector("[data-search-result-count]");
+const searchCandidateGrid = document.querySelector(".candidate-grid");
+let searchCandidateCards = Array.from(document.querySelectorAll(".candidate-grid [data-search-score]"));
+const localLibraryEmpty = document.querySelector("[data-local-library-empty]");
+const localCandidateList = document.querySelector("[data-local-candidate-list]");
+const localSearchList = document.querySelector("[data-local-search-list]");
+const localSourceList = document.querySelector("[data-local-source-list]");
+const localTaskList = document.querySelector("[data-local-task-list]");
+const isDesktopLocalLibrary = Boolean(window.deerRecallDesktop);
+const searchAiCard = document.querySelector("[data-search-ai-card]");
+const searchAiStatus = document.querySelector("[data-search-ai-status]");
+const searchAiAnswer = document.querySelector("[data-search-ai-answer]");
+const searchAiAnswerBody = document.querySelector("[data-search-ai-answer-body]");
+const searchAiSuggestions = document.querySelector("[data-search-ai-suggestions]");
+const searchAiHistoryList = document.querySelector("[data-search-ai-history]");
+const searchAiHistoryEmpty = document.querySelector("[data-search-ai-history-empty]");
+const searchAiHistoryClear = document.querySelector("[data-search-ai-history-clear]");
+const searchConversationAnswer = document.querySelector("[data-search-conversation-answer]");
+const marketInsightButtons = document.querySelectorAll("[data-market-insight-run]");
+const marketInsightCards = document.querySelectorAll("[data-market-insight-card]");
+
+const defaultQuery = "查看本地人才库中已解析的简历。";
+const SEARCH_AI_HISTORY_KEY = "deerrecall:searchAiHistory";
+const SEARCH_AI_HISTORY_LIMIT = 8;
+const AI_API_PATHS = {
+  status: "/api/ai/status",
+  "search-assistant": "/api/ai/search-assistant",
+  "market-insight": "/api/ai/market-insight",
+};
+const searchCityOptions = ["城市不限", "上海", "杭州", "深圳", "北京"];
+const searchSortOptions = [
+  { label: "按匹配度排序", key: "score" },
+  { label: "按经验年限排序", key: "years" },
+];
+const searchExtraFilters = [
+  { id: "complete", label: "资料完整" },
+  { id: "recent-import", label: "近 30 天导入" },
+  { id: "exclude-duplicate", label: "排除疑似重复" },
+];
+const searchCapabilityCopy = {
+  natural: {
+    title: "自然语言搜人",
+    text: "直接写岗位、技能、业务场景和限制条件，系统会把一句话拆成可执行的搜索条件。",
+  },
+  semantic: {
+    title: "简历语义匹配",
+    text: "不只匹配关键词，还会读取项目经历、职责描述和行业上下文，找出表达不同但能力相近的人选。",
+  },
+  shortlist: {
+    title: "候选人短名单",
+    text: "把当前认可的人选临时收集起来，后续可统一复制摘要、导出或继续做相似候选人搜索。",
+  },
+};
+const talentFilters = new Set(["all", "recent", "saved", "pending", "duplicate"]);
+const candidateRecords = {
+  candidate_chenyu_001: {
+    id: "candidate_chenyu_001",
+    name: "陈屿",
+    initial: "陈",
+    title: "Java 后端开发工程师",
+    city: "上海",
+    years: 7,
+    role: "Java 后端开发工程师 · 上海 · 7 年经验",
+    shortRole: "Java 后端开发工程师 · 上海 · 7 年",
+    score: 92,
+    matchScore: 92,
+    completeness: 92,
+    source: "FinTech_Backend_2026",
+    sourceName: "FinTech_Backend_2026",
+    created: "今天 10:32",
+    importedAt: "今天 10:32",
+    file: "陈屿_Java后端工程师_7年.pdf",
+    resumeFileName: "陈屿_Java后端工程师_7年.pdf",
+    company: "某金融科技公司",
+    project: "支付风控规则引擎",
+    experience: "负责支付风控规则引擎、交易拦截服务和风险命中记录。",
+    recentExperience: {
+      company: "某金融科技公司",
+      title: "高级后端工程师",
+      period: "2022.06 - 至今",
+      summary: "负责支付风控交易链路、规则引擎与风险命中记录服务。",
+    },
+    keyProject: {
+      name: "支付风控规则引擎",
+      summary: "参与规则配置、实时计算、交易拦截与风控日志模块，支撑高并发交易场景。",
+    },
+    stack: "Java / Spring Boot / Redis / Kafka / MySQL",
+    matchNote: "与“支付风控 Java 后端”搜索条件匹配度较高。",
+    tags: ["Java", "Spring Boot", "支付风控", "高并发", "金融科技"],
+    summary: [
+      "7 年 Java 后端经验，长期负责支付与风控相关系统，业务方向与当前搜索高度贴合。",
+      "熟悉规则引擎、交易链路、Redis / Kafka / MySQL 等技术栈，有高并发处理经验。",
+      "最近经历集中在金融科技场景，适合支付风控、交易平台、后端服务治理方向。",
+    ],
+    matchEvidence: [
+      { label: "Java / Spring", level: "strong", score: 98 },
+      { label: "支付风控经验", level: "strong", score: 94 },
+      { label: "高并发项目", level: "strong", score: 88 },
+      { label: "金融科技背景", level: "bonus", score: 76 },
+    ],
+    contacts: {
+      phone: "138****5678",
+      email: "chenyu@example.com",
+      wechat: "chenyu_tech",
+    },
+  },
+  "lin-xiaoran": {
+    id: "lin-xiaoran",
+    name: "林晓然",
+    initial: "林",
+    role: "高级 Java 开发工程师 · 杭州 · 6 年经验",
+    shortRole: "高级 Java 开发工程师 · 杭州 · 6 年",
+    score: 88,
+    source: "客户A_后端简历包",
+    created: "今天 09:48",
+    file: "林晓然_后端架构师.docx",
+    company: "客户A 金融支付团队",
+    project: "风控服务拆分与性能优化",
+    experience: "负责风控服务拆分、链路稳定性治理和交易高峰性能优化。",
+    stack: "Java / Spring Cloud / Redis / Kafka",
+    matchNote: "Java / 支付 / 微服务均命中",
+    tags: ["Java", "Spring Cloud", "微服务", "Redis", "Kafka"],
+    summary: [
+      "6 年 Java 后端经验，熟悉金融支付和风控服务场景。",
+      "负责风控服务拆分与性能优化，支撑高并发交易链路。",
+      "Spring Cloud、Redis、Kafka 使用经验完整。",
+      "资料有少量待补字段，适合沟通前快速确认邮箱与教育经历。",
+    ],
+  },
+  "zhou-jing": {
+    id: "zhou-jing",
+    name: "周靖",
+    initial: "周",
+    role: "后端架构师 · 深圳 · 9 年经验",
+    shortRole: "后端架构师 · 深圳 · 9 年",
+    score: 84,
+    source: "Java后端候选人_5月",
+    created: "昨天 16:22",
+    file: "周靖_后端架构师.pdf",
+    company: "互联网金融平台",
+    project: "支付风控平台架构升级",
+    experience: "主导支付风控平台架构与服务治理，保障核心链路稳定性。",
+    stack: "Java / 分布式架构 / MySQL / 性能优化",
+    matchNote: "架构设计 / 高并发 / 风控平台匹配",
+    tags: ["架构设计", "高并发", "分布式", "性能优化", "MySQL"],
+    summary: [
+      "9 年后端与架构经验，擅长平台治理和核心链路稳定性。",
+      "主导过支付风控平台架构设计，适合偏技术治理角色。",
+      "高并发、分布式、性能优化证据较完整。",
+      "和当前搜索需求匹配，但岗位层级更偏架构方向。",
+    ],
+  },
+  "xu-nan": {
+    id: "xu-nan",
+    name: "许南",
+    initial: "许",
+    role: "后端工程师 · 北京 · 5 年经验",
+    shortRole: "后端工程师 · 北京 · 5 年",
+    score: 81,
+    source: "FinTech_Backend_2026",
+    created: "昨天 11:05",
+    file: "许南_后端工程师.pdf",
+    company: "金融科技创业公司",
+    project: "反欺诈与消息队列治理",
+    experience: "参与反欺诈模块和消息队列治理，支持风控规则优化。",
+    stack: "Java / Spring Boot / MySQL / Redis / Linux",
+    matchNote: "Java / 风控 / Kafka 经验命中",
+    tags: ["Java", "Spring Boot", "MySQL", "Redis", "Linux"],
+    summary: [
+      "5 年 Java 后端经验，有反欺诈模块和风控规则优化经历。",
+      "熟悉 Spring Boot、MySQL、Redis 和 Linux 环境。",
+      "高并发证据相对简洁，可作为备选候选人继续确认。",
+      "当前档案存在疑似重复记录，建议先完成合并判断。",
+    ],
+  },
+};
+candidateRecords["chen-yu"] = candidateRecords.candidate_chenyu_001;
+const taskRecords = {
+  customer_backend_001: {
+    id: "customer_backend_001",
+    source: "客户A_后端简历包",
+    importType: "文件夹导入",
+    time: "今天 09:40",
+    status: "partial_failed",
+    total: 54,
+    success: 42,
+    failed: 8,
+    unsupported: 4,
+    skipped: 0,
+    retryable: 5,
+    newProfiles: 34,
+    updatedProfiles: 8,
+    files: [
+      { id: "cb-01", name: "陈屿_Java后端工程师.pdf", info: "1.6 MB · PDF", ext: "PDF", status: "success", result: "已入库：陈屿" },
+      { id: "cb-02", name: "李思_后端开发工程师.docx", info: "1.1 MB · DOCX", ext: "DOCX", status: "success", result: "已入库：李思" },
+      { id: "cb-03", name: "张明_高级Java开发.pdf", info: "2.4 MB · PDF", ext: "PDF", status: "failed", reason: "扫描件不可读", suggestion: "转为清晰 PDF 后重试", retryable: true, selected: true },
+      { id: "cb-04", name: "王晶_简历扫描件.pdf", info: "3.6 MB · PDF", ext: "PDF", status: "failed", reason: "扫描件不可读", suggestion: "使用更清晰的 PDF 或重新扫描", retryable: true, selected: true },
+      { id: "cb-05", name: "赵敏_产品经理.pages", info: "1.8 MB · PAGES", ext: "PAGES", status: "unsupported", reason: "格式不支持", suggestion: "转为 PDF 或 DOCX 后重新导入", retryable: false, selected: true },
+      { id: "cb-06", name: "陈晨_测试工程师.doc", info: "0 KB · DOC", ext: "DOC", status: "failed", reason: "内容为空", suggestion: "确认文件是否为空白或仅包含图片", retryable: true, selected: false },
+    ],
+  },
+  campus_resume_001: {
+    id: "campus_resume_001",
+    source: "校招候选人_简历包",
+    importType: "批量文件导入",
+    time: "今天 08:15",
+    status: "failed",
+    total: 27,
+    success: 16,
+    failed: 6,
+    unsupported: 5,
+    skipped: 0,
+    retryable: 4,
+    newProfiles: 14,
+    updatedProfiles: 2,
+    files: [
+      { id: "cr-01", name: "刘洋_后端实习生.pdf", info: "960 KB · PDF", ext: "PDF", status: "success", result: "已入库：刘洋" },
+      { id: "cr-02", name: "周宁_算法工程师.pdf", info: "1.5 MB · PDF", ext: "PDF", status: "failed", reason: "文件损坏", suggestion: "定位原文件并替换后重试", retryable: false, selected: true },
+      { id: "cr-03", name: "许然_Java开发.docx", info: "820 KB · DOCX", ext: "DOCX", status: "failed", reason: "内容为空", suggestion: "确认文件内容后重新解析", retryable: true, selected: true },
+      { id: "cr-04", name: "李昊_前端工程师.pages", info: "1.2 MB · PAGES", ext: "PAGES", status: "unsupported", reason: "格式不支持", suggestion: "转为 PDF 或 DOCX 后重新导入", retryable: false, selected: true },
+      { id: "cr-05", name: "王若_数据分析.pdf", info: "1.9 MB · PDF", ext: "PDF", status: "failed", reason: "扫描件不可读", suggestion: "替换为高清扫描件后重试", retryable: true, selected: false },
+    ],
+  },
+  fintech_backend_2026: {
+    id: "fintech_backend_2026",
+    source: "FinTech_Backend_2026",
+    importType: "文件夹导入",
+    time: "今天 10:32",
+    status: "processing",
+    total: 126,
+    success: 86,
+    failed: 2,
+    unsupported: 0,
+    skipped: 0,
+    retryable: 2,
+    newProfiles: 72,
+    updatedProfiles: 14,
+    files: [
+      { id: "fb-01", name: "张明_高级Java开发工程师.pdf", info: "2.4 MB · PDF", ext: "PDF", status: "success", result: "已入库：张明" },
+      { id: "fb-02", name: "林晓然_后端架构师.docx", info: "1.4 MB · DOCX", ext: "DOCX", status: "success", result: "已入库：林晓然" },
+      { id: "fb-03", name: "韩舟_支付风控.pdf", info: "2.1 MB · PDF", ext: "PDF", status: "failed", reason: "文件损坏", suggestion: "定位原文件并替换后重试", retryable: false, selected: true },
+      { id: "fb-04", name: "许南_后端工程师.pdf", info: "1.8 MB · PDF", ext: "PDF", status: "failed", reason: "内容为空", suggestion: "确认文件内容后重新解析", retryable: true, selected: true },
+    ],
+  },
+};
+const defaultTalentLibrary = {
+  candidates: [
+    candidateRecords.candidate_chenyu_001,
+    candidateRecords["lin-xiaoran"],
+    candidateRecords["zhou-jing"],
+    candidateRecords["xu-nan"],
+  ],
+  importTasks: Object.values(taskRecords),
+  sources: [],
+};
+const importSupportedExtensions = new Set(["pdf", "doc", "docx", "txt", "md", "markdown"]);
+const importSettings = {
+  scanSubfolders: true,
+  autoDedupe: true,
+  autoTalent: true,
+};
+let currentImportState = "default";
+let currentImportSource = {
+  name: "FinTech_Backend_2026",
+  path: "/Users/deer/Downloads/FinTech_Backend_2026",
+  type: "文件夹",
+  files: [],
+  rawStats: {
+    total: 126,
+    parseable: 108,
+    duplicate: 12,
+    unsupported: 6,
+    newProfiles: 96,
+    updatedProfiles: 18,
+    skippedDuplicates: 9,
+    failed: 3,
+  },
+  stats: {
+    total: 126,
+    parseable: 108,
+    duplicate: 12,
+    unsupported: 6,
+    newProfiles: 96,
+    updatedProfiles: 18,
+    skippedDuplicates: 9,
+    failed: 3,
+  },
+};
+let currentTaskPanel = "overview";
+let currentTaskView = "list";
+let selectedTaskId = null;
+let currentView = "candidateResumeDetail";
+let currentCandidateView = "summary";
+let selectedCandidateId = null;
+let candidateResumeEntry = "talent";
+let resumeReturnContext = null;
+let currentTalentPanel = "overview";
+let currentTalentFilter = "all";
+let currentTalentDetailView = null;
+let currentImportAction = "searchImported";
+let currentQueryId = "local_default";
+let currentExportScope = "candidateList";
+let currentSearchCityIndex = 0;
+let currentSearchSortIndex = 0;
+let searchExtraFilterCursor = 0;
+let searchAiHistory = loadSearchAiHistory();
+let activeSearchAiHistoryId = searchAiHistory[0]?.id || null;
+let searchAiServiceStatus = null;
+let activeSearchResult = null;
+let localTalentLibrary = null;
+let p2ReturnContext = { view: "talents", talentFilter: "all", taskId: null, searchQuery: defaultQuery };
+
+function hideCandidateResumeContext() {
+  candidateResumeState.classList.add("state-hidden");
+  candidateResumeAssistants.forEach((panel) => panel.classList.add("state-hidden"));
+}
+
+function hideTalentDetailViews() {
+  talentDuplicateDetailState.classList.add("state-hidden");
+  talentPendingCompleteState.classList.add("state-hidden");
+  talentDetailAssistants.forEach((panel) => panel.classList.add("state-hidden"));
+}
+
+function hideP1Views() {
+  talentSourceDetailState.classList.add("state-hidden");
+  importActionState.classList.add("state-hidden");
+  talentAdvancedFilterState.classList.add("state-hidden");
+  talentCandidateActionsState.classList.add("state-hidden");
+  settingsState.classList.add("state-hidden");
+  p1Assistants.forEach((panel) => panel.classList.add("state-hidden"));
+}
+
+function hideP2Views() {
+  exportCenterState.classList.add("state-hidden");
+  shortlistState.classList.add("state-hidden");
+  tagManagerState.classList.add("state-hidden");
+  taskFailureDetailState.classList.add("state-hidden");
+  searchFilterState.classList.add("state-hidden");
+  p2Assistants.forEach((panel) => panel.classList.add("state-hidden"));
+}
+
+function hideAllAssistantContexts() {
+  emptySide.classList.add("state-hidden");
+  resultsSide.classList.add("state-hidden");
+  importSidePanels.forEach((panel) => panel.classList.add("state-hidden"));
+  taskAssistantPanels.forEach((panel) => panel.classList.add("state-hidden"));
+  talentAssistantPanels.forEach((panel) => panel.classList.add("state-hidden"));
+  talentDetailAssistants.forEach((panel) => panel.classList.add("state-hidden"));
+  p1Assistants.forEach((panel) => panel.classList.add("state-hidden"));
+  p2Assistants.forEach((panel) => panel.classList.add("state-hidden"));
+  candidateResumeAssistants.forEach((panel) => panel.classList.add("state-hidden"));
+}
+
+function normalizeQuery(value) {
+  const query = value.trim();
+  if (!query) return defaultQuery;
+  return /[。！？.!?]$/.test(query) ? query : `${query}。`;
+}
+
+function escapeHtml(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function renderInlineList(target, items) {
+  if (!target) return;
+  target.innerHTML = (items || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+}
+
+function normalizeLocalLibrary(library) {
+  return {
+    schemaVersion: library?.schemaVersion || 1,
+    candidates: Array.isArray(library?.candidates) ? library.candidates : [],
+    importTasks: Array.isArray(library?.importTasks) ? library.importTasks : [],
+    sources: Array.isArray(library?.sources) ? library.sources : [],
+  };
+}
+
+function getLocalCandidates() {
+  return normalizeLocalLibrary(localTalentLibrary).candidates;
+}
+
+function formatLocalTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value || "刚刚";
+  return date.toLocaleString("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function getLocalCandidateRole(candidate) {
+  return candidate.shortRole || candidate.role || candidate.title || "候选人";
+}
+
+function getLocalCandidateStatus(candidate) {
+  const hasContact = Boolean(candidate.contacts?.phone || candidate.contacts?.email);
+  if (candidate.completeness >= 80 || hasContact) return { label: "资料完整", className: "green" };
+  return { label: "待完善", className: "yellow" };
+}
+
+function getLocalCandidateTags(candidate) {
+  const tags = Array.isArray(candidate.tags) ? candidate.tags.filter(Boolean).slice(0, 6) : [];
+  return tags.length ? tags : ["本地解析"];
+}
+
+function getLocalCandidateSummary(candidate) {
+  if (Array.isArray(candidate.summary) && candidate.summary.length) return candidate.summary[0];
+  return candidate.experience || candidate.matchNote || "已从本地简历提取正文，等待补充结构化信息。";
+}
+
+function renderAiCandidateInsight(candidate) {
+  if (!candidate.aiMatchSummary && !candidate.aiStrengths?.length && !candidate.aiConcerns?.length) return "";
+  const strengths = Array.isArray(candidate.aiStrengths) ? candidate.aiStrengths.slice(0, 3) : [];
+  const concerns = Array.isArray(candidate.aiConcerns) ? candidate.aiConcerns.slice(0, 2) : [];
+  const strengthText = strengths.length ? `匹配点：${strengths.map(escapeHtml).join("、")}` : "";
+  const concernText = concerns.length ? `待确认：${concerns.map(escapeHtml).join("、")}` : "";
+  return `
+    <div class="ai-match-note" data-ai-match-summary>
+      <strong>AI 判断</strong>
+      <p>${escapeHtml(candidate.aiMatchSummary || "AI 已基于本地召回结果给出匹配判断。")}</p>
+      ${strengthText ? `<span>${strengthText}</span>` : ""}
+      ${concernText ? `<span>${concernText}</span>` : ""}
+    </div>
+  `;
+}
+
+function updateLocalKpis(candidates) {
+  const pending = candidates.filter((candidate) => getLocalCandidateStatus(candidate).label === "待完善").length;
+  const counts = {
+    total: candidates.length,
+    recent: candidates.length,
+    pending,
+    duplicate: 0,
+  };
+  document.querySelectorAll("[data-local-kpi]").forEach((node) => {
+    const value = counts[node.dataset.localKpi];
+    if (Number.isFinite(value)) node.textContent = String(value);
+  });
+  document.querySelectorAll("[data-local-indexed-count]").forEach((node) => {
+    node.textContent = String(candidates.length);
+  });
+}
+
+function renderLocalSearchCards(candidates, options = {}) {
+  if (!localSearchList) return;
+  if (!candidates.length) {
+    const title = options.emptyTitle || "暂无候选人";
+    const role = options.emptyRole || "请先导入本地简历文件夹";
+    const message = options.emptyMessage || "本地人才库为空，搜索会在导入并解析简历后开始返回结果。";
+    localSearchList.innerHTML = `
+      <article class="candidate-card local-empty-card">
+        <div class="candidate-top">
+          <div>
+            <h3>${escapeHtml(title)}</h3>
+            <p class="candidate-role">${escapeHtml(role)}</p>
+          </div>
+          <div class="score"><strong>0</strong><span>匹配</span></div>
+        </div>
+        <p class="candidate-desc">${escapeHtml(message)}</p>
+        <div class="candidate-actions">
+          <button class="resume-btn" type="button" data-import-pick="folder">选择简历文件夹</button>
+        </div>
+      </article>
+    `;
+    searchCandidateCards = [];
+    updateSearchResultCount(0);
+    return;
+  }
+
+  localSearchList.innerHTML = candidates
+    .map((candidate, index) => {
+      const tags = getLocalCandidateTags(candidate);
+      const score = candidate.localSearchScore || candidate.matchScore || candidate.score || Math.max(35, candidate.completeness || 0);
+      return `
+        <article class="candidate-card" data-candidate="${escapeHtml(candidate.name)}" data-candidate-id="${escapeHtml(candidate.id)}" data-search-score="${score}" data-search-years="${candidate.years || 0}" data-search-city="${escapeHtml(candidate.city || "")}" data-search-index="${index}">
+          <div class="candidate-top">
+            <div>
+              <h3>${escapeHtml(candidate.name)}</h3>
+              <p class="candidate-role">${escapeHtml(getLocalCandidateRole(candidate))}</p>
+            </div>
+            <div class="score"><strong>${score}</strong><span>匹配</span></div>
+          </div>
+          <p class="candidate-desc">${escapeHtml(getLocalCandidateSummary(candidate))}</p>
+          ${renderAiCandidateInsight(candidate)}
+          <div class="tag-row">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
+          <div class="candidate-actions">
+            <button class="resume-btn candidate-resume-open" type="button" data-candidate-id="${escapeHtml(candidate.id)}" data-candidate-resume-entry="search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v5h5"></path><path d="M9 15h6"></path><path d="M9 18h4"></path></svg> 查看简历</button>
+            <button class="bookmark-btn shortlist-action" type="button" aria-label="加入短名单" data-name="${escapeHtml(candidate.name)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"></path></svg></button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+  searchCandidateCards = Array.from(localSearchList.querySelectorAll("[data-search-score]"));
+  updateSearchResultCount(candidates.length);
+}
+
+function renderLocalTalentRows(candidates) {
+  if (!localCandidateList) return;
+  if (!candidates.length) {
+    localCandidateList.innerHTML = `
+      <article class="talent-row local-empty-row" data-talent-item data-talent-kind="all" data-talent-panel-target="overview">
+        <div class="talent-avatar">0</div>
+        <div class="talent-main">
+          <div class="talent-name-line"><h3>暂无候选人</h3></div>
+          <p>选择本地文件夹后开始建立人才库。</p>
+          <div class="talent-tags"><span>PDF</span><span>DOCX</span><span>TXT</span><span>Markdown</span></div>
+        </div>
+        <div class="talent-source"><span>来源：本地 Mac</span><strong class="yellow">等待导入</strong><small>从 0 开始</small></div>
+        <div class="talent-actions"><button type="button" data-import-pick="folder">选择文件夹</button></div>
+      </article>
+    `;
+    talentItems = document.querySelectorAll("[data-talent-item]");
+    selectTalentItem(localCandidateList.querySelector("[data-talent-item]"));
+    return;
+  }
+
+  localCandidateList.innerHTML = `${candidates
+    .map((candidate, index) => {
+      const status = getLocalCandidateStatus(candidate);
+      const tags = getLocalCandidateTags(candidate);
+      return `
+        <article class="talent-row${index === 0 ? " is-selected" : ""}" data-talent-item data-candidate-id="${escapeHtml(candidate.id)}" data-talent-kind="all" data-talent-panel-target="profile">
+          <div class="talent-avatar">${escapeHtml(candidate.initial || candidate.name.slice(0, 1))}</div>
+          <div class="talent-main">
+            <div class="talent-name-line"><h3>${escapeHtml(candidate.name)}</h3><button class="talent-star" type="button" aria-label="收藏">☆</button></div>
+            <p>${escapeHtml(getLocalCandidateRole(candidate))}</p>
+            <div class="talent-tags">${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
+          </div>
+          <div class="talent-source"><span>来源：${escapeHtml(candidate.sourceName || candidate.source || "本地导入")}</span><strong class="${status.className}">${status.label}</strong><small>${escapeHtml(formatLocalTime(candidate.importedAt || candidate.created))} 入库</small></div>
+          <div class="talent-actions"><button class="candidate-resume-open" type="button" data-candidate-id="${escapeHtml(candidate.id)}" data-candidate-resume-entry="talent">查看简历</button><button class="dot-menu" type="button" aria-label="更多操作" data-talent-open="candidateActions">...</button></div>
+        </article>
+      `;
+    })
+    .join("")}<footer class="talent-pagination"><span>共 ${candidates.length} 位候选人</span></footer>`;
+  talentItems = document.querySelectorAll("[data-talent-item]");
+  selectTalentItem(localCandidateList.querySelector("[data-talent-item]"));
+}
+
+function renderLocalSources(library) {
+  if (!localSourceList) return;
+  const sources = library.sources.length
+    ? library.sources
+    : library.importTasks.map((task) => ({
+        id: task.id,
+        name: task.source,
+        path: task.folderPath,
+        total: task.total,
+        parseable: task.success,
+        failed: task.failed,
+        unsupported: task.unsupported,
+        importedAt: task.time,
+      }));
+  const header = '<h2>最近导入</h2><p class="talent-view-note">按导入来源查看本地简历解析结果。</p>';
+  if (!sources.length) {
+    localSourceList.innerHTML = `${header}<article class="import-source-row" data-talent-item data-talent-kind="recent" data-talent-panel-target="recent"><div class="source-icon">0</div><div><h3>暂无导入来源</h3><p>选择本地简历文件夹后会显示来源批次。</p></div><strong>0 新增</strong><span>0 失败</span><button type="button" data-import-pick="folder">导入</button></article>`;
+  } else {
+    localSourceList.innerHTML = `${header}${sources
+      .map(
+        (source, index) => `
+          <article class="import-source-row${index === 0 ? " is-selected" : ""}" data-talent-item data-talent-kind="recent" data-talent-panel-target="recent">
+            <div class="source-icon">${escapeHtml((source.name || "本").slice(0, 1))}</div>
+            <div><h3>${escapeHtml(source.name || "本地导入")}</h3><p>${escapeHtml(formatLocalTime(source.importedAt))} · ${source.total || 0} 个文件 · ${escapeHtml(source.path || "本地文件夹")}</p></div>
+            <strong>${source.parseable || 0} 成功</strong><span>${(source.failed || 0) + (source.unsupported || 0)} 需处理</span><button type="button" data-talent-open="sourceDetail">查看来源</button>
+          </article>
+        `
+      )
+      .join("")}`;
+  }
+  talentItems = document.querySelectorAll("[data-talent-item]");
+}
+
+function renderTaskRow(task) {
+  const kind = getTaskKindFromRecord(task);
+  const pendingIssues = (task.failed || 0) + (task.unsupported || 0);
+  const icon =
+    pendingIssues > 0
+      ? '<div class="task-status-icon alert"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v6"></path><path d="M12 17h.01"></path></svg></div>'
+      : '<div class="task-status-icon success"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg></div>';
+  const primaryAction = pendingIssues
+    ? `<button class="task-action primary-lite" type="button" data-task-open="issue" data-task-id="${escapeHtml(task.id)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-3-3Z"></path></svg>处理问题</button>`
+    : "";
+  return `
+    <article class="task-row task-${kind}" data-task-item data-task-id="${escapeHtml(task.id)}" data-task-kind="${kind}" data-task-panel-target="${pendingIssues ? "issue" : "detail"}">
+      ${icon}
+      <div class="task-main">
+        <div class="task-title-line"><h3>${escapeHtml(task.source || "本地导入")}</h3><span class="task-badge">${pendingIssues ? "需处理" : "已完成"}</span></div>
+        <p>${escapeHtml(task.importType || "文件夹导入")} · ${task.total || 0} 个文件 · ${escapeHtml(formatLocalTime(task.time))}</p>
+        <div class="task-stats"><span>成功 <strong class="green">${task.success || 0}</strong></span><span>失败 <strong class="red">${task.failed || 0}</strong></span><span>格式不支持 <strong>${task.unsupported || 0}</strong></span></div>
+      </div>
+      <div class="task-actions">
+        ${primaryAction}
+        <button class="task-action" type="button" data-task-open="detail" data-task-id="${escapeHtml(task.id)}">查看详情 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>
+      </div>
+    </article>
+  `;
+}
+
+function renderLocalImportTasks(library) {
+  if (!localTaskList) return;
+  const tasks = Array.isArray(library.importTasks) ? library.importTasks : [];
+  Object.keys(taskRecords).forEach((taskId) => {
+    if (isDesktopLocalLibrary) delete taskRecords[taskId];
+  });
+  tasks.forEach((task) => {
+    taskRecords[task.id] = task;
+  });
+
+  if (!tasks.length) {
+    localTaskList.innerHTML = `
+      <section class="task-group" data-task-group="completed">
+        <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg>最近完成</h2>
+        <article class="task-row task-completed local-empty-row">
+          <div class="task-status-icon success"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg></div>
+          <div class="task-main"><div class="task-title-line"><h3>暂无解析任务</h3></div><p>导入本地简历文件夹后会生成任务记录。</p></div>
+          <div class="task-actions"><button class="task-action" type="button" data-import-pick="folder">选择文件夹</button></div>
+        </article>
+      </section>
+    `;
+  } else {
+    const groups = {
+      needs: tasks.filter((task) => getTaskKindFromRecord(task) === "needs"),
+      processing: tasks.filter((task) => getTaskKindFromRecord(task) === "processing"),
+      completed: tasks.filter((task) => getTaskKindFromRecord(task) === "completed"),
+    };
+    localTaskList.innerHTML = `
+      <section class="task-group" data-task-group="needs">
+        <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>需处理</h2>
+        ${groups.needs.map(renderTaskRow).join("")}
+      </section>
+      <section class="task-group" data-task-group="processing">
+        <h2><span class="mini-ring"></span>正在解析</h2>
+        ${groups.processing.map(renderTaskRow).join("")}
+      </section>
+      <section class="task-group" data-task-group="completed">
+        <h2><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg>最近完成</h2>
+        ${groups.completed.map(renderTaskRow).join("")}
+      </section>
+    `;
+  }
+  taskRows = document.querySelectorAll("[data-task-item]");
+  updateTaskFilterCounts();
+}
+
+function renderLocalCandidates(candidates) {
+  updateLocalKpis(candidates);
+  renderLocalSearchCards(candidates);
+  renderLocalTalentRows(candidates);
+  localLibraryEmpty?.classList.toggle("state-hidden", candidates.length > 0);
+}
+
+function applyLocalTalentLibrary(library) {
+  localTalentLibrary = normalizeLocalLibrary(library);
+  const candidates = getLocalCandidates();
+  candidates.forEach((candidate) => {
+    candidateRecords[candidate.id] = candidate;
+  });
+  renderLocalCandidates(candidates);
+  renderLocalSources(localTalentLibrary);
+  renderLocalImportTasks(localTalentLibrary);
+  currentImportSource = localTalentLibrary.sources[0]
+    ? {
+        name: localTalentLibrary.sources[0].name,
+        path: localTalentLibrary.sources[0].path,
+        type: localTalentLibrary.sources[0].type || "文件夹",
+        files: [],
+        rawStats: localTalentLibrary.importTasks[0]?.stats || {},
+        stats: deriveImportStats(localTalentLibrary.importTasks[0]?.stats || {}),
+      }
+    : getEmptyImportSource();
+  updateImportPreview(currentImportSource);
+}
+
+async function loadLocalTalentLibrary() {
+  if (!isDesktopLocalLibrary) return;
+  try {
+    const library = await window.deerRecallDesktop?.getTalentLibrary();
+    applyLocalTalentLibrary(library);
+    showTalentState("all");
+  } catch {
+    applyLocalTalentLibrary({ candidates: [], importTasks: [], sources: [] });
+    showTalentState("all");
+    showToast("本地人才库读取失败，请重新打开应用或重新导入。");
+  }
+}
+
+function createSearchAiHistoryId() {
+  return `search_ai_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function clampText(value = "", maxLength = 600) {
+  const text = String(value || "").trim();
+  return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+}
+
+function normalizeSearchAiHistoryItem(item = {}) {
+  const query = clampText(item.query, 180);
+  if (!query) return null;
+  return {
+    id: item.id || createSearchAiHistoryId(),
+    query,
+    answer: clampText(item.answer, 900),
+    suggestions: Array.isArray(item.suggestions) ? item.suggestions.map((suggestion) => clampText(suggestion, 80)).filter(Boolean).slice(0, 4) : [],
+    status: item.status === "error" || item.status === "loading" ? item.status : "ready",
+    createdAt: Number.isFinite(item.createdAt) ? item.createdAt : Date.now(),
+  };
+}
+
+function loadSearchAiHistory() {
+  try {
+    const raw = window.localStorage?.getItem(SEARCH_AI_HISTORY_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(normalizeSearchAiHistoryItem).filter(Boolean).slice(0, SEARCH_AI_HISTORY_LIMIT);
+  } catch {
+    return [];
+  }
+}
+
+function persistSearchAiHistory() {
+  try {
+    window.localStorage?.setItem(SEARCH_AI_HISTORY_KEY, JSON.stringify(searchAiHistory));
+  } catch {
+    // Local storage can be unavailable in some desktop or privacy contexts.
+  }
+}
+
+function formatSearchAiHistoryTime(timestamp) {
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return "刚刚";
+  return date.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+}
+
+function upsertSearchAiHistory(item) {
+  const normalized = normalizeSearchAiHistoryItem(item);
+  if (!normalized) return null;
+
+  const existingIndex = searchAiHistory.findIndex((entry) => entry.id === normalized.id);
+  if (existingIndex >= 0) {
+    searchAiHistory[existingIndex] = { ...searchAiHistory[existingIndex], ...normalized };
+  } else {
+    searchAiHistory.unshift(normalized);
+  }
+  searchAiHistory = searchAiHistory
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, SEARCH_AI_HISTORY_LIMIT);
+  persistSearchAiHistory();
+  renderSearchAiHistory();
+  return normalized;
+}
+
+function getSearchAiContext(activeId = activeSearchAiHistoryId) {
+  return searchAiHistory
+    .filter((item) => item.id !== activeId && item.status === "ready" && item.answer)
+    .slice(0, 4)
+    .reverse()
+    .map((item) => ({
+      query: item.query,
+      answer: item.answer,
+      suggestions: item.suggestions,
+    }));
+}
+
+function renderSearchAiHistory() {
+  if (!searchAiHistoryList || !searchAiHistoryEmpty) return;
+
+  searchAiHistoryEmpty.hidden = searchAiHistory.length > 0;
+  searchAiHistoryList.innerHTML = searchAiHistory
+    .map((item) => {
+      const statusLabel = item.status === "loading" ? "生成中" : item.status === "error" ? "未生成" : "已保存";
+      const preview = item.answer || "等待 AI 回答生成";
+      const isActive = item.id === activeSearchAiHistoryId ? " is-active" : "";
+      return `
+        <button class="search-ai-history-item${isActive}" type="button" data-search-ai-history-id="${escapeHtml(item.id)}">
+          <strong>${escapeHtml(item.query)}</strong>
+          <span>${escapeHtml(statusLabel)} · ${escapeHtml(formatSearchAiHistoryTime(item.createdAt))} · ${escapeHtml(preview)}</span>
+        </button>
+      `;
+    })
+    .join("");
+}
+
+function restoreSearchAiHistoryItem(historyId) {
+  const item = searchAiHistory.find((entry) => entry.id === historyId);
+  if (!item) return;
+  showResults(item.query, { restoreHistoryItem: item });
+}
+
+function setSearchAiState(state, message) {
+  searchAiCard?.classList.toggle("is-loading", state === "loading");
+  searchAiCard?.classList.toggle("is-error", state === "error");
+  if (searchAiStatus) searchAiStatus.textContent = message;
+  if (searchAiAnswer) searchAiAnswer.hidden = state !== "ready";
+  if (searchAiSuggestions) searchAiSuggestions.hidden = state !== "ready";
+}
+
+function renderSearchAssistant(assistant, options = {}) {
+  const answer = clampText(assistant.answer || "");
+  const suggestions = Array.isArray(assistant.suggestions) ? assistant.suggestions : [];
+
+  if (searchAiAnswerBody) {
+    searchAiAnswerBody.textContent = answer;
+  }
+  if (searchAiSuggestions) {
+    searchAiSuggestions.innerHTML = suggestions.map((item) => `<span>${escapeHtml(item)}</span>`).join("");
+  }
+  setSearchAiState("ready", options.statusMessage || "已生成搜索建议。");
+
+  if (options.historyId && !options.skipHistoryUpdate) {
+    upsertSearchAiHistory({
+      id: options.historyId,
+      query: options.query || currentQuery?.textContent || defaultQuery,
+      answer,
+      suggestions,
+      status: "ready",
+      createdAt: options.createdAt || Date.now(),
+    });
+  } else {
+    renderSearchAiHistory();
+  }
+}
+
+function createAiRequestError(payload, fallbackMessage = "AI 服务暂不可用") {
+  const error = new Error(payload?.message || fallbackMessage);
+  error.code = payload?.code || payload?.reason || "";
+  return error;
+}
+
+async function callAiApi(endpoint, payload = {}) {
+  if (isDesktopLocalLibrary && window.deerRecallDesktop) {
+    if (endpoint === "status") {
+      return window.deerRecallDesktop?.getAiStatus?.();
+    }
+    if (endpoint === "search-assistant") {
+      const result = await window.deerRecallDesktop?.requestSearchAssistant?.(payload);
+      if (!result?.ok) throw createAiRequestError(result, "AI 搜索助手暂不可用");
+      return result;
+    }
+    if (endpoint === "market-insight") {
+      const result = await window.deerRecallDesktop?.requestMarketInsight?.(payload);
+      if (!result?.ok) throw createAiRequestError(result, "AI 市场画像暂不可用");
+      return result;
+    }
+  }
+
+  const response = await fetch(AI_API_PATHS[endpoint] || `/api/ai/${endpoint}`, {
+    method: endpoint === "status" ? "GET" : "POST",
+    headers: endpoint === "status" ? undefined : { "Content-Type": "application/json" },
+    body: endpoint === "status" ? undefined : JSON.stringify(payload),
+    cache: endpoint === "status" ? "no-store" : undefined,
+  });
+  const data = await response.json();
+  if (!response.ok || !data.ok) {
+    throw createAiRequestError(data, "AI 服务暂不可用");
+  }
+  return data;
+}
+
+async function getSearchAiServiceStatus() {
+  if (searchAiServiceStatus) return searchAiServiceStatus;
+  try {
+    const data = await callAiApi("status");
+    searchAiServiceStatus = data?.ok ? data : { configured: false, reason: "status_unavailable" };
+  } catch {
+    searchAiServiceStatus = { configured: false, reason: "status_unavailable" };
+  }
+  return searchAiServiceStatus;
+}
+
+async function requestSearchAssistant(message, historyId = activeSearchAiHistoryId) {
+  if (!searchAiCard) return;
+  setSearchAiState("loading", "正在理解搜索意图...");
+  const status = await getSearchAiServiceStatus();
+  if (status && !status.configured) {
+    const fallback = activeSearchResult?.assistant || {
+      answer: "AI 服务尚未配置模型 Key，当前使用本地搜索模式。",
+      suggestions: ["保留当前搜索记录", "配置模型环境变量", "继续查看本地搜索结果"],
+    };
+    if (historyId === activeSearchAiHistoryId) {
+      renderSearchAssistant(fallback, {
+        historyId,
+        query: message,
+        statusMessage: "本地搜索模式（未配置 AI Key）。",
+      });
+    }
+    else upsertSearchAiHistory({ id: historyId, query: message, ...fallback, status: "ready" });
+    return;
+  }
+  try {
+    const data = await callAiApi("search-assistant", {
+      message,
+      history: getSearchAiContext(historyId),
+      localContext: buildSearchAiLocalContext(message),
+    });
+    if (historyId === activeSearchAiHistoryId) {
+      const appliedAiRanking = applyAiSearchAssistantResult(data.assistant);
+      renderSearchAssistant(data.assistant, {
+        historyId,
+        query: message,
+        statusMessage: appliedAiRanking ? "AI 增强排序已应用。" : "已生成搜索建议。",
+      });
+    } else {
+      upsertSearchAiHistory({ id: historyId, query: message, ...data.assistant, status: "ready" });
+    }
+  } catch {
+    const fallback = {
+      answer: "AI 助手暂不可用，当前搜索结果仍可继续查看。",
+      suggestions: ["稍后重试", "继续使用筛选条件", "查看已保存搜索记录"],
+      status: "error",
+    };
+    upsertSearchAiHistory({ id: historyId, query: message, ...fallback });
+    if (historyId === activeSearchAiHistoryId) {
+      setSearchAiState("error", fallback.answer);
+    }
+  }
+}
+
+function showSearchCapabilityDetail(type = "natural") {
+  const copy = searchCapabilityCopy[type] || searchCapabilityCopy.natural;
+  if (!searchCapabilityDetail) return;
+
+  const title = document.createElement("strong");
+  const text = document.createElement("span");
+  title.textContent = copy.title;
+  text.textContent = copy.text;
+  searchCapabilityDetail.replaceChildren(title, text);
+
+  searchCapabilityButtons.forEach((button) => {
+    const isActive = button.dataset.searchCapability === type;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-expanded", String(isActive));
+  });
+}
+
+function toggleSearchTips() {
+  if (!searchTipsToggle || !searchTipsGuide) return;
+  const shouldOpen = searchTipsGuide.classList.contains("state-hidden");
+  searchTipsGuide.classList.toggle("state-hidden", !shouldOpen);
+  searchTipsToggle.setAttribute("aria-expanded", String(shouldOpen));
+}
+
+function getSearchFilterButtons() {
+  if (!searchFilterBar) return [];
+  return Array.from(searchFilterBar.querySelectorAll("[data-search-filter-chip]"));
+}
+
+function createSearchFilterChip(filter) {
+  const button = document.createElement("button");
+  button.className = "filter-chip";
+  button.type = "button";
+  button.dataset.searchFilterChip = filter.id;
+  button.dataset.filterLabel = filter.label;
+  button.setAttribute("aria-label", `移除筛选：${filter.label}`);
+  button.innerHTML = `${filter.label} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>`;
+  return button;
+}
+
+function getNextSearchFilter() {
+  const activeIds = new Set(getSearchFilterButtons().map((button) => button.dataset.searchFilterChip));
+  for (let index = 0; index < searchExtraFilters.length; index += 1) {
+    const filter = searchExtraFilters[(searchExtraFilterCursor + index) % searchExtraFilters.length];
+    if (!activeIds.has(filter.id)) {
+      searchExtraFilterCursor = (searchExtraFilterCursor + index + 1) % searchExtraFilters.length;
+      return filter;
+    }
+  }
+  return null;
+}
+
+function refreshSearchFilterAddState() {
+  if (!searchFilterAddButton) return;
+  const activeIds = new Set(getSearchFilterButtons().map((button) => button.dataset.searchFilterChip));
+  const hasAvailableFilter = searchExtraFilters.some((filter) => !activeIds.has(filter.id));
+  searchFilterAddButton.disabled = !hasAvailableFilter;
+}
+
+function removeSearchFilterChip(button) {
+  const label = button?.dataset.filterLabel || button?.textContent?.trim() || "筛选条件";
+  const removeChip = () => button?.remove();
+  if (!window.DeerRecallMotion?.flipFilterChips?.(searchFilterBar, removeChip)) {
+    removeChip();
+  }
+  refreshSearchFilterAddState();
+  showToast(`已移除筛选：${label}`);
+}
+
+function addSearchFilterChip() {
+  const nextFilter = getNextSearchFilter();
+  if (!nextFilter || !searchFilterAddButton) {
+    refreshSearchFilterAddState();
+    showToast("当前可添加的快速筛选已全部启用");
+    return;
+  }
+  const addChip = () => searchFilterAddButton.before(createSearchFilterChip(nextFilter));
+  if (!window.DeerRecallMotion?.flipFilterChips?.(searchFilterBar, addChip)) {
+    addChip();
+  }
+  refreshSearchFilterAddState();
+  showToast(`已添加筛选：${nextFilter.label}`);
+}
+
+function updateSearchResultCount(visibleCount) {
+  if (!searchResultCountLine) return;
+  searchResultCountLine.dataset.searchResultCount = String(visibleCount);
+  const countNode = searchResultCountLine.querySelector("strong");
+  if (countNode) countNode.textContent = String(visibleCount);
+}
+
+function setSearchResultCountLine(result) {
+  if (!searchResultCountLine) return;
+  const total = result?.total || 0;
+  const noun = result?.intent?.asksForList ? "份简历" : "位候选人";
+  searchResultCountLine.dataset.searchResultCount = String(total);
+  searchResultCountLine.innerHTML = `共找到 <strong>${total}</strong> ${noun}`;
+}
+
+function renderSearchFilterChips(chips = []) {
+  getSearchFilterButtons().forEach((button) => button.remove());
+  chips.forEach((chip) => {
+    if (searchFilterAddButton) searchFilterAddButton.before(createSearchFilterChip(chip));
+  });
+  refreshSearchFilterAddState();
+}
+
+function renderSearchResultState(result) {
+  const emptyOptions = result?.total
+    ? {}
+    : {
+        emptyTitle: "没有匹配结果",
+        emptyRole: "本地人才库搜索",
+        emptyMessage: result?.emptyMessage || "没有找到匹配当前条件的候选人。",
+      };
+  renderLocalSearchCards(result?.candidates || [], emptyOptions);
+  setSearchResultCountLine(result);
+  renderSearchFilterChips(result?.chips || []);
+  if (searchConversationAnswer) {
+    searchConversationAnswer.textContent = result?.assistant?.answer || "我已按当前条件搜索本地人才库。";
+  }
+}
+
+function buildLocalSearchResult(queryText) {
+  const candidates = getLocalCandidates();
+  if (window.DeerRecallSearch?.searchLocalCandidates) {
+    return window.DeerRecallSearch.searchLocalCandidates(queryText, candidates);
+  }
+  return {
+    engine: "local",
+    intent: { rawQuery: queryText, keywords: [], asksForList: false },
+    candidates,
+    total: candidates.length,
+    chips: [{ id: "local", label: "本地人才库" }],
+    assistant: { answer: "当前搜索引擎未加载，已展示本地人才库候选人。", suggestions: [] },
+    emptyMessage: "本地人才库为空，搜索会在导入并解析简历后开始返回结果。",
+  };
+}
+
+function buildSearchAiLocalContext(queryText) {
+  if (!window.DeerRecallSearch?.buildAiRerankPayload || !activeSearchResult) return null;
+  return window.DeerRecallSearch.buildAiRerankPayload(queryText, activeSearchResult);
+}
+
+function applyAiSearchAssistantResult(assistant) {
+  const rankedIds = assistant?.ranked_ids || assistant?.rankedIds || [];
+  const insights = assistant?.candidate_insights || assistant?.candidateInsights || [];
+  const hasAiResult = (Array.isArray(rankedIds) && rankedIds.length) || (Array.isArray(insights) && insights.length);
+  if (!hasAiResult || !activeSearchResult || !window.DeerRecallSearch?.applyAiRerankResult) return false;
+  const aiResult = window.DeerRecallSearch.applyAiRerankResult(activeSearchResult, assistant);
+  applySearchResultModel(aiResult);
+  return true;
+}
+
+function applySearchResultModel(result) {
+  activeSearchResult = result;
+  renderSearchResultState(result);
+  sortSearchCandidates();
+  applySearchResultFilters();
+}
+
+function applySearchResultFilters() {
+  const city = searchCityOptions[currentSearchCityIndex] || searchCityOptions[0];
+  let visibleCount = 0;
+
+  searchCandidateCards.forEach((card) => {
+    const cityMatched = city === "城市不限" || card.dataset.searchCity === city;
+    card.hidden = !cityMatched;
+    if (cityMatched) visibleCount += 1;
+  });
+
+  updateSearchResultCount(visibleCount);
+}
+
+function cycleSearchCity() {
+  currentSearchCityIndex = (currentSearchCityIndex + 1) % searchCityOptions.length;
+  const city = searchCityOptions[currentSearchCityIndex];
+  if (searchCityLabel) searchCityLabel.textContent = city;
+  applySearchResultFilters();
+  showToast(city === "城市不限" ? "已显示全部城市候选人" : `已筛选城市：${city}`);
+}
+
+function sortSearchCandidates() {
+  if (!searchCandidateGrid) return;
+  const sortConfig = searchSortOptions[currentSearchSortIndex] || searchSortOptions[0];
+  const sortedCards = [...searchCandidateCards].sort((a, b) => {
+    const aValue = Number(a.dataset[`search${sortConfig.key[0].toUpperCase()}${sortConfig.key.slice(1)}`] || 0);
+    const bValue = Number(b.dataset[`search${sortConfig.key[0].toUpperCase()}${sortConfig.key.slice(1)}`] || 0);
+    if (bValue !== aValue) return bValue - aValue;
+    return Number(a.dataset.searchIndex || 0) - Number(b.dataset.searchIndex || 0);
+  });
+
+  const applySort = () => {
+    sortedCards.forEach((card) => searchCandidateGrid.append(card));
+  };
+
+  if (!window.DeerRecallMotion?.flipSearchCards?.(searchCandidateGrid, applySort)) {
+    applySort();
+  }
+}
+
+function cycleSearchSort() {
+  currentSearchSortIndex = (currentSearchSortIndex + 1) % searchSortOptions.length;
+  const sortConfig = searchSortOptions[currentSearchSortIndex];
+  if (searchSortLabel) searchSortLabel.textContent = sortConfig.label;
+  sortSearchCandidates();
+  applySearchResultFilters();
+  showToast(`已切换为${sortConfig.label}`);
+}
+
+function getImportFileName(file) {
+  return file?.name || file?.path?.split("/").pop() || "未命名文件";
+}
+
+function getImportFileExtension(file) {
+  const name = getImportFileName(file);
+  return name.includes(".") ? name.split(".").pop().toLowerCase() : "";
+}
+
+function getImportRelativePath(file) {
+  return file?.webkitRelativePath || file?.relativePath || file?.path || getImportFileName(file);
+}
+
+function getImportSourceName(files, options = {}) {
+  if (options.name) return options.name;
+  const firstPath = getImportRelativePath(files[0] || {});
+  if (firstPath.includes("/")) return firstPath.split("/")[0];
+  if (files.length > 1) return "本地批量文件";
+  return getImportFileName(files[0] || {}) || "本地选择文件";
+}
+
+function deriveImportStats(rawStats) {
+  const total = Number(rawStats.total || 0);
+  const unsupported = Number(rawStats.unsupported || 0);
+  const supported = Math.max(0, total - unsupported);
+  const duplicate = importSettings.autoDedupe ? Number(rawStats.duplicate || 0) : 0;
+  const parseable = importSettings.autoDedupe ? Math.max(0, Number(rawStats.parseable ?? supported - duplicate)) : supported;
+  const failed = Number(rawStats.failed ?? Math.max(0, Math.round(parseable * 0.03)));
+  const successfulProfiles = Math.max(0, parseable - failed);
+  const newProfiles = importSettings.autoTalent ? Number(rawStats.newProfiles ?? Math.max(0, successfulProfiles - Math.round(successfulProfiles * 0.16))) : 0;
+  const updatedProfiles = importSettings.autoTalent ? Number(rawStats.updatedProfiles ?? Math.max(0, successfulProfiles - newProfiles)) : 0;
+
+  return {
+    total,
+    parseable,
+    duplicate,
+    unsupported,
+    newProfiles,
+    updatedProfiles,
+    skippedDuplicates: importSettings.autoDedupe ? Number(rawStats.skippedDuplicates ?? duplicate) : 0,
+    failed,
+  };
+}
+
+function getEmptyImportSource() {
+  const rawStats = {
+    total: 0,
+    parseable: 0,
+    duplicate: 0,
+    unsupported: 0,
+    newProfiles: 0,
+    updatedProfiles: 0,
+    skippedDuplicates: 0,
+    failed: 0,
+  };
+  return {
+    name: "等待选择本地文件夹",
+    path: "本地人才库为空",
+    type: "文件夹",
+    files: [],
+    rawStats,
+    stats: deriveImportStats(rawStats),
+  };
+}
+
+function getSeedImportSource(overrides = {}) {
+  const seedRawStats = {
+    total: 126,
+    parseable: 108,
+    duplicate: 12,
+    unsupported: 6,
+    newProfiles: 96,
+    updatedProfiles: 18,
+    skippedDuplicates: 9,
+    failed: 3,
+  };
+  const rawStats = overrides.stats || overrides.rawStats ? { total: 0, parseable: 0, duplicate: 0, unsupported: 0, newProfiles: 0, updatedProfiles: 0, skippedDuplicates: 0, failed: 0, ...(overrides.rawStats || overrides.stats) } : seedRawStats;
+
+  return {
+    name: overrides.name || "FinTech_Backend_2026",
+    path: overrides.path || "/Users/deer/Downloads/FinTech_Backend_2026",
+    type: overrides.type || "文件夹",
+    files: overrides.files || [],
+    rawStats,
+    stats: deriveImportStats(rawStats),
+  };
+}
+
+function openImportPickerCard(mode = "folder") {
+  importPickerCard?.classList.add("state-hidden");
+  if (mode === "files") {
+    if (isDesktopLocalLibrary) {
+      requestImportSource("desktopFiles");
+      return;
+    }
+    if (importPickerStatus) importPickerStatus.textContent = "请选择一个或多个简历文件。";
+    importFileInput?.click();
+    return;
+  }
+
+  if (isDesktopLocalLibrary) {
+    requestImportSource("desktopFolder");
+    return;
+  }
+
+  if (importPickerStatus) importPickerStatus.textContent = "请选择本地简历文件夹。";
+  importFolderInput?.click();
+}
+
+function applyDesktopImportResult(selectedImport, fallbackMessage = "已取消选择。") {
+  if (!selectedImport) {
+    if (importPickerStatus) importPickerStatus.textContent = fallbackMessage;
+    showImportState("default");
+    return false;
+  }
+  const sourceStats = selectedImport.stats || selectedImport.task?.stats || {};
+  const source = {
+    type: selectedImport.type || "文件夹",
+    name: selectedImport.name,
+    path: selectedImport.path,
+    files: selectedImport.files || [],
+    rawStats: sourceStats,
+    stats: deriveImportStats(sourceStats),
+    task: selectedImport.task,
+  };
+  updateImportPreview(source);
+  if (selectedImport.library) applyLocalTalentLibrary(selectedImport.library);
+  setImportAssistantResult(source);
+  if (importPickerStatus) {
+    importPickerStatus.textContent = `已解析 ${source.stats?.total || 0} 个文件，${source.stats?.parseable || 0} 个已入库。`;
+  }
+  showImportState("finished");
+  showToast("本地简历解析完成");
+  return true;
+}
+
+async function importDesktopSelection(action) {
+  const isFileAction = action === "desktopFiles";
+  if (importPickerStatus) importPickerStatus.textContent = isFileAction ? "正在打开文件选择器。" : "正在打开文件夹选择器。";
+  const selectImport = isFileAction ? window.deerRecallDesktop?.selectImportFiles : window.deerRecallDesktop?.selectImportFolder;
+  if (!selectImport) {
+    if (importPickerStatus) importPickerStatus.textContent = "本机选择器不可用，请重新打开客户端。";
+    showToast("本机选择器不可用");
+    return;
+  }
+  try {
+    setImportAssistantProgress({
+      sourceName: isFileAction ? "本地选择文件" : "本地简历文件夹",
+      total: 0,
+      done: 0,
+      active: 1,
+      failed: 0,
+      percent: 8,
+      fileName: isFileAction ? "等待选择简历文件" : "等待选择简历文件夹",
+      fileMeta: "Electron 本机选择器",
+      status: isFileAction ? "正在等待选择文件" : "正在等待选择文件夹",
+    });
+    showImportState("loading");
+    const selectedImport = await selectImport();
+    applyDesktopImportResult(selectedImport, isFileAction ? "已取消文件选择。" : "已取消文件夹选择。");
+  } catch (error) {
+    if (importPickerStatus) importPickerStatus.textContent = "本机选择器打开失败，请重试。";
+    showImportState("default");
+    showToast("本机选择器打开失败");
+  }
+}
+
+async function importDesktopDroppedPaths(paths) {
+  if (!paths.length) {
+    if (importPickerStatus) importPickerStatus.textContent = "没有读取到拖拽路径，请使用上方按钮选择文件夹或文件。";
+    showToast("没有读取到拖拽路径");
+    return;
+  }
+  if (!window.deerRecallDesktop?.importPaths) {
+    if (importPickerStatus) importPickerStatus.textContent = "拖拽导入不可用，请重新打开客户端。";
+    showToast("拖拽导入不可用");
+    return;
+  }
+  if (importPickerStatus) importPickerStatus.textContent = "正在解析拖入的本地文件。";
+  try {
+    const sourceName = paths.length === 1 ? paths[0].split("/").pop() : "拖拽导入";
+    setImportAssistantProgress({
+      sourceName,
+      total: paths.length,
+      done: 0,
+      active: 1,
+      failed: 0,
+      percent: 12,
+      fileName: sourceName,
+      fileMeta: "拖拽本地路径",
+      status: "正在解析拖入的本地文件",
+    });
+    showImportState("loading");
+    const selectedImport = await window.deerRecallDesktop.importPaths(paths);
+    applyDesktopImportResult(selectedImport, "没有读取到可导入文件。");
+  } catch (error) {
+    if (importPickerStatus) importPickerStatus.textContent = "拖拽导入失败，请重试。";
+    showImportState("default");
+    showToast("拖拽导入失败");
+  }
+}
+
+function isSupportedDroppedResume(file) {
+  const extension = getImportFileExtension(file);
+  return importSupportedExtensions.has(extension);
+}
+
+function getEntryFile(entry) {
+  return new Promise((resolve) => {
+    entry.file(resolve, () => resolve(null));
+  });
+}
+
+function readDirectoryEntries(entry) {
+  return new Promise((resolve) => {
+    const reader = entry.createReader();
+    const entries = [];
+    const readBatch = () => {
+      reader.readEntries((batch) => {
+        if (!batch.length) {
+          resolve(entries);
+          return;
+        }
+        entries.push(...batch);
+        readBatch();
+      }, () => resolve(entries));
+    };
+    readBatch();
+  });
+}
+
+async function collectFilesFromEntry(entry, output, limit = 1000) {
+  if (!entry || output.length >= limit) return;
+  if (entry.isFile) {
+    const file = await getEntryFile(entry);
+    if (file && isSupportedDroppedResume(file)) {
+      output.push({ file, relativePath: entry.fullPath || file.name });
+    }
+    return;
+  }
+  if (entry.isDirectory) {
+    const entries = await readDirectoryEntries(entry);
+    for (const childEntry of entries) {
+      if (output.length >= limit) break;
+      await collectFilesFromEntry(childEntry, output, limit);
+    }
+  }
+}
+
+async function collectDroppedResumeFiles(dataTransfer) {
+  const entries = Array.from(dataTransfer?.items || [])
+    .map((item) => (typeof item.webkitGetAsEntry === "function" ? item.webkitGetAsEntry() : null))
+    .filter(Boolean);
+  const fileRecords = [];
+
+  if (entries.length) {
+    for (const entry of entries) {
+      await collectFilesFromEntry(entry, fileRecords);
+    }
+  } else {
+    Array.from(dataTransfer?.files || []).forEach((file) => {
+      if (isSupportedDroppedResume(file)) {
+        fileRecords.push({ file, relativePath: file.webkitRelativePath || file.name });
+      }
+    });
+  }
+
+  const payload = [];
+  for (const record of fileRecords) {
+    payload.push({
+      name: record.file.name,
+      relativePath: record.relativePath,
+      size: record.file.size,
+      type: record.file.type,
+      lastModified: record.file.lastModified,
+      buffer: await record.file.arrayBuffer(),
+    });
+  }
+  return payload;
+}
+
+async function importDesktopDroppedFiles(dataTransfer) {
+  if (!window.deerRecallDesktop?.importDroppedFiles) {
+    if (importPickerStatus) importPickerStatus.textContent = "拖拽文件读取不可用，请使用上方按钮选择文件夹或文件。";
+    showToast("拖拽文件读取不可用");
+    return;
+  }
+  if (importPickerStatus) importPickerStatus.textContent = "正在读取拖入文件夹中的简历文件。";
+  const files = await collectDroppedResumeFiles(dataTransfer);
+  if (!files.length) {
+    if (importPickerStatus) importPickerStatus.textContent = "没有读取到可导入的简历文件，请使用上方按钮选择文件夹或文件。";
+    showToast("没有读取到可导入文件");
+    return;
+  }
+  if (importPickerStatus) importPickerStatus.textContent = `正在解析拖入的 ${files.length} 个简历文件。`;
+  try {
+    setImportAssistantProgress({
+      sourceName: "拖拽导入",
+      total: files.length,
+      done: 0,
+      active: Math.min(files.length, 1),
+      failed: 0,
+      percent: 12,
+      fileName: files[0]?.name || "拖入文件夹",
+      fileMeta: `${files.length} 个可读取文件`,
+      status: "正在解析拖入文件夹中的简历正文",
+    });
+    showImportState("loading");
+    const selectedImport = await window.deerRecallDesktop.importDroppedFiles(files);
+    applyDesktopImportResult(selectedImport, "没有读取到可导入文件。");
+  } catch (error) {
+    if (importPickerStatus) importPickerStatus.textContent = "拖拽导入失败，请重试。";
+    showImportState("default");
+    showToast("拖拽导入失败");
+  }
+}
+
+function readDesktopDroppedPaths() {
+  const consumedPaths = window.deerRecallDesktop?.consumeDroppedFilePaths?.() || [];
+  if (consumedPaths.length) return consumedPaths;
+  return window.deerRecallDesktop?.getDroppedFilePaths
+    ? window.deerRecallDesktop.getDroppedFilePaths()
+    : [];
+}
+
+async function requestImportSource(action) {
+  if (isDesktopLocalLibrary && action === "browserFolder") {
+    await requestImportSource("desktopFolder");
+    return;
+  }
+
+  if (action === "browserFolder") {
+    if (importPickerStatus) importPickerStatus.textContent = "正在打开浏览器文件夹选择器。";
+    importFolderInput?.click();
+    return;
+  }
+
+  if (action === "browserFiles") {
+    if (importPickerStatus) importPickerStatus.textContent = "正在打开文件选择器。";
+    importFileInput?.click();
+    return;
+  }
+
+  if (action === "desktopFiles") {
+    await importDesktopSelection("desktopFiles");
+    return;
+  }
+
+  if (action === "desktopFolder") {
+    await importDesktopSelection("desktopFolder");
+  }
+}
+
+function scanImportFiles(fileList, options = {}) {
+  const files = Array.from(fileList || []);
+  if (!files.length && (options.stats || options.path || options.useDemo)) {
+    const source = getSeedImportSource({
+      name: options.name,
+      path: options.path,
+      type: options.type,
+      files,
+      stats: options.stats,
+      rawStats: options.rawStats,
+    });
+    return source;
+  }
+
+  const scopedFiles = importSettings.scanSubfolders
+    ? files
+    : files.filter((file) => {
+        const relativePath = getImportRelativePath(file);
+        const pathParts = relativePath.split("/").filter(Boolean);
+        return pathParts.length <= 2;
+      });
+  const seenNames = new Set();
+  let duplicate = 0;
+  let unsupported = 0;
+  let supported = 0;
+
+  scopedFiles.forEach((file) => {
+    const extension = getImportFileExtension(file);
+    const normalizedName = getImportFileName(file).toLowerCase();
+    if (!importSupportedExtensions.has(extension)) {
+      unsupported += 1;
+      return;
+    }
+    if (seenNames.has(normalizedName)) duplicate += 1;
+    seenNames.add(normalizedName);
+    supported += 1;
+  });
+
+  const rawParseable = Math.max(0, supported - duplicate);
+  const failed = Math.min(rawParseable, Math.max(0, Math.round(rawParseable * 0.03)));
+  const successfulProfiles = Math.max(0, rawParseable - failed);
+  const updatedProfiles = Math.round(successfulProfiles * 0.16);
+  const newProfiles = Math.max(0, successfulProfiles - updatedProfiles);
+
+  const rawStats = {
+    total: scopedFiles.length,
+    parseable: rawParseable,
+    duplicate,
+    unsupported,
+    newProfiles,
+    updatedProfiles,
+    skippedDuplicates: duplicate,
+    failed,
+  };
+
+  return {
+    name: getImportSourceName(scopedFiles, options),
+    path: options.path || (options.type === "文件" ? "浏览器本地文件选择" : `浏览器本地文件夹 / ${getImportSourceName(scopedFiles, options)}`),
+    type: options.type || (scopedFiles.length > 1 ? "文件夹" : "文件"),
+    files: scopedFiles,
+    rawStats,
+    stats: deriveImportStats(rawStats),
+  };
+}
+
+function updateImportLegend(stats) {
+  const labels = {
+    newProfiles: "新增简历",
+    updatedProfiles: "更新已有",
+    skippedDuplicates: "重复跳过",
+    failed: "解析失败",
+  };
+  const total = Math.max(1, Number(stats.total || 0));
+  document.querySelectorAll("[data-import-legend]").forEach((node) => {
+    const key = node.dataset.importLegend;
+    const value = Number(stats[key] || 0);
+    const percent = Math.round((value / total) * 100);
+    node.textContent = `${value} ${labels[key] || "文件"}（${percent}%）`;
+  });
+}
+
+function updateImportPreview(source = currentImportSource) {
+  currentImportSource = source;
+  const stats = source.stats || {};
+  document.querySelectorAll("[data-import-source-type]").forEach((node) => {
+    node.textContent = source.type || "文件夹";
+  });
+  document.querySelectorAll("[data-import-source-name]").forEach((node) => {
+    node.textContent = source.name || "本地选择文件";
+  });
+  document.querySelectorAll("[data-import-source-path]").forEach((node) => {
+    node.textContent = source.path || "浏览器本地选择";
+  });
+  document.querySelectorAll("[data-import-stat]").forEach((node) => {
+    const key = node.dataset.importStat;
+    if (Object.prototype.hasOwnProperty.call(stats, key)) {
+      node.textContent = String(stats[key]);
+    }
+  });
+  document.querySelectorAll("[data-import-finished-copy]").forEach((node) => {
+    const destination = importSettings.autoTalent ? "已加入人才库" : "已解析，暂未自动入库";
+    node.textContent = `本次导入已处理 ${stats.total || 0} 个文件，${destination}。`;
+  });
+  updateImportLegend(stats);
+}
+
+function setImportAssistantProgress({
+  sourceName = currentImportSource.name || "本地简历",
+  total = currentImportSource.stats?.total || 0,
+  done = 0,
+  active = 1,
+  failed = 0,
+  percent = 0,
+  fileName = sourceName,
+  fileMeta = "本地简历解析",
+  status = "正在解析本地简历正文",
+} = {}) {
+  const safeTotal = Math.max(0, Number(total || 0));
+  const safeDone = Math.max(0, Number(done || 0));
+  const safeActive = Math.max(0, Number(active || 0));
+  const safeFailed = Math.max(0, Number(failed || 0));
+  const safePercent = Math.min(100, Math.max(0, Number(percent || 0)));
+
+  document.querySelectorAll("[data-import-loading-percent]").forEach((node) => {
+    node.textContent = `${safePercent}%`;
+  });
+  const progressNodes = document.querySelectorAll("[data-import-loading-progress]");
+  if (!window.DeerRecallMotion?.updateImportProgress?.(progressNodes, safePercent)) {
+    progressNodes.forEach((node) => {
+      node.style.width = `${safePercent}%`;
+    });
+  }
+  document.querySelectorAll("[data-import-loading-total]").forEach((node) => {
+    node.textContent = String(safeTotal);
+  });
+  document.querySelectorAll("[data-import-loading-done]").forEach((node) => {
+    node.textContent = node.closest(".side-stat-list") ? `${safeDone} (${safePercent}%)` : String(safeDone);
+  });
+  document.querySelectorAll("[data-import-loading-active]").forEach((node) => {
+    node.textContent = node.closest(".side-stat-list") ? `${safeActive} (${safeTotal ? Math.max(1, Math.round((safeActive / safeTotal) * 100)) : 0}%)` : String(safeActive);
+  });
+  document.querySelectorAll("[data-import-loading-failed]").forEach((node) => {
+    node.textContent = node.closest(".side-stat-list") ? `${safeFailed} (${safeTotal ? Math.round((safeFailed / safeTotal) * 100) : 0}%)` : String(safeFailed);
+  });
+  document.querySelectorAll("[data-import-loading-file]").forEach((node) => {
+    node.textContent = fileName || sourceName;
+  });
+  document.querySelectorAll("[data-import-loading-file-meta]").forEach((node) => {
+    node.textContent = fileMeta;
+  });
+  document.querySelectorAll("[data-import-loading-source]").forEach((node) => {
+    node.textContent = sourceName;
+  });
+  document.querySelectorAll("[data-import-loading-status]").forEach((node) => {
+    node.textContent = status;
+  });
+}
+
+function setImportAssistantResult(source = currentImportSource) {
+  const stats = source.stats || {};
+  const total = Number(stats.total || 0);
+  const failed = Number(stats.failed || 0);
+  const unsupported = Number(stats.unsupported || 0);
+  const done = Math.max(0, Number(stats.parseable || 0));
+  setImportAssistantProgress({
+    sourceName: source.name || "本地导入",
+    total,
+    done,
+    active: 0,
+    failed: failed + unsupported,
+    percent: total ? 100 : 0,
+    fileName: source.name || "本地导入",
+    fileMeta: source.path || "本地来源",
+    status: total ? "解析完成，已更新本地人才库" : "没有读取到可导入的简历文件",
+  });
+}
+
+function buildTaskFilesFromImport(source) {
+  if (source.task?.files?.length) return source.task.files.slice(0, 12);
+  const fallbackTask = getTaskRecord("fintech_backend_2026");
+  const files = source.files?.length ? source.files.slice(0, 12) : isDesktopLocalLibrary ? [] : fallbackTask.files;
+  return files.map((file, index) => {
+    const extension = getImportFileExtension(file).toUpperCase() || "PDF";
+    const name = getImportFileName(file);
+    const supported = importSupportedExtensions.has(extension.toLowerCase());
+    const status = supported ? "success" : "unsupported";
+    return {
+      id: `local-${index + 1}`,
+      name,
+      info: `${file.size ? `${Math.max(1, Math.round(file.size / 1024))} KB` : "本地文件"} · ${extension}`,
+      ext: extension,
+      status,
+      result: supported ? `已入库：${name.replace(/\.[^.]+$/, "")}` : undefined,
+      reason: supported ? undefined : "格式不支持",
+      suggestion: supported ? undefined : "转为 PDF 或 DOCX 后重新导入",
+      retryable: false,
+      selected: !supported,
+    };
+  });
+}
+
+function getTaskKindFromRecord(task) {
+  if ((task.failed || 0) + (task.unsupported || 0) > 0) return "needs";
+  if (task.status === "processing") return "processing";
+  return "completed";
+}
+
+function updateTaskAssistantCounts(counts) {
+  document.querySelectorAll("[data-task-summary]").forEach((node) => {
+    const key = node.dataset.taskSummary;
+    if (Number.isFinite(counts[key])) node.textContent = String(counts[key]);
+  });
+}
+
+function updateTaskFilterCounts() {
+  const rows = Array.from(taskRows);
+  const counts = {
+    all: rows.length,
+    processing: rows.filter((row) => row.dataset.taskKind === "processing").length,
+    completed: rows.filter((row) => row.dataset.taskKind === "completed").length,
+    needs: rows.filter((row) => row.dataset.taskKind === "needs").length,
+    waiting: 0,
+  };
+  taskFilterButtons.forEach((button) => {
+    const count = counts[button.dataset.taskFilter];
+    const countNode = button.querySelector("span");
+    if (countNode && Number.isFinite(count)) countNode.textContent = String(count);
+  });
+  updateTaskAssistantCounts(counts);
+}
+
+function updateImportTaskRow(task) {
+  const row = document.querySelector(`[data-task-item][data-task-id="${task.id}"]`);
+  if (!row) return;
+
+  const taskKind = getTaskKindFromRecord(task);
+  const pendingIssues = (task.failed || 0) + (task.unsupported || 0);
+  const taskSource = escapeHtml(task.source);
+  const taskImportType = escapeHtml(task.importType);
+  const taskTime = escapeHtml(task.time);
+  row.dataset.taskKind = taskKind;
+  row.dataset.taskPanelTarget = pendingIssues ? "issue" : "detail";
+  row.classList.remove("task-needs", "task-processing", "task-completed");
+  row.classList.add(`task-${taskKind}`);
+
+  const statusMarkup =
+    pendingIssues > 0
+      ? '<div class="task-status-icon alert"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v6"></path><path d="M12 17h.01"></path></svg></div>'
+      : '<div class="task-status-icon success"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 6-11 11-5-5"></path></svg></div>';
+  row.firstElementChild.outerHTML = statusMarkup;
+
+  const titleMeta = pendingIssues > 0 ? '<span class="task-badge">需处理</span>' : '<span class="task-badge">已完成</span>';
+  const main = row.querySelector(".task-main");
+  if (main) {
+    main.innerHTML = `
+      <div class="task-title-line"><h3>${taskSource}</h3>${titleMeta}</div>
+      <p>${taskImportType} · ${task.total} 个文件 · ${taskTime}</p>
+      <div class="task-stats">
+        <span>成功 <strong class="green">${task.success}</strong></span>
+        <span>失败 <strong class="red">${task.failed}</strong></span>
+        <span>格式不支持 <strong>${task.unsupported}</strong></span>
+        <span>跳过 <strong>${task.skipped}</strong></span>
+      </div>
+    `;
+  }
+
+  const actions = row.querySelector(".task-actions");
+  if (actions) {
+    actions.innerHTML = pendingIssues
+      ? `<button class="task-action primary-lite" type="button" data-task-open="issue" data-task-id="${task.id}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-3-3Z"></path></svg>处理问题</button><button class="task-action" type="button" data-task-open="detail" data-task-id="${task.id}">查看详情 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>`
+      : `<button class="task-action" type="button" data-task-open="detail" data-task-id="${task.id}">查看详情 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button>`;
+  }
+
+  const targetGroup = document.querySelector(`[data-task-group="${taskKind}"]`);
+  if (targetGroup && row.parentElement !== targetGroup) targetGroup.append(row);
+  updateTaskFilterCounts();
+}
+
+function persistImportTask(source = currentImportSource) {
+  const stats = source.stats || {};
+  const task = taskRecords.fintech_backend_2026;
+  task.source = source.name || task.source;
+  task.importType = source.type === "文件" ? "批量文件导入" : "文件夹导入";
+  task.time = "刚刚";
+  task.status = stats.failed || stats.unsupported ? "partial_failed" : "completed";
+  task.total = stats.total || 0;
+  task.success = Math.max(0, (stats.parseable || 0) - (stats.failed || 0));
+  task.failed = stats.failed || 0;
+  task.unsupported = stats.unsupported || 0;
+  task.skipped = stats.skippedDuplicates || 0;
+  task.retryable = stats.failed || 0;
+  task.newProfiles = stats.newProfiles || 0;
+  task.updatedProfiles = stats.updatedProfiles || 0;
+  task.files = buildTaskFilesFromImport(source);
+  updateImportTaskRow(task);
+  selectedTaskId = task.id;
+  try {
+    window.localStorage?.setItem("deerrecall:lastImportTask", JSON.stringify({ ...task, files: task.files.slice(0, 20) }));
+  } catch (error) {
+    // Local storage is optional in packaged desktop contexts.
+  }
+}
+
+function handleImportFiles(fileList, options = {}) {
+  if (isDesktopLocalLibrary) {
+    if (importPickerStatus) importPickerStatus.textContent = "请使用上方按钮选择文件夹或文件。";
+    showToast("请使用上方按钮选择本地来源");
+    return;
+  }
+
+  const files = Array.from(fileList || []);
+  if (!files.length && !options.stats && !options.path && !options.useDemo) {
+    if (importPickerStatus) importPickerStatus.textContent = "没有读取到文件，请重新选择文件夹。";
+    showToast("没有读取到可导入文件");
+    return;
+  }
+
+  const source = scanImportFiles(files, options);
+  updateImportPreview(source);
+  persistImportTask(source);
+  if (importPickerStatus) {
+    importPickerStatus.textContent = `已读取 ${source.stats.total} 个文件，${source.stats.parseable} 个可解析。`;
+  }
+  showImportState("preview");
+}
+
+async function handleImportDrop(event) {
+  event.preventDefault();
+  importDropZone?.classList.remove("is-dragging");
+  if (isDesktopLocalLibrary) {
+    const paths = readDesktopDroppedPaths();
+    if (paths.length) await importDesktopDroppedPaths(paths);
+    else await importDesktopDroppedFiles(event.dataTransfer);
+    return;
+  }
+  const files = event.dataTransfer?.files || [];
+  handleImportFiles(files, { type: "拖拽文件夹" });
+}
+
+function updateImportSettingsUi() {
+  importSettingInputs.forEach((input) => {
+    const key = input.dataset.importSetting;
+    input.checked = Boolean(importSettings[key]);
+  });
+  document.querySelectorAll("[data-import-setting-status]").forEach((node) => {
+    const key = node.dataset.importSettingStatus;
+    node.textContent = importSettings[key] ? "已开启" : "已关闭";
+  });
+}
+
+function toggleImportSetting(input) {
+  const key = input?.dataset.importSetting;
+  if (!key) return;
+  importSettings[key] = input.checked;
+  updateImportSettingsUi();
+  if (currentImportState === "preview" || currentImportState === "finished") {
+    const source = scanImportFiles(currentImportSource.files || [], {
+      name: currentImportSource.name,
+      path: currentImportSource.path,
+      type: currentImportSource.type,
+      stats: currentImportSource.rawStats || currentImportSource.stats,
+    });
+    updateImportPreview(source);
+    persistImportTask(source);
+  }
+  const labels = {
+    scanSubfolders: "扫描子文件夹",
+    autoDedupe: "自动去重",
+    autoTalent: "解析后加入人才库",
+  };
+  showToast(`${labels[key] || "导入设置"}已${importSettings[key] ? "开启" : "关闭"}`);
+}
+
+function openImportTasks() {
+  selectedTaskId = null;
+  currentTaskView = "list";
+  currentTaskPanel = "overview";
+  showTaskState("overview");
+  setTaskFilter("all");
+  showToast("已打开所有导入任务");
+}
+
+function showResults(queryText = defaultQuery, options = {}) {
+  const normalizedQuery = normalizeQuery(queryText);
+  const restoredHistoryItem = options.restoreHistoryItem || null;
+  currentView = "searchResults";
+  currentQueryId = `local_${encodeURIComponent(normalizedQuery).slice(0, 64)}`;
+
+  emptyState.classList.add("state-hidden");
+  importState.classList.add("state-hidden");
+  taskState.classList.add("state-hidden");
+  talentState.classList.add("state-hidden");
+  candidateResumeState.classList.add("state-hidden");
+  hideTalentDetailViews();
+  hideP1Views();
+  hideP2Views();
+  emptySide.classList.add("state-hidden");
+  importSidePanels.forEach((panel) => panel.classList.add("state-hidden"));
+  taskAssistantPanels.forEach((panel) => panel.classList.add("state-hidden"));
+  talentAssistantPanels.forEach((panel) => panel.classList.add("state-hidden"));
+  candidateResumeAssistants.forEach((panel) => panel.classList.add("state-hidden"));
+  resultsState.classList.remove("state-hidden");
+  resultsSide.classList.remove("state-hidden");
+  setActiveNav("search");
+
+  userQuery.textContent = normalizedQuery;
+  currentQuery.textContent = normalizedQuery;
+  refineSearchInput.value = "";
+  const localResult = buildLocalSearchResult(normalizedQuery);
+  applySearchResultModel(localResult);
+  window.DeerRecallMotion?.enterSearchResults?.(resultsState);
+
+  if (restoredHistoryItem) {
+    activeSearchAiHistoryId = restoredHistoryItem.id;
+    if (restoredHistoryItem.status === "error") {
+      if (searchAiAnswerBody) searchAiAnswerBody.textContent = restoredHistoryItem.answer || "";
+      setSearchAiState("error", restoredHistoryItem.answer || "历史记录中的 AI 回答暂不可用。");
+      renderSearchAiHistory();
+      return;
+    }
+    renderSearchAssistant(restoredHistoryItem, {
+      statusMessage: "已恢复历史搜索。",
+      skipHistoryUpdate: true,
+    });
+    return;
+  }
+
+  const historyItem = upsertSearchAiHistory({
+    id: createSearchAiHistoryId(),
+    query: normalizedQuery,
+    answer: "",
+    suggestions: [],
+    status: "loading",
+    createdAt: Date.now(),
+  });
+  activeSearchAiHistoryId = historyItem?.id || null;
+  renderSearchAiHistory();
+  renderSearchAssistant(localResult.assistant, {
+    historyId: activeSearchAiHistoryId,
+    query: normalizedQuery,
+    statusMessage: "本地搜索模式。配置模型 Key 后可启用 AI 增强解释。",
+  });
+  requestSearchAssistant(normalizedQuery, activeSearchAiHistoryId);
+}
+
+function setActiveNav(view) {
+  navButtons.forEach((button) => {
+    const isActive = button.dataset.navView === view;
+    button.classList.toggle("active", isActive);
+    if (isActive) {
+      button.setAttribute("aria-current", "page");
+    } else {
+      button.removeAttribute("aria-current");
+    }
+  });
+}
+
+function showSearch() {
+  currentView = "search";
+  importState.classList.add("state-hidden");
+  taskState.classList.add("state-hidden");
+  talentState.classList.add("state-hidden");
+  candidateResumeState.classList.add("state-hidden");
+  hideTalentDetailViews();
+  hideP1Views();
+  hideP2Views();
+  resultsState.classList.add("state-hidden");
+  resultsSide.classList.add("state-hidden");
+  importSidePanels.forEach((panel) => panel.classList.add("state-hidden"));
+  taskAssistantPanels.forEach((panel) => panel.classList.add("state-hidden"));
+  talentAssistantPanels.forEach((panel) => panel.classList.add("state-hidden"));
+  candidateResumeAssistants.forEach((panel) => panel.classList.add("state-hidden"));
+  emptyState.classList.remove("state-hidden");
+  emptySide.classList.remove("state-hidden");
+  setActiveNav("search");
+}
+
+function showImportState(nextState = currentImportState) {
+  currentView = "import";
+  currentImportState = nextState;
+  updateImportPreview();
+  updateImportSettingsUi();
+  emptyState.classList.add("state-hidden");
+  resultsState.classList.add("state-hidden");
+  taskState.classList.add("state-hidden");
+  talentState.classList.add("state-hidden");
+  candidateResumeState.classList.add("state-hidden");
+  hideTalentDetailViews();
+  hideP1Views();
+  hideP2Views();
+  emptySide.classList.add("state-hidden");
+  resultsSide.classList.add("state-hidden");
+  taskAssistantPanels.forEach((panel) => panel.classList.add("state-hidden"));
+  talentAssistantPanels.forEach((panel) => panel.classList.add("state-hidden"));
+  candidateResumeAssistants.forEach((panel) => panel.classList.add("state-hidden"));
+  importState.classList.remove("state-hidden");
+
+  importPanels.forEach((panel) => {
+    panel.classList.toggle("state-hidden", panel.dataset.importState !== nextState);
+  });
+  importSidePanels.forEach((panel) => {
+    panel.classList.toggle("state-hidden", panel.dataset.importSide !== nextState);
+  });
+  if (nextState !== "default") {
+    importPickerCard?.classList.add("state-hidden");
+  }
+  setActiveNav("import");
+  window.DeerRecallMotion?.enterImportState?.(nextState, importState);
+}
+
+function getTaskRecord(taskId = selectedTaskId) {
+  if (isDesktopLocalLibrary) {
+    return taskRecords[taskId] || Object.values(taskRecords)[0] || {
+      id: "local_empty_task",
+      source: "暂无解析任务",
+      importType: "文件夹导入",
+      time: "",
+      status: "completed",
+      total: 0,
+      success: 0,
+      failed: 0,
+      unsupported: 0,
+      skipped: 0,
+      retryable: 0,
+      newProfiles: 0,
+      updatedProfiles: 0,
+      files: [],
+    };
+  }
+  return taskRecords[taskId] || taskRecords.customer_backend_001;
+}
+
+function getTaskStats(task) {
+  const issueFiles = task.files.filter((file) => file.status === "failed" || file.status === "unsupported");
+  const selectedIssues = issueFiles.filter((file) => file.selected).length;
+  const selectedRetryable = issueFiles.filter((file) => file.selected && file.retryable).length;
+  const successRate = task.total > 0 ? `${((task.success / task.total) * 100).toFixed(1)}%` : "0%";
+
+  return {
+    total: task.total,
+    success: task.success,
+    failed: task.failed,
+    unsupported: task.unsupported,
+    skipped: task.skipped,
+    retryable: task.retryable,
+    pendingIssues: task.failed + task.unsupported,
+    selectedIssues,
+    selectedRetryable,
+    newProfiles: task.newProfiles,
+    updatedProfiles: task.updatedProfiles,
+    successRate,
+  };
+}
+
+function updateTaskText(task) {
+  document.querySelectorAll("[data-task-text]").forEach((node) => {
+    const key = node.dataset.taskText;
+    if (key === "issueSelection") return;
+    node.textContent = task[key] || "";
+  });
+  document.querySelectorAll('[data-task-panel="detail"] [data-task-open]').forEach((button) => {
+    button.dataset.taskId = task.id;
+  });
+}
+
+function updateTaskMetrics(task) {
+  const stats = getTaskStats(task);
+  document.querySelectorAll("[data-task-metric]").forEach((node) => {
+    const key = node.dataset.taskMetric;
+    if (Object.prototype.hasOwnProperty.call(stats, key)) {
+      node.textContent = stats[key];
+    }
+  });
+
+  document.querySelectorAll("[data-task-progress]").forEach((node) => {
+    node.style.width = stats.successRate;
+  });
+
+  const issueSelection = document.querySelector('[data-task-text="issueSelection"]');
+  if (issueSelection) {
+    issueSelection.textContent = `已选择 ${stats.selectedIssues} 个文件，其中可直接重试 ${stats.selectedRetryable} 个`;
+  }
+}
+
+function getStatusLabel(status) {
+  if (status === "success") return "成功";
+  if (status === "failed") return "失败";
+  if (status === "unsupported") return "格式不支持";
+  if (status === "ignored") return "已忽略";
+  return "解析中";
+}
+
+function getTaskCandidateId(file) {
+  if (file.candidateId) return file.candidateId;
+  const matchedCandidate = Object.values(candidateRecords).find((candidate) => {
+    return file.name.includes(candidate.name) || file.result?.includes(candidate.name);
+  });
+  return matchedCandidate?.id || "candidate_chenyu_001";
+}
+
+function renderTaskIssueList(task) {
+  if (!taskIssueList) return;
+  const issueFiles = task.files.filter((file) => file.status === "failed" || file.status === "unsupported");
+  taskIssueList.innerHTML = issueFiles
+    .map((file) => {
+      const fileName = escapeHtml(file.name);
+      const fileInfo = escapeHtml(file.info || "");
+      const fileExt = escapeHtml(file.ext || "");
+      const fileReason = escapeHtml(file.reason || "");
+      const fileSuggestion = escapeHtml(file.suggestion || "");
+      return `
+        <article class="task-file-row" data-task-file-id="${file.id}">
+          <span><input type="checkbox" ${file.selected ? "checked" : ""} aria-label="选择 ${fileName}" /></span>
+          <span class="task-file-name"><em>${fileExt}</em><strong>${fileName}</strong><small>${fileInfo}</small></span>
+          <span><mark class="${file.status === "unsupported" ? "warning" : "danger"}">${fileReason}</mark></span>
+          <span>${fileSuggestion}</span>
+          <span class="task-row-actions">
+            <button type="button">定位文件</button>
+            <button type="button" data-task-failure-open="file" data-task-file-id="${file.id}">详情</button>
+            <button type="button" data-task-file-resolve="${file.retryable ? "retry" : "replace"}" data-task-file-id="${file.id}">${file.retryable ? "尝试解析" : "替换文件"}</button>
+            <button type="button" data-task-file-resolve="ignore" data-task-file-id="${file.id}">忽略</button>
+          </span>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderTaskDetailList(task) {
+  if (!taskDetailList) return;
+  taskDetailList.innerHTML = task.files
+    .map((file) => {
+      const fileName = escapeHtml(file.name);
+      const fileInfo = escapeHtml(file.info || "");
+      const fileExt = escapeHtml(file.ext || "");
+      const fileResult = escapeHtml(file.result || file.reason || "等待解析");
+      return `
+        <article class="task-file-row" data-task-file-id="${file.id}">
+          <span class="task-file-name"><em>${fileExt}</em><strong>${fileName}</strong></span>
+          <span>${fileInfo}</span>
+          <span><mark class="${file.status}">${getStatusLabel(file.status)}</mark></span>
+          <span>${fileResult}</span>
+          <span class="task-row-actions">
+            ${
+              file.status === "success"
+                ? `<button class="candidate-resume-open" type="button" data-candidate-id="${getTaskCandidateId(file)}" data-candidate-resume-entry="task" data-task-id="${task.id}">查看候选人</button>`
+                : `<button type="button" data-task-open="issue" data-task-id="${task.id}">查看问题</button>`
+            }
+          </span>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function refreshTaskRows(task) {
+  const stats = getTaskStats(task);
+  const row = document.querySelector(`[data-task-item][data-task-id="${task.id}"]`);
+  if (!row) return;
+
+  row.dataset.taskKind = stats.pendingIssues === 0 ? "completed" : row.dataset.taskKind;
+  const badge = row.querySelector(".task-badge");
+  if (badge && stats.pendingIssues === 0) badge.textContent = "已完成";
+
+  const statValues = row.querySelectorAll(".task-stats strong");
+  if (statValues.length >= 3) {
+    statValues[0].textContent = stats.success;
+    statValues[1].textContent = stats.failed;
+    statValues[2].textContent = stats.unsupported;
+  }
+}
+
+function renderSelectedTask() {
+  if (!selectedTaskId) return;
+  const task = getTaskRecord(selectedTaskId);
+  updateTaskText(task);
+  updateTaskMetrics(task);
+  renderTaskIssueList(task);
+  renderTaskDetailList(task);
+  refreshTaskRows(task);
+}
+
+function showTaskPanel(panelName = currentTaskPanel) {
+  currentTaskPanel = panelName;
+  taskAssistantPanels.forEach((panel) => {
+    panel.classList.toggle("state-hidden", panel.dataset.taskPanel !== panelName);
+  });
+}
+
+function showTaskView(viewName = currentTaskView) {
+  currentTaskView = viewName;
+  taskViews.forEach((view) => {
+    view.classList.toggle("state-hidden", view.dataset.taskView !== viewName);
+  });
+}
+
+function showTaskState(panelName = currentTaskPanel) {
+  currentView = "tasks";
+  emptyState.classList.add("state-hidden");
+  resultsState.classList.add("state-hidden");
+  importState.classList.add("state-hidden");
+  talentState.classList.add("state-hidden");
+  candidateResumeState.classList.add("state-hidden");
+  hideTalentDetailViews();
+  hideP1Views();
+  hideP2Views();
+  emptySide.classList.add("state-hidden");
+  resultsSide.classList.add("state-hidden");
+  importSidePanels.forEach((panel) => panel.classList.add("state-hidden"));
+  talentAssistantPanels.forEach((panel) => panel.classList.add("state-hidden"));
+  candidateResumeAssistants.forEach((panel) => panel.classList.add("state-hidden"));
+  taskState.classList.remove("state-hidden");
+  showTaskView(currentTaskView);
+  showTaskPanel(panelName);
+  setActiveNav("tasks");
+}
+
+function setTaskFilter(filter) {
+  currentTaskView = "list";
+  selectedTaskId = null;
+  showTaskView("list");
+  taskState.dataset.filter = filter;
+  taskFilterButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.taskFilter === filter);
+  });
+
+  if (filter === "all") {
+    showTaskPanel("overview");
+    taskRows.forEach((taskRow) => taskRow.classList.remove("is-selected"));
+    return;
+  }
+
+  const row = document.querySelector(`[data-task-item][data-task-kind="${filter === "needs" ? "needs" : filter}"]`);
+  if (row) {
+    selectTaskRow(row);
+    showTaskPanel(filter === "needs" ? "overview" : row.dataset.taskPanelTarget || "overview");
+  }
+}
+
+function selectTaskRow(row) {
+  if (!row) return;
+  taskRows.forEach((taskRow) => taskRow.classList.toggle("is-selected", taskRow === row));
+}
+
+function selectTaskById(taskId) {
+  const row = document.querySelector(`[data-task-item][data-task-id="${taskId}"]`);
+  selectTaskRow(row);
+}
+
+function openTaskIssue(taskId) {
+  selectedTaskId = taskId;
+  currentTaskView = "issue";
+  currentTaskPanel = "issue";
+  selectTaskById(taskId);
+  renderSelectedTask();
+  showTaskState("issue");
+}
+
+function openTaskDetail(taskId) {
+  selectedTaskId = taskId;
+  currentTaskView = "detail";
+  currentTaskPanel = "detail";
+  selectTaskById(taskId);
+  renderSelectedTask();
+  showTaskState("detail");
+}
+
+function returnTaskList() {
+  currentTaskView = "list";
+  currentTaskPanel = "overview";
+  selectedTaskId = null;
+  taskRows.forEach((taskRow) => taskRow.classList.remove("is-selected"));
+  showTaskState("overview");
+}
+
+function returnTaskDetail() {
+  if (!selectedTaskId) {
+    returnTaskList();
+    return;
+  }
+  openTaskDetail(selectedTaskId);
+}
+
+function resolveTaskFiles(action, fileId) {
+  if (!selectedTaskId) return;
+  const task = getTaskRecord(selectedTaskId);
+  const issueFiles = task.files.filter((file) => file.status === "failed" || file.status === "unsupported");
+  const filesToResolve = fileId ? task.files.filter((file) => file.id === fileId) : issueFiles.filter((file) => file.selected);
+
+  filesToResolve.forEach((file) => {
+    const wasFailed = file.status === "failed";
+    const wasUnsupported = file.status === "unsupported";
+
+    if (action === "ignore" || action === "ignoreSelected") {
+      file.status = "ignored";
+      file.result = "已忽略";
+      file.selected = false;
+      if (wasFailed) task.failed = Math.max(0, task.failed - 1);
+      if (wasUnsupported) task.unsupported = Math.max(0, task.unsupported - 1);
+      if (file.retryable) task.retryable = Math.max(0, task.retryable - 1);
+      task.skipped += 1;
+      return;
+    }
+
+    if (file.retryable || action === "replace") {
+      file.status = "success";
+      file.result = `已入库：${file.name.split("_")[0]}`;
+      file.selected = false;
+      if (wasFailed) task.failed = Math.max(0, task.failed - 1);
+      if (wasUnsupported) task.unsupported = Math.max(0, task.unsupported - 1);
+      if (file.retryable) task.retryable = Math.max(0, task.retryable - 1);
+      task.success += 1;
+    }
+  });
+
+  const stats = getTaskStats(task);
+  if (stats.pendingIssues === 0) task.status = "completed";
+  renderSelectedTask();
+}
+
+function showTalentPanel(panelName = currentTalentPanel) {
+  currentTalentPanel = panelName;
+  talentAssistantPanels.forEach((panel) => {
+    panel.classList.toggle("state-hidden", panel.dataset.talentPanel !== panelName);
+  });
+}
+
+function setTalentFilter(filter) {
+  currentTalentFilter = filter;
+  talentState.dataset.filter = filter;
+  talentFilterButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.talentFilter === filter);
+  });
+  talentViews.forEach((view) => {
+    view.classList.toggle("state-hidden", view.dataset.talentView !== filter);
+  });
+
+  const panelName = filter === "all" ? "overview" : filter;
+  showTalentPanel(panelName);
+  const firstItem = document.querySelector(`[data-talent-view="${filter}"] [data-talent-item]`);
+  selectTalentItem(firstItem);
+  window.DeerRecallMotion?.enterTalentView?.(talentState);
+}
+
+function showTalentState(filter = currentTalentFilter) {
+  currentView = "talents";
+  emptyState.classList.add("state-hidden");
+  resultsState.classList.add("state-hidden");
+  importState.classList.add("state-hidden");
+  taskState.classList.add("state-hidden");
+  candidateResumeState.classList.add("state-hidden");
+  hideTalentDetailViews();
+  hideP1Views();
+  hideP2Views();
+  emptySide.classList.add("state-hidden");
+  resultsSide.classList.add("state-hidden");
+  importSidePanels.forEach((panel) => panel.classList.add("state-hidden"));
+  taskAssistantPanels.forEach((panel) => panel.classList.add("state-hidden"));
+  candidateResumeAssistants.forEach((panel) => panel.classList.add("state-hidden"));
+  talentState.classList.remove("state-hidden");
+  setTalentFilter(filter);
+  setActiveNav("talents");
+}
+
+function showTalentDetailShell(detailView) {
+  currentTalentDetailView = detailView;
+  emptyState.classList.add("state-hidden");
+  resultsState.classList.add("state-hidden");
+  importState.classList.add("state-hidden");
+  taskState.classList.add("state-hidden");
+  talentState.classList.add("state-hidden");
+  candidateResumeState.classList.add("state-hidden");
+  hideAllAssistantContexts();
+  hideTalentDetailViews();
+  hideP1Views();
+  hideP2Views();
+  setActiveNav("talents");
+}
+
+function openTalentDuplicateDetail() {
+  currentView = "talentDuplicateDetail";
+  currentTalentFilter = "duplicate";
+  currentTalentPanel = "duplicate";
+  showTalentDetailShell("duplicate");
+  talentDuplicateDetailState.classList.remove("state-hidden");
+  document.querySelector('[data-talent-detail-assistant="duplicate"]').classList.remove("state-hidden");
+}
+
+function openTalentPendingComplete() {
+  currentView = "talentPendingComplete";
+  currentTalentFilter = "pending";
+  currentTalentPanel = "pending";
+  showTalentDetailShell("pending");
+  talentPendingCompleteState.classList.remove("state-hidden");
+  document.querySelector('[data-talent-detail-assistant="pending"]').classList.remove("state-hidden");
+}
+
+function closeTalentDetail() {
+  const returnFilter = currentTalentDetailView === "duplicate" ? "duplicate" : "pending";
+  currentTalentDetailView = null;
+  hideTalentDetailViews();
+  showTalentState(returnFilter);
+  showTalentPanel(returnFilter);
+}
+
+function showP1Shell(activeNav) {
+  emptyState.classList.add("state-hidden");
+  resultsState.classList.add("state-hidden");
+  importState.classList.add("state-hidden");
+  taskState.classList.add("state-hidden");
+  talentState.classList.add("state-hidden");
+  candidateResumeState.classList.add("state-hidden");
+  hideAllAssistantContexts();
+  hideTalentDetailViews();
+  hideP1Views();
+  hideP2Views();
+  setActiveNav(activeNav);
+}
+
+function showP1Assistant(name) {
+  const panel = document.querySelector(`[data-p1-assistant="${name}"]`);
+  if (panel) panel.classList.remove("state-hidden");
+}
+
+function openTalentSourceDetail() {
+  currentView = "talentSourceDetail";
+  currentTalentFilter = "recent";
+  currentTalentPanel = "recent";
+  showP1Shell("talents");
+  talentSourceDetailState.classList.remove("state-hidden");
+  showP1Assistant("source");
+}
+
+function updateImportAction(action) {
+  currentImportAction = action || "searchImported";
+  const titles = {
+    searchImported: "新导入候选人搜索",
+    dedupeImported: "智能去重与合并",
+    tagImported: "标签与分组",
+    ruleImported: "更新解析规则",
+  };
+  const copies = {
+    searchImported: "从新导入批次直接生成搜索条件，确认候选人是否能被准确召回。",
+    dedupeImported: "聚焦本批次疑似重复记录，先合并高相似候选人再进入沟通。",
+    tagImported: "为新导入候选人补齐技能、来源和业务方向标签。",
+    ruleImported: "根据失败文件和低置信字段，更新下一次导入的解析规则。",
+  };
+  document.querySelectorAll("[data-import-action-title]").forEach((node) => {
+    node.textContent = titles[currentImportAction] || titles.searchImported;
+  });
+  document.querySelectorAll("[data-import-action-copy]").forEach((node) => {
+    node.textContent = copies[currentImportAction] || copies.searchImported;
+  });
+  importActionCards.forEach((card) => {
+    card.classList.toggle("is-active", card.dataset.importActionCard === currentImportAction);
+  });
+}
+
+function openImportAction(action = "searchImported") {
+  currentView = "importAction";
+  currentImportState = "finished";
+  updateImportAction(action);
+  showP1Shell("import");
+  importActionState.classList.remove("state-hidden");
+  showP1Assistant("importAction");
+}
+
+function openTalentAdvancedFilter() {
+  currentView = "talentAdvancedFilter";
+  showP1Shell("talents");
+  talentAdvancedFilterState.classList.remove("state-hidden");
+  showP1Assistant("filter");
+}
+
+function openTalentCandidateActions() {
+  currentView = "talentCandidateActions";
+  selectedCandidateId = getCandidateRecord(selectedCandidateId)?.id || null;
+  showP1Shell("talents");
+  talentCandidateActionsState.classList.remove("state-hidden");
+  showP1Assistant("candidateActions");
+}
+
+function showSettingsState() {
+  currentView = "settings";
+  showP1Shell("settings");
+  settingsState.classList.remove("state-hidden");
+  showP1Assistant("settings");
+}
+
+function closeP1View(target) {
+  hideP1Views();
+  if (target === "importFinished") {
+    showImportState("finished");
+    return;
+  }
+  if (target === "talentRecent") {
+    showTalentState("recent");
+    return;
+  }
+  showTalentState(currentTalentFilter || "all");
+}
+
+function handleP1Action(action) {
+  if (action === "exportCandidate") {
+    openExportCenter("candidateList", { activeNav: "talents" });
+    return;
+  }
+  const labels = {
+    applyFilter: "已应用高级筛选",
+    ignoreCandidate: "已记录忽略候选人操作",
+    deleteCandidate: "删除候选人需要二次确认",
+    saveSettings: "设置已保存",
+  };
+  showToast(labels[action] || "操作已记录");
+}
+
+function handleImportActionRun(action) {
+  if (action === "search") {
+    showResults("只看 FinTech_Backend_2026 本次新增的 Java 后端候选人。");
+    showToast("已打开新导入候选人搜索");
+    return;
+  }
+  if (action === "tags") {
+    openTagManager("imported", { activeNav: "import" });
+    return;
+  }
+  if (action === "rules") {
+    showToast("解析规则草稿已保存");
+  }
+}
+
+function getActiveNav() {
+  return document.querySelector("[data-nav-view].active")?.dataset.navView || "talents";
+}
+
+function captureP2ReturnContext(overrides = {}) {
+  return {
+    view: currentView,
+    importState: currentImportState,
+    importAction: currentImportAction,
+    taskView: currentTaskView,
+    taskPanel: currentTaskPanel,
+    taskId: selectedTaskId,
+    talentFilter: currentTalentFilter,
+    talentPanel: currentTalentPanel,
+    candidateId: selectedCandidateId,
+    candidateEntry: candidateResumeEntry,
+    searchQuery: currentQuery?.textContent || defaultQuery,
+    activeNav: getActiveNav(),
+    ...overrides,
+  };
+}
+
+function showP2Assistant(name) {
+  const panel = document.querySelector(`[data-p2-assistant="${name}"]`);
+  if (panel) panel.classList.remove("state-hidden");
+}
+
+function showP2Shell(activeNav = "talents", assistantName = "export", returnContext = {}) {
+  p2ReturnContext = returnContext;
+  emptyState.classList.add("state-hidden");
+  resultsState.classList.add("state-hidden");
+  importState.classList.add("state-hidden");
+  taskState.classList.add("state-hidden");
+  talentState.classList.add("state-hidden");
+  candidateResumeState.classList.add("state-hidden");
+  hideAllAssistantContexts();
+  hideTalentDetailViews();
+  hideP1Views();
+  hideP2Views();
+  setActiveNav(activeNav);
+  showP2Assistant(assistantName);
+}
+
+function updateExportCenter(scope = "candidateList") {
+  currentExportScope = scope;
+  const exportMeta = {
+    candidateList: {
+      title: "候选人列表",
+      count: "428",
+      description: "确认导出范围、字段和文件格式，生成可发给业务方的候选人列表。",
+    },
+    sourceList: {
+      title: "来源批次",
+      count: "126",
+      description: "导出当前来源批次的入库结果、质量状态和候选人摘要。",
+    },
+    savedList: {
+      title: "收藏候选人",
+      count: "18",
+      description: "导出已收藏候选人，适合给业务方或面试官做初筛沟通。",
+    },
+    pendingList: {
+      title: "待完善资料",
+      count: "41",
+      description: "导出待完善资料清单，方便集中补全联系方式与经历字段。",
+    },
+    failedList: {
+      title: "失败文件",
+      count: "12",
+      description: "导出解析失败和格式不支持文件，用于人工替换、转换和重试。",
+    },
+  };
+  const meta = exportMeta[scope] || exportMeta.candidateList;
+  document.querySelectorAll("[data-export-title]").forEach((node) => {
+    node.textContent = meta.title;
+  });
+  document.querySelectorAll("[data-export-count]").forEach((node) => {
+    node.textContent = meta.count;
+  });
+  document.querySelectorAll("[data-export-description]").forEach((node) => {
+    node.textContent = meta.description;
+  });
+  exportScopeButtons.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.exportScopeOption === scope);
+  });
+}
+
+function openExportCenter(scope = "candidateList", options = {}) {
+  const returnContext = captureP2ReturnContext(options.returnContext || {});
+  const activeNav = options.activeNav || returnContext.activeNav || (scope === "failedList" ? "tasks" : "talents");
+  currentView = "exportCenter";
+  updateExportCenter(scope);
+  showP2Shell(activeNav, "export", returnContext);
+  exportCenterState.classList.remove("state-hidden");
+}
+
+function openShortlistManager(source = "manager", options = {}) {
+  const returnContext = captureP2ReturnContext(options.returnContext || {});
+  currentView = "shortlistManager";
+  showP2Shell(options.activeNav || returnContext.activeNav || "talents", "shortlist", returnContext);
+  shortlistState.dataset.shortlistSource = source;
+  refreshShortlistManager();
+  shortlistState.classList.remove("state-hidden");
+}
+
+function openTagManager(source = "candidate", options = {}) {
+  const returnContext = captureP2ReturnContext(options.returnContext || {});
+  currentView = "tagManager";
+  showP2Shell(options.activeNav || returnContext.activeNav || "talents", "tags", returnContext);
+  tagManagerState.dataset.tagSource = source;
+  tagManagerState.classList.remove("state-hidden");
+}
+
+function openTaskFailureDetail(fileId = "file", options = {}) {
+  const returnContext = captureP2ReturnContext(options.returnContext || {});
+  selectedTaskId = options.taskId || selectedTaskId || "customer_backend_001";
+  currentView = "taskFailureDetail";
+  currentTaskView = "issue";
+  currentTaskPanel = "issue";
+  renderSelectedTask();
+  showP2Shell("tasks", "failure", returnContext);
+  taskFailureDetailState.dataset.taskFileId = fileId;
+  taskFailureDetailState.classList.remove("state-hidden");
+}
+
+function openSearchFilter(mode = "advanced", options = {}) {
+  const returnContext = captureP2ReturnContext(options.returnContext || {});
+  currentView = "searchFilter";
+  showP2Shell("search", "searchFilter", returnContext);
+  searchFilterState.dataset.searchFilterMode = mode;
+  searchFilterState.classList.remove("state-hidden");
+}
+
+function setP2ActionStatus(scope, message, tone = "success") {
+  const statusSelectors = {
+    export: '[data-p2-action-status="export"]',
+    shortlist: '[data-p2-action-status="shortlist"]',
+    tag: "[data-tag-action-status]",
+    failure: "[data-failure-action-status]",
+    searchFilter: "[data-search-filter-status]",
+  };
+  const selector = statusSelectors[scope] || `[data-p2-action-status="${scope}"]`;
+  document.querySelectorAll(selector).forEach((node) => {
+    node.textContent = message;
+    node.classList.remove("is-success", "is-warning");
+    if (tone) node.classList.add(`is-${tone}`);
+  });
+}
+
+function refreshShortlistManager() {
+  const visibleCards = shortlistState.querySelectorAll("[data-shortlist-card]:not(.is-removed)");
+  const total = Math.max(selectedCandidates.size, visibleCards.length);
+  document.querySelectorAll("[data-shortlist-total]").forEach((node) => {
+    node.textContent = total;
+  });
+  if (visibleCards.length === 0) {
+    setP2ActionStatus("shortlist", "短名单已清空，可返回候选人页重新加入", "warning");
+  }
+}
+
+function applySuggestedTag(triggerButton) {
+  const tokenBox = document.querySelector("[data-tag-token-box]");
+  const tagValue = triggerButton?.dataset.tagValue || triggerButton?.closest(".p2-suggestion-list p")?.querySelector("strong")?.textContent?.trim();
+  if (!tokenBox || !tagValue) {
+    setP2ActionStatus("tag", "未找到可应用的标签建议", "warning");
+    showToast("未找到可应用的标签建议");
+    return;
+  }
+
+  const exists = Array.from(tokenBox.querySelectorAll("span")).some((token) => token.textContent.trim() === tagValue);
+  if (!exists) {
+    const token = document.createElement("span");
+    token.className = "is-added";
+    token.textContent = tagValue;
+    tokenBox.append(token);
+  }
+
+  if (triggerButton) {
+    triggerButton.textContent = exists ? "已存在" : "已应用";
+    triggerButton.disabled = true;
+  }
+  setP2ActionStatus("tag", exists ? `${tagValue} 已在当前标签中` : `${tagValue} 已加入当前标签`);
+  showToast(exists ? "标签已存在" : "标签建议已应用");
+}
+
+function closeP2View() {
+  const context = p2ReturnContext || {};
+  hideP2Views();
+  if (context.view === "candidateResumeDetail" && context.candidateId) {
+    openCandidateResume(context.candidateId, { entry: context.candidateEntry || "talent" });
+    return;
+  }
+  if (context.view === "search" || context.activeNav === "search") {
+    if (context.view === "search") showSearch();
+    else showResults(context.searchQuery || defaultQuery);
+    return;
+  }
+  if (context.activeNav === "import" || context.view === "import" || context.view === "importAction") {
+    if (context.view === "importAction") openImportAction(context.importAction || currentImportAction);
+    else showImportState(context.importState || currentImportState);
+    return;
+  }
+  if (context.activeNav === "tasks" || context.view === "tasks") {
+    selectedTaskId = context.taskId || selectedTaskId;
+    currentTaskView = context.taskView || currentTaskView;
+    currentTaskPanel = context.taskPanel || currentTaskPanel;
+    if (currentTaskView === "issue" && selectedTaskId) openTaskIssue(selectedTaskId);
+    else if (currentTaskView === "detail" && selectedTaskId) openTaskDetail(selectedTaskId);
+    else showTaskState(currentTaskPanel || "overview");
+    return;
+  }
+  showTalentState(context.talentFilter || currentTalentFilter || "all");
+  showTalentPanel(context.talentPanel || currentTalentPanel || "overview");
+}
+
+function handleP2Action(action, triggerButton = null) {
+  const labels = {
+    exportNow: "导出文件已生成",
+    copyShortlist: "短名单已复制",
+    removeShortlist: "已从短名单移除",
+    applyTag: "标签建议已应用",
+    saveTags: "标签已保存",
+    batchTags: "标签已批量应用",
+    replaceFile: "替换文件入口已预留",
+    locateFile: "已定位原文件",
+    applySearchFilter: "筛选条件已应用",
+    saveSearch: "搜索条件已保存",
+  };
+  if (action === "exportNow") {
+    setP2ActionStatus("export", "已生成 XLSX 文件，可在导出历史中查看");
+  }
+  if (action === "copyShortlist") {
+    copyText("支付风控 Java 后端短名单：陈屿、林晓然、周靖", labels.copyShortlist);
+    setP2ActionStatus("shortlist", "短名单内容已复制，可直接发给业务方");
+    return;
+  }
+  if (action === "removeShortlist") {
+    const card = triggerButton?.closest("[data-shortlist-card]");
+    const name = card?.dataset.shortlistName || "候选人";
+    card?.classList.add("is-removed");
+    card?.setAttribute("aria-hidden", "true");
+    refreshShortlistManager();
+    setP2ActionStatus("shortlist", `${name} 已从当前短名单移除`);
+  }
+  if (action === "applyTag") {
+    applySuggestedTag(triggerButton);
+    return;
+  }
+  if (action === "saveTags") {
+    setP2ActionStatus("tag", "当前候选人标签已保存");
+  }
+  if (action === "batchTags") {
+    setP2ActionStatus("tag", "AI 标签建议已批量应用到本批候选人");
+  }
+  if (action === "replaceFile") {
+    setP2ActionStatus("failure", "替换文件入口已预留，等待选择新文件", "warning");
+  }
+  if (action === "locateFile") {
+    setP2ActionStatus("failure", "已定位到原文件所在批次");
+  }
+  if (action === "applySearchFilter") {
+    setP2ActionStatus("searchFilter", "筛选条件已应用，正在返回搜索结果");
+    showResults("找做过支付风控的 Java 后端，5 年以上，资料完整，优先上海 / 杭州 / 深圳。");
+  }
+  if (action === "saveSearch") {
+    setP2ActionStatus("searchFilter", "搜索条件已保存，可在 DeerSearch 中复用");
+  }
+  showToast(labels[action] || "操作已记录");
+}
+
+function handleTalentOpenAction(action) {
+  if (action === "sourceDetail") openTalentSourceDetail();
+  if (action === "advancedFilter") openTalentAdvancedFilter();
+  if (action === "candidateActions") openTalentCandidateActions();
+  if (action === "duplicateDetail") openTalentDuplicateDetail();
+  if (action === "pendingComplete") openTalentPendingComplete();
+}
+
+function handleTalentDetailAction(action) {
+  const labels = {
+    merge: "已按推荐策略合并简历",
+    newer: "已选择保留较新版本",
+    separate: "已分别保留该重复组",
+    apply: "已应用 AI 补全建议",
+    check: "已标记为待人工确认",
+    save: "补全信息已保存",
+    parse: "已加入重新解析队列",
+  };
+  showToast(labels[action] || "操作已记录");
+}
+
+function selectTalentItem(item) {
+  if (!item) return;
+  talentItems.forEach((talentItem) => talentItem.classList.toggle("is-selected", talentItem === item));
+  window.DeerRecallMotion?.pulseTalentSelection?.(item);
+}
+
+function toggleShortlistButton(button) {
+  const name = button?.dataset.name;
+  if (!name) return;
+  if (selectedCandidates.has(name)) {
+    selectedCandidates.delete(name);
+    button.classList.remove("is-selected");
+  } else {
+    selectedCandidates.add(name);
+    button.classList.add("is-selected");
+  }
+  updateShortlist();
+}
+
+function updateShortlist() {
+  shortlistCount.textContent = selectedCandidates.size;
+  shortlistText.textContent =
+    selectedCandidates.size === 0
+      ? "点击候选人卡片后，小鹿会把短名单收在这里。"
+      : Array.from(selectedCandidates).join("、");
+}
+
+function getCandidateRecord(candidateId = selectedCandidateId) {
+  if (isDesktopLocalLibrary) {
+    const localCandidates = getLocalCandidates();
+    if (candidateId) {
+      return localCandidates.find((candidate) => candidate.id === candidateId) || null;
+    }
+    return localCandidates[0] || null;
+  }
+  return candidateRecords[candidateId] || candidateRecords.candidate_chenyu_001;
+}
+
+function normalizeCandidateResumeEntry(entry = "talent") {
+  if (entry === "talents") return "talent";
+  if (entry === "tasks") return "task";
+  return entry;
+}
+
+function getResumeReturnContext(entry, options = {}) {
+  const context = { ...options, entry };
+  if (entry === "search") {
+    context.queryId = context.queryId || currentQueryId;
+    context.searchQuery = context.searchQuery || currentQuery?.textContent || defaultQuery;
+  }
+  if (entry === "talent") {
+    context.talentFilter = context.talentFilter || currentTalentFilter;
+    context.talentPanel = context.talentPanel || currentTalentPanel;
+  }
+  if (entry === "task") {
+    context.taskId = context.taskId || selectedTaskId;
+  }
+  return context;
+}
+
+function setResumeEntryVisibility(entry) {
+  document.querySelectorAll("[data-resume-entry-only]").forEach((node) => {
+    node.classList.toggle("state-hidden", node.dataset.resumeEntryOnly !== entry);
+  });
+}
+
+function getCandidateTextExcerpt(candidate, maxParagraphs = 10) {
+  const rawText = String(candidate.resumeText || (candidate.summary || []).join("\n") || "").trim();
+  if (!rawText) return [];
+  return rawText
+    .split(/\n{1,}|(?<=。)/)
+    .map((item) => item.trim())
+    .filter((item) => item.length >= 6)
+    .filter((item) => !/^[a-z0-9_-]{24,}~*$/i.test(item))
+    .slice(0, maxParagraphs);
+}
+
+function getResumeFileUrl(filePath = "") {
+  if (!filePath) return "";
+  if (/^file:\/\//i.test(filePath)) return filePath;
+  if (!filePath.startsWith("/")) return "";
+  return `file://${filePath.split("/").map((part) => encodeURIComponent(part)).join("/")}`;
+}
+
+function renderTagRow(tags = []) {
+  const visibleTags = tags.filter(Boolean).slice(0, 6);
+  if (!visibleTags.length) return "";
+  return `<div class="resume-tag-row">${visibleTags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>`;
+}
+
+function renderCandidateArchive(candidate) {
+  const file = candidate.resumeFileName || candidate.file || "未命名简历";
+  const filePath = candidate.resumePath || "";
+  const extension = file.split(".").pop()?.toUpperCase() || "FILE";
+  const fileUrl = getResumeFileUrl(filePath);
+  const isPdf = /\.pdf$/i.test(file);
+
+  document.querySelectorAll("[data-candidate-resume-preview]").forEach((node) => {
+    if (isPdf && fileUrl) {
+      node.innerHTML = `
+        <div class="resume-pdf-title">
+          <strong>${escapeHtml(file)}</strong>
+          <span>PDF</span>
+        </div>
+        <iframe class="resume-pdf-frame" src="${escapeHtml(fileUrl)}" title="${escapeHtml(file)}"></iframe>
+      `;
+      return;
+    }
+    node.innerHTML = `
+      <div class="resume-pdf-title">
+        <strong>${escapeHtml(file)}</strong>
+        <span>${escapeHtml(extension)}</span>
+      </div>
+      <div class="resume-preview-empty">
+        <strong>${filePath ? "此格式暂无内嵌预览" : "暂无原始文件"}</strong>
+        <p>${filePath ? escapeHtml(filePath) : "导入本地简历后会显示原文件信息。"}</p>
+      </div>
+    `;
+  });
+
+  document.querySelectorAll("[data-candidate-raw-text]").forEach((node) => {
+    const paragraphs = getCandidateTextExcerpt(candidate);
+    node.innerHTML = paragraphs.length
+      ? paragraphs.map((item) => `<p>${escapeHtml(item)}</p>`).join("")
+      : "<p>暂无可复制的解析文本。</p>";
+  });
+}
+
+function renderCandidateWorkExperiences(candidate) {
+  const experiences = Array.isArray(candidate.workExperiences) ? candidate.workExperiences : [];
+  const fallback = !experiences.length && (candidate.recentExperience || candidate.experience)
+    ? [{
+        company: candidate.recentExperience?.company || candidate.company || "待补充",
+        title: candidate.recentExperience?.title || candidate.title || "待补充",
+        period: candidate.recentExperience?.period || "最近经历",
+        summary: candidate.recentExperience?.summary || candidate.experience || "暂无结构化工作经历。",
+        tags: candidate.tags || [],
+      }]
+    : [];
+
+  document.querySelectorAll("[data-candidate-work-experiences]").forEach((node) => {
+    const rows = experiences.length ? experiences : fallback;
+    node.innerHTML = rows.length
+      ? rows.map((item) => {
+          const title = [item.company, item.title].filter(Boolean).join(" · ") || "待补充";
+          return `
+            <section>
+              <time>${escapeHtml(item.period || "时间待补充")}</time>
+              <strong>${escapeHtml(title)}</strong>
+              <p>${escapeHtml(item.summary || "暂无工作内容摘要。")}</p>
+              ${renderTagRow(item.tags || candidate.tags || [])}
+            </section>
+          `;
+        }).join("")
+      : `
+        <section>
+          <time>待补充</time>
+          <strong>未识别到结构化工作经历</strong>
+          <p>已保留原始简历文本，可在“原始简历”中查看并复制。</p>
+        </section>
+      `;
+  });
+}
+
+function renderCandidateProjects(candidate) {
+  const projects = Array.isArray(candidate.projects) ? candidate.projects : [];
+  const fallback = !projects.length && candidate.keyProject?.name && candidate.keyProject.name !== "待补充"
+    ? [candidate.keyProject]
+    : [];
+
+  document.querySelectorAll("[data-candidate-projects]").forEach((node) => {
+    const rows = projects.length ? projects : fallback;
+    node.innerHTML = rows.length
+      ? rows.map((item) => `
+          <section>
+            <div>
+              <strong>${escapeHtml(item.name || "未命名项目")}</strong>
+              <p>${escapeHtml(item.summary || "暂无项目摘要。")}</p>
+            </div>
+            <div class="resume-project-meta">
+              <span>角色：${escapeHtml(item.role || "简历提及")}</span>
+              <span>证据强度：${escapeHtml(item.confidence || "中")}</span>
+            </div>
+          </section>
+        `).join("")
+      : `
+        <section>
+          <div>
+            <strong>未识别到结构化项目经历</strong>
+            <p>可在原始简历文本中查看项目相关描述，后续再人工补充。</p>
+          </div>
+          <div class="resume-project-meta"><span>角色：待补充</span><span>证据强度：待确认</span></div>
+        </section>
+      `;
+  });
+}
+
+function renderCandidateContacts(candidate) {
+  const contacts = candidate.contacts || {};
+  const rows = [
+    { label: "手机号", value: contacts.phone, status: contacts.phone ? "已识别" : "待补充", attr: "data-candidate-phone" },
+    { label: "邮箱", value: contacts.email, status: contacts.email ? "已识别" : "待补充", attr: "data-candidate-email" },
+    { label: "微信", value: contacts.wechat, status: contacts.wechat ? "已识别" : "待补充", attr: "data-candidate-wechat" },
+  ];
+  document.querySelectorAll(".resume-contact-list").forEach((node) => {
+    node.innerHTML = rows
+      .map((row) => `<p><span>${row.label}</span><strong ${row.attr}>${escapeHtml(row.value || "待补充")}</strong><em>${row.status}</em></p>`)
+      .join("");
+  });
+
+  const priority = contacts.phone ? "手机号" : contacts.email ? "邮箱" : "待补充联系方式";
+  const focus = (candidate.tags || []).slice(0, 4).join("、") || candidate.title || "简历核心经历";
+  const needConfirm = contacts.phone || contacts.email ? "到岗时间、薪资预期、最近项目细节" : "手机号、微信、到岗时间";
+  document.querySelectorAll("[data-candidate-contact-insights]").forEach((node) => {
+    node.innerHTML = `
+      <p><span>优先方式</span><strong>${escapeHtml(priority)}</strong></p>
+      <p><span>沟通重点</span><strong>${escapeHtml(focus)}</strong></p>
+      <p><span>需确认</span><strong>${escapeHtml(needConfirm)}</strong></p>
+    `;
+  });
+}
+
+function renderCandidateTagSources(candidate) {
+  const sources = Array.isArray(candidate.tagSources) && candidate.tagSources.length
+    ? candidate.tagSources
+    : (candidate.tags || []).map((tag) => ({ tag, source: "简历正文", confidence: "中", evidence: "" }));
+  document.querySelectorAll("[data-candidate-tag-sources]").forEach((node) => {
+    node.innerHTML = sources.length
+      ? sources.slice(0, 10).map((item) => `
+          <section title="${escapeHtml(item.evidence || "")}">
+            <span>${escapeHtml(item.tag)}</span>
+            <strong>${escapeHtml(item.source || "简历正文")}</strong>
+            <em>${escapeHtml(item.confidence || "中")}置信</em>
+          </section>
+        `).join("")
+      : `
+        <section>
+          <span>待补充</span>
+          <strong>未识别到标签来源</strong>
+          <em>待确认</em>
+        </section>
+      `;
+  });
+}
+
+function updateCandidateResume(candidate) {
+  const isLocalCandidate = Boolean(candidate.resumePath || candidate.resumeText || candidate.workExperiences || candidate.projects);
+  const title = candidate.title || candidate.shortRole?.split(" · ")[0] || candidate.role?.split(" · ")[0] || "";
+  const city = candidate.city || candidate.shortRole?.split(" · ")[1] || "";
+  const years = candidate.years || Number.parseInt(candidate.shortRole?.match(/(\d+)\s*年/)?.[1] || "", 10) || "";
+  const role = candidate.role || [title, city, years ? `${years} 年经验` : ""].filter(Boolean).join(" · ");
+  const shortRole = candidate.shortRole || [title, city, years ? `${years} 年` : ""].filter(Boolean).join(" · ");
+  const score = candidate.matchScore || candidate.score || 0;
+  const completeness = candidate.completeness || score;
+  const source = candidate.sourceName || candidate.source || "";
+  const importedAt = candidate.importedAt || candidate.created || "";
+  const file = candidate.resumeFileName || candidate.file || "";
+  const recentExperience = candidate.recentExperience || candidate.workExperiences?.[0] || {
+    company: candidate.company || (isLocalCandidate ? "待补充" : "最近公司"),
+    title: title || (isLocalCandidate ? "待补充" : "高级后端工程师"),
+    period: "最近经历",
+    summary: candidate.experience || "",
+  };
+  const keyProject = candidate.keyProject || candidate.projects?.[0] || {
+    name: candidate.project || (isLocalCandidate ? "待补充" : "核心项目"),
+    summary: candidate.project ? "" : `技术栈：${candidate.stack || "待补充"}`,
+  };
+  const contacts = candidate.contacts || (isLocalCandidate
+    ? { phone: "", email: "", wechat: "" }
+    : {
+        phone: "138****5678",
+        email: "chenyu@example.com",
+        wechat: "待确认",
+      });
+  const evidence = candidate.matchEvidence || (isLocalCandidate
+    ? (candidate.tags || []).slice(0, 4).map((tag) => ({ label: tag, level: "简历提及", score: "" }))
+    : [
+    { label: "Java / Spring", level: "strong", score: score },
+    { label: "支付风控经验", level: "strong", score: Math.max(score - 4, 0) },
+    { label: "高并发项目", level: "strong", score: Math.max(score - 8, 0) },
+    { label: "金融科技背景", level: "bonus", score: Math.max(score - 16, 0) },
+  ]);
+  const status = getLocalCandidateStatus(candidate);
+
+  document.querySelectorAll("[data-candidate-name]").forEach((node) => {
+    node.textContent = candidate.name;
+  });
+  document.querySelectorAll("[data-candidate-initial]").forEach((node) => {
+    node.textContent = candidate.initial || candidate.name.slice(0, 1);
+  });
+  document.querySelectorAll("[data-candidate-role]").forEach((node) => {
+    node.textContent = role;
+  });
+  document.querySelectorAll("[data-candidate-short-role]").forEach((node) => {
+    node.textContent = shortRole;
+  });
+  document.querySelectorAll("[data-candidate-score]").forEach((node) => {
+    node.textContent = score;
+  });
+  document.querySelectorAll("[data-candidate-completeness]").forEach((node) => {
+    node.textContent = `${completeness}%`;
+  });
+  document.querySelectorAll("[data-candidate-status]").forEach((node) => {
+    node.textContent = status.label;
+  });
+  document.querySelectorAll("[data-candidate-source]").forEach((node) => {
+    node.textContent = source;
+  });
+  document.querySelectorAll("[data-candidate-created]").forEach((node) => {
+    node.textContent = importedAt;
+  });
+  document.querySelectorAll("[data-candidate-file]").forEach((node) => {
+    node.textContent = file;
+  });
+  document.querySelectorAll("[data-candidate-file-path]").forEach((node) => {
+    node.textContent = candidate.resumePath || "待补充";
+  });
+  document.querySelectorAll("[data-candidate-company]").forEach((node) => {
+    node.textContent = [recentExperience.company, recentExperience.title].filter(Boolean).join(" · ") || "待补充";
+  });
+  document.querySelectorAll("[data-candidate-project]").forEach((node) => {
+    node.textContent = keyProject.name;
+  });
+  document.querySelectorAll("[data-candidate-project-summary]").forEach((node) => {
+    node.textContent = keyProject.summary;
+  });
+  document.querySelectorAll("[data-candidate-experience]").forEach((node) => {
+    node.textContent = [recentExperience.period, recentExperience.summary].filter(Boolean).join("。") || "待补充";
+  });
+  document.querySelectorAll("[data-candidate-stack]").forEach((node) => {
+    node.textContent = candidate.stack || "待补充";
+  });
+  document.querySelectorAll("[data-candidate-match-note]").forEach((node) => {
+    node.textContent = candidate.matchNote || "来自当前候选人档案。";
+  });
+  document.querySelectorAll("[data-candidate-tags]").forEach((node) => {
+    node.innerHTML = (candidate.tags || []).map((tag) => `<span>${escapeHtml(tag)}</span>`).join("");
+  });
+  document.querySelectorAll("[data-candidate-summary]").forEach((node) => {
+    node.innerHTML = (candidate.summary || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  });
+  document.querySelectorAll("[data-candidate-evidence]").forEach((node) => {
+    node.innerHTML = `
+      <h3>匹配证据</h3>
+      ${evidence
+        .map(
+          (item) =>
+            `<p style="--score: ${Number(item.score) || 0}%"><span>${escapeHtml(item.label)}</span><i></i><strong>${item.level === "bonus" ? "加分" : escapeHtml(item.level || "强")}</strong></p>`
+        )
+        .join("")}
+    `;
+  });
+  document.querySelectorAll("[data-candidate-phone]").forEach((node) => {
+    node.textContent = contacts.phone || "待补充";
+  });
+  document.querySelectorAll("[data-candidate-email]").forEach((node) => {
+    node.textContent = contacts.email || "待补充";
+  });
+  document.querySelectorAll("[data-candidate-wechat]").forEach((node) => {
+    node.textContent = contacts.wechat || "待补充";
+  });
+  renderCandidateArchive(candidate);
+  renderCandidateWorkExperiences(candidate);
+  renderCandidateProjects(candidate);
+  renderCandidateContacts(candidate);
+  renderCandidateTagSources(candidate);
+}
+
+function showCandidateResumePanel(viewName = "summary") {
+  currentCandidateView = viewName;
+  candidateResumeTabs.forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.candidateResumeView === viewName);
+  });
+  candidateResumePanels.forEach((panel) => {
+    const isActive = panel.dataset.candidateResumePanel === viewName;
+    panel.classList.toggle("is-active", isActive);
+    panel.classList.toggle("state-hidden", !isActive);
+  });
+  window.DeerRecallMotion?.enterResumePanel?.(candidateResumeState);
+}
+
+function showToast(message) {
+  const toast = document.querySelector("#appToast");
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add("is-visible");
+  window.clearTimeout(showToast.timer);
+  showToast.timer = window.setTimeout(() => {
+    toast.classList.remove("is-visible");
+  }, 1600);
+}
+
+function copyText(text, message) {
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).catch(() => {});
+  }
+  showToast(message);
+}
+
+function getMarketInsightCandidatePayload(candidate = getCandidateRecord()) {
+  if (!candidate) {
+    return {
+      id: "",
+      name: "",
+      role: "",
+      city: "",
+      years: "",
+      source: "",
+      company: "",
+      project: "",
+      experience: "",
+      stack: "",
+      tags: [],
+      summary: [],
+      matchEvidence: [],
+      recentExperience: null,
+      keyProject: null,
+    };
+  }
+  return {
+    id: candidate.id,
+    name: candidate.name,
+    role: candidate.role || candidate.shortRole || candidate.title,
+    city: candidate.city,
+    years: candidate.years,
+    source: candidate.sourceName || candidate.source,
+    company: candidate.company,
+    project: candidate.project,
+    experience: candidate.experience,
+    stack: candidate.stack,
+    tags: candidate.tags || [],
+    summary: candidate.summary || [],
+    matchEvidence: candidate.matchEvidence || [],
+    recentExperience: candidate.recentExperience || null,
+    keyProject: candidate.keyProject || null,
+  };
+}
+
+function setMarketInsightState(state, message) {
+  marketInsightCards.forEach((card) => {
+    card.classList.toggle("is-loading", state === "loading");
+    card.classList.toggle("is-error", state === "error");
+    const status = card.querySelector("[data-market-insight-status]");
+    if (status) status.textContent = message;
+    card.querySelectorAll("[data-market-insight-result]").forEach((node) => {
+      node.hidden = state !== "ready";
+    });
+  });
+  marketInsightButtons.forEach((button) => {
+    button.disabled = state === "loading";
+    button.textContent = state === "loading" ? "生成中..." : "生成市场画像";
+  });
+}
+
+function getActiveCandidateResumeAssistant() {
+  return Array.from(candidateResumeAssistants).find((panel) => !panel.classList.contains("state-hidden")) || null;
+}
+
+function renderMarketInsight(insight) {
+  marketInsightCards.forEach((card) => {
+    card.querySelector("[data-market-insight-position]").textContent = insight.market_position;
+    card.querySelector("[data-market-insight-level]").textContent = insight.level;
+    card.querySelector("[data-market-insight-scarcity]").textContent = insight.scarcity;
+    card.querySelector("[data-market-insight-monthly]").textContent = insight.monthly_salary_range;
+    card.querySelector("[data-market-insight-annual]").textContent = insight.annual_package_range;
+    card.querySelector("[data-market-insight-confidence]").textContent = insight.confidence;
+    renderInlineList(card.querySelector("[data-market-insight-drivers]"), insight.salary_drivers || []);
+    renderInlineList(card.querySelector("[data-market-insight-risks]"), insight.risk_factors || []);
+    card.querySelector("[data-market-insight-hr]").textContent = insight.hr_suggestion;
+    card.querySelector("[data-market-insight-boss]").textContent = insight.boss_summary;
+    card.querySelector("[data-market-insight-disclaimer]").textContent = insight.disclaimer;
+  });
+  setMarketInsightState("ready", "已生成市场画像。");
+  window.DeerRecallMotion?.enterMarketInsight?.(getActiveCandidateResumeAssistant() || candidateResumeState);
+}
+
+async function requestMarketInsight() {
+  setMarketInsightState("loading", "正在生成市场画像、薪资参考和沟通建议...");
+  try {
+    const data = await callAiApi("market-insight", { candidate: getMarketInsightCandidatePayload() });
+    renderMarketInsight(data.insight);
+  } catch (error) {
+    const message = error.message === "missing_api_key" || error.message === "missing_model" || error.code === "llm_not_configured"
+      ? "后台还没有配置大模型 API Key 或模型名称。"
+      : "AI 市场画像生成失败，请稍后重试或检查后台配置。";
+    setMarketInsightState("error", message);
+  }
+}
+
+function openCandidateResume(candidateId, options = {}) {
+  const entry = normalizeCandidateResumeEntry(options.entry || "talent");
+  const candidate = getCandidateRecord(candidateId);
+  if (!candidate) {
+    showToast("请先导入本地简历后再查看候选人详情");
+    return;
+  }
+  currentView = "candidateResumeDetail";
+  currentCandidateView = "summary";
+  selectedCandidateId = candidate.id;
+  candidateResumeEntry = entry;
+  resumeReturnContext = getResumeReturnContext(entry, options);
+
+  emptyState.classList.add("state-hidden");
+  resultsState.classList.add("state-hidden");
+  importState.classList.add("state-hidden");
+  taskState.classList.add("state-hidden");
+  talentState.classList.add("state-hidden");
+  hideTalentDetailViews();
+  hideP1Views();
+  hideP2Views();
+  hideAllAssistantContexts();
+
+  candidateResumeState.dataset.candidateResumeEntry = entry;
+  candidateResumeState.classList.remove("state-hidden");
+  candidateResumeAssistants.forEach((panel) => {
+    panel.classList.toggle("state-hidden", panel.dataset.candidateResumeEntry !== entry);
+  });
+  showCandidateResumePanel("summary");
+  setResumeEntryVisibility(entry);
+  const activeNav = {
+    search: "search",
+    talent: "talents",
+    task: "tasks",
+  }[entry];
+  setActiveNav(activeNav);
+  setMarketInsightState("idle", "基于当前简历估算市场定位、薪资参考和沟通建议。");
+  updateCandidateResume(candidate);
+  window.DeerRecallMotion?.enterResumeDetail?.(candidateResumeState);
+}
+
+function closeCandidateResume() {
+  const entry = candidateResumeEntry;
+  const context = resumeReturnContext || {};
+  hideCandidateResumeContext();
+  if (entry === "search") {
+    currentView = "searchResults";
+    showResults(context.searchQuery || defaultQuery);
+    return;
+  }
+  if (entry === "talent") {
+    currentView = "talents";
+    currentTalentFilter = context.talentFilter || currentTalentFilter;
+    showTalentState(currentTalentFilter);
+    showTalentPanel(context.talentPanel || currentTalentPanel);
+    return;
+  }
+  if (entry === "task") {
+    currentView = "tasks";
+    currentTaskView = "detail";
+    selectedTaskId = context.taskId || selectedTaskId;
+    returnTaskDetail();
+  }
+}
+
+async function handleResumeAction(action) {
+  const candidate = getCandidateRecord();
+  if (!candidate) {
+    showToast("请先导入本地简历");
+    return;
+  }
+  if (action === "shortlist") {
+    selectedCandidates.add(candidate.name);
+    updateShortlist();
+    openShortlistManager("manager", { returnContext: { view: currentView, candidateId: candidate.id, candidateEntry: candidateResumeEntry } });
+    showToast(`${candidate.name} 已加入短名单`);
+    return;
+  }
+  if (action === "copySummary" || action === "copyParse") {
+    const summaryText = (candidate.summary || []).join(" ");
+    const text = action === "copyParse"
+      ? candidate.resumeText || summaryText || `${candidate.name}：暂无解析文本`
+      : `${candidate.name}：${summaryText || candidate.experience || "暂无摘要"}`;
+    copyText(text, action === "copyParse" ? "解析文本已复制" : "候选人摘要已复制");
+    return;
+  }
+  if (action === "favorite") {
+    showToast(`${candidate.name} 已收藏`);
+    return;
+  }
+  if (action === "openFile") {
+    if (!candidate.resumePath || !window.deerRecallDesktop?.openResumeFile) {
+      showToast("未找到可打开的本地原文件");
+      return;
+    }
+    const result = await window.deerRecallDesktop?.openResumeFile(candidate.resumePath);
+    showToast(result?.ok ? "已打开原文件" : result?.message || "原文件打开失败");
+    return;
+  }
+  if (action === "finder") {
+    if (!candidate.resumePath || !window.deerRecallDesktop?.showResumeInFolder) {
+      showToast("未找到可定位的本地原文件");
+      return;
+    }
+    const result = await window.deerRecallDesktop?.showResumeInFolder(candidate.resumePath);
+    showToast(result?.ok ? "已在 Finder 中定位" : result?.message || "Finder 定位失败");
+    return;
+  }
+  if (action === "edit") {
+    openTagManager("candidate", { returnContext: { view: currentView, candidateId: candidate.id, candidateEntry: candidateResumeEntry } });
+    return;
+  }
+  if (action === "addTag") {
+    openTagManager("candidate", { returnContext: { view: currentView, candidateId: candidate.id, candidateEntry: candidateResumeEntry } });
+    return;
+  }
+  if (action === "similar") {
+    const role = candidate.title || candidate.shortRole || "候选人";
+    const focus = (candidate.tags || []).slice(0, 4).join("、") || role;
+    const similarQuery = `查找与${candidate.name}相似的 ${role}，重点关注${focus}`;
+    openSearchFilter("similar", { returnContext: { view: currentView, candidateId: candidate.id, candidateEntry: candidateResumeEntry } });
+    refineSearchInput.value = similarQuery;
+    showToast("已生成相似候选人条件");
+  }
+}
+
+function getCandidateResumeOpenOptions(button) {
+  const entry = normalizeCandidateResumeEntry(button.dataset.candidateResumeEntry || "talent");
+  const options = { entry };
+  if (entry === "search") options.queryId = currentQueryId;
+  if (entry === "talent") options.talentFilter = currentTalentFilter;
+  if (entry === "task") options.taskId = button.dataset.taskId || selectedTaskId;
+  return options;
+}
+
+emptySearchForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  showResults(emptySearchInput.value);
+});
+
+refineSearchForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  showResults(refineSearchInput.value);
+});
+
+document.querySelectorAll("[data-prompt]").forEach((button) => {
+  button.addEventListener("click", () => {
+    emptySearchInput.value = button.dataset.prompt;
+    showResults(button.dataset.prompt);
+  });
+});
+
+searchCapabilityButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    showSearchCapabilityDetail(button.dataset.searchCapability || "natural");
+  });
+});
+
+searchTipsToggle?.addEventListener("click", toggleSearchTips);
+
+searchFilterBar?.addEventListener("click", (event) => {
+  const filterChip = event.target.closest("[data-search-filter-chip]");
+  if (filterChip) {
+    removeSearchFilterChip(filterChip);
+    return;
+  }
+
+  if (event.target.closest("[data-search-filter-add]")) {
+    addSearchFilterChip();
+  }
+});
+
+searchCityToggle?.addEventListener("click", cycleSearchCity);
+searchSortToggle?.addEventListener("click", cycleSearchSort);
+
+searchAiHistoryList?.addEventListener("click", (event) => {
+  const historyButton = event.target.closest("[data-search-ai-history-id]");
+  if (!historyButton) return;
+  restoreSearchAiHistoryItem(historyButton.dataset.searchAiHistoryId);
+});
+
+searchAiHistoryClear?.addEventListener("click", () => {
+  searchAiHistory = [];
+  activeSearchAiHistoryId = null;
+  persistSearchAiHistory();
+  renderSearchAiHistory();
+  setSearchAiState("idle", "搜索记录已清空。提交搜索后，小鹿会继续保留最近对话。");
+});
+
+document.querySelectorAll(".shortlist-action").forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleShortlistButton(button);
+  });
+});
+
+document.querySelectorAll(".candidate-resume-open").forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openCandidateResume(button.dataset.candidateId, getCandidateResumeOpenOptions(button));
+  });
+});
+
+navButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    if (button.dataset.navView === "import") {
+      showImportState(currentImportState);
+      return;
+    }
+    if (button.dataset.navView === "tasks") {
+      showTaskState(currentTaskPanel);
+      return;
+    }
+    if (button.dataset.navView === "talents") {
+      showTalentState(currentTalentFilter);
+      return;
+    }
+    if (button.dataset.navView === "settings") {
+      showSettingsState();
+      return;
+    }
+    showSearch();
+  });
+});
+
+importStateButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    showImportState(button.dataset.targetState);
+  });
+});
+
+importPickButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openImportPickerCard(button.dataset.importPick);
+  });
+});
+
+importSourceButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    requestImportSource(button.dataset.importSourceAction);
+  });
+});
+
+importFolderInput?.addEventListener("change", () => {
+  handleImportFiles(importFolderInput.files, { type: "文件夹" });
+  importFolderInput.value = "";
+});
+
+importFileInput?.addEventListener("change", () => {
+  handleImportFiles(importFileInput.files, { type: "文件" });
+  importFileInput.value = "";
+});
+
+importSettingInputs.forEach((input) => {
+  input.addEventListener("change", () => {
+    toggleImportSetting(input);
+  });
+});
+
+importTaskOpenButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    openImportTasks(button.dataset.importTaskOpen);
+  });
+});
+
+importDropZone?.addEventListener("dragover", (event) => {
+  event.preventDefault();
+  importDropZone.classList.add("is-dragging");
+});
+
+importDropZone?.addEventListener("dragleave", () => {
+  importDropZone.classList.remove("is-dragging");
+});
+
+importDropZone?.addEventListener("drop", handleImportDrop);
+
+importOpenButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openImportAction(button.dataset.importOpen);
+  });
+});
+
+taskFilterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    showTaskState("overview");
+    setTaskFilter(button.dataset.taskFilter);
+  });
+});
+
+taskRows.forEach((row) => {
+  row.addEventListener("click", (event) => {
+    event.stopPropagation();
+    selectTaskRow(row);
+    selectedTaskId = row.dataset.taskId || null;
+    currentTaskView = "list";
+    if (selectedTaskId) renderSelectedTask();
+    showTaskState(row.dataset.taskPanelTarget || "overview");
+  });
+});
+
+taskPanelButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const row = button.closest("[data-task-item]");
+    if (row) {
+      selectTaskRow(row);
+      selectedTaskId = row.dataset.taskId || selectedTaskId;
+      renderSelectedTask();
+    }
+    currentTaskView = "list";
+    showTaskState(button.dataset.taskPanelTarget);
+  });
+});
+
+taskOpenButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const row = button.closest("[data-task-item]");
+    const taskId = button.dataset.taskId || row?.dataset.taskId || selectedTaskId;
+    if (!taskId) return;
+    if (button.dataset.taskOpen === "issue") {
+      openTaskIssue(taskId);
+      return;
+    }
+    if (button.dataset.taskOpen === "detail") {
+      openTaskDetail(taskId);
+    }
+  });
+});
+
+taskReturnButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (button.dataset.taskReturn === "list") {
+      returnTaskList();
+      return;
+    }
+    if (button.dataset.taskReturn === "detail") {
+      returnTaskDetail();
+    }
+  });
+});
+
+taskResolveButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    resolveTaskFiles(button.dataset.taskResolve);
+    if (button.closest("#taskFailureDetailState")) {
+      setP2ActionStatus("failure", "已加入重新解析队列");
+    }
+  });
+});
+
+document.addEventListener("click", (event) => {
+  const openButton = event.target.closest("[data-task-open]");
+  if (openButton && !Array.from(taskOpenButtons).includes(openButton)) {
+    event.stopPropagation();
+    const taskId = openButton.dataset.taskId || selectedTaskId;
+    if (openButton.dataset.taskOpen === "issue") openTaskIssue(taskId);
+    if (openButton.dataset.taskOpen === "detail") openTaskDetail(taskId);
+    return;
+  }
+
+  const button = event.target.closest("[data-task-file-resolve]");
+  if (!button) return;
+  event.stopPropagation();
+  resolveTaskFiles(button.dataset.taskFileResolve, button.dataset.taskFileId);
+  if (button.closest("#taskFailureDetailState")) {
+    setP2ActionStatus("failure", "已加入重新解析队列");
+  }
+});
+
+talentFilterButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    setTalentFilter(button.dataset.talentFilter);
+  });
+});
+
+talentItems.forEach((item) => {
+  item.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (event.target.closest(".candidate-resume-open")) return;
+    if (event.target.closest("[data-talent-open]")) return;
+    selectTalentItem(item);
+    showTalentPanel(item.dataset.talentPanelTarget || currentTalentPanel);
+  });
+});
+
+document.addEventListener("click", (event) => {
+  const resumeButton = event.target.closest(".candidate-resume-open");
+  if (resumeButton) {
+    event.stopPropagation();
+    openCandidateResume(resumeButton.dataset.candidateId, getCandidateResumeOpenOptions(resumeButton));
+    return;
+  }
+
+  const shortlistButton = event.target.closest(".shortlist-action");
+  if (shortlistButton) {
+    event.stopPropagation();
+    toggleShortlistButton(shortlistButton);
+    return;
+  }
+
+  const importPickButton = event.target.closest("[data-import-pick]");
+  if (importPickButton) {
+    event.stopPropagation();
+    openImportPickerCard(importPickButton.dataset.importPick);
+    return;
+  }
+
+  const dynamicTaskRow = event.target.closest("[data-task-item]");
+  if (dynamicTaskRow && !event.target.closest("button, a, input, textarea, select")) {
+    event.stopPropagation();
+    selectTaskRow(dynamicTaskRow);
+    selectedTaskId = dynamicTaskRow.dataset.taskId || null;
+    currentTaskView = "list";
+    if (selectedTaskId) renderSelectedTask();
+    showTaskState(dynamicTaskRow.dataset.taskPanelTarget || "overview");
+    return;
+  }
+
+  const dynamicTalentItem = event.target.closest("[data-talent-item]");
+  if (dynamicTalentItem && !event.target.closest("button, a, input, textarea, select")) {
+    event.stopPropagation();
+    selectTalentItem(dynamicTalentItem);
+    showTalentPanel(dynamicTalentItem.dataset.talentPanelTarget || currentTalentPanel);
+  }
+});
+
+talentPanelButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const target = button.dataset.talentPanelTarget;
+    if (talentFilters.has(target)) {
+      setTalentFilter(target);
+      return;
+    }
+    showTalentPanel(target || currentTalentPanel);
+  });
+});
+
+talentStars.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    button.classList.toggle("is-on");
+    button.textContent = button.classList.contains("is-on") ? "★" : "☆";
+  });
+});
+
+talentOpenButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    handleTalentOpenAction(button.dataset.talentOpen);
+  });
+});
+
+talentDetailReturnButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    closeTalentDetail();
+  });
+});
+
+talentDetailActionButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    handleTalentDetailAction(button.dataset.talentDetailAction);
+  });
+});
+
+p1ReturnButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    closeP1View(button.dataset.p1Return);
+  });
+});
+
+p1ActionButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    handleP1Action(button.dataset.p1Action);
+  });
+});
+
+importActionRunButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    handleImportActionRun(button.dataset.importActionRun);
+  });
+});
+
+p2ReturnButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    closeP2View();
+  });
+});
+
+p2ActionButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    handleP2Action(button.dataset.p2Action, button);
+  });
+});
+
+exportOpenButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openExportCenter(button.dataset.exportOpen);
+  });
+});
+
+exportScopeButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    updateExportCenter(button.dataset.exportScopeOption);
+  });
+});
+
+shortlistOpenButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openShortlistManager(button.dataset.shortlistOpen);
+  });
+});
+
+tagOpenButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openTagManager(button.dataset.tagOpen);
+  });
+});
+
+taskFailureOpenButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openTaskFailureDetail(button.dataset.taskFileId || button.dataset.taskFailureOpen);
+  });
+});
+
+searchFilterOpenButtons.forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    openSearchFilter(button.dataset.searchFilterOpen);
+  });
+});
+
+candidateResumeTabs.forEach((button) => {
+  button.addEventListener("click", () => {
+    showCandidateResumePanel(button.dataset.candidateResumeView || "summary");
+  });
+});
+
+candidateResumeReturnButtons.forEach((button) => {
+  button.addEventListener("click", closeCandidateResume);
+});
+
+resumeActionButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    handleResumeAction(button.dataset.resumeAction);
+  });
+});
+
+marketInsightButtons.forEach((button) => {
+  button.addEventListener("click", requestMarketInsight);
+});
+
+document.addEventListener("click", (event) => {
+  const talentOpenButton = event.target.closest("[data-talent-open]");
+  if (talentOpenButton) {
+    event.stopPropagation();
+    handleTalentOpenAction(talentOpenButton.dataset.talentOpen);
+    return;
+  }
+
+  const returnButton = event.target.closest("[data-talent-detail-return]");
+  if (returnButton) {
+    event.stopPropagation();
+    closeTalentDetail();
+    return;
+  }
+
+  const actionButton = event.target.closest("[data-talent-detail-action]");
+  if (!actionButton) return;
+  event.stopPropagation();
+  handleTalentDetailAction(actionButton.dataset.talentDetailAction);
+});
+
+document.addEventListener("click", (event) => {
+  const importOpenButton = event.target.closest("[data-import-open]");
+  if (importOpenButton) {
+    event.stopPropagation();
+    openImportAction(importOpenButton.dataset.importOpen);
+    return;
+  }
+
+  const returnButton = event.target.closest("[data-p1-return]");
+  if (returnButton) {
+    event.stopPropagation();
+    closeP1View(returnButton.dataset.p1Return);
+    return;
+  }
+
+  const p1ActionButton = event.target.closest("[data-p1-action]");
+  if (p1ActionButton) {
+    event.stopPropagation();
+    handleP1Action(p1ActionButton.dataset.p1Action);
+    return;
+  }
+
+  const importRunButton = event.target.closest("[data-import-action-run]");
+  if (!importRunButton) return;
+  event.stopPropagation();
+  handleImportActionRun(importRunButton.dataset.importActionRun);
+});
+
+document.addEventListener("click", (event) => {
+  const exportOpenButton = event.target.closest("[data-export-open]");
+  if (exportOpenButton) {
+    event.stopPropagation();
+    openExportCenter(exportOpenButton.dataset.exportOpen);
+    return;
+  }
+
+  const shortlistOpenButton = event.target.closest("[data-shortlist-open]");
+  if (shortlistOpenButton) {
+    event.stopPropagation();
+    openShortlistManager(shortlistOpenButton.dataset.shortlistOpen);
+    return;
+  }
+
+  const tagOpenButton = event.target.closest("[data-tag-open]");
+  if (tagOpenButton) {
+    event.stopPropagation();
+    openTagManager(tagOpenButton.dataset.tagOpen);
+    return;
+  }
+
+  const taskFailureOpenButton = event.target.closest("[data-task-failure-open]");
+  if (taskFailureOpenButton) {
+    event.stopPropagation();
+    openTaskFailureDetail(taskFailureOpenButton.dataset.taskFileId || taskFailureOpenButton.dataset.taskFailureOpen);
+    return;
+  }
+
+  const searchFilterOpenButton = event.target.closest("[data-search-filter-open]");
+  if (searchFilterOpenButton) {
+    event.stopPropagation();
+    openSearchFilter(searchFilterOpenButton.dataset.searchFilterOpen);
+    return;
+  }
+
+  const p2ReturnButton = event.target.closest("[data-p2-return]");
+  if (p2ReturnButton) {
+    event.stopPropagation();
+    closeP2View();
+    return;
+  }
+
+  const p2ActionButton = event.target.closest("[data-p2-action]");
+  if (!p2ActionButton) return;
+  event.stopPropagation();
+  handleP2Action(p2ActionButton.dataset.p2Action, p2ActionButton);
+});
+
+document.querySelectorAll("[data-nav-view-proxy]").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (button.dataset.navViewProxy === "import") showImportState(currentImportState);
+  });
+});
+
+updateShortlist();
+showSearchCapabilityDetail("natural");
+renderSearchAiHistory();
+refreshSearchFilterAddState();
+sortSearchCandidates();
+applySearchResultFilters();
+if (isDesktopLocalLibrary) {
+  applyLocalTalentLibrary({ candidates: [], importTasks: [], sources: [] });
+  showTalentState("all");
+  loadLocalTalentLibrary();
+} else {
+  applyLocalTalentLibrary(defaultTalentLibrary);
+  setTaskFilter("all");
+  showTalentState("all");
+}

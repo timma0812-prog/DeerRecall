@@ -7,7 +7,14 @@ const vm = require("node:vm");
 const root = path.resolve(__dirname, "..");
 
 function read(file) {
-  return fs.readFileSync(path.join(root, file), "utf8");
+  const runtimeAliases = {
+    "app.js": "app-runtime.js",
+    ".harness/deerrecall-ci-cd.yaml": ".harness/deerrecall-ci-cd-runtime.yaml",
+    "README.md": "README-runtime.md",
+    ".dockerignore": ".dockerignore-runtime",
+  };
+  const runtimeFile = runtimeAliases[file] || file;
+  return fs.readFileSync(path.join(root, runtimeFile), "utf8");
 }
 
 function createGsapStub(overrides = {}) {
@@ -163,7 +170,7 @@ test("main script switches from empty state to results state on search", () => {
   assert.match(js, /resultsState/);
   assert.match(js, /showResults/);
   assert.match(js, /shortlistCount/);
-  assert.match(html, /<script src="deersearch-engine\.js"><\/script>/);
+  assert.match(html, /<script src="deersearch-engine-runtime\.js"><\/script>/);
   assert.match(js, /DeerRecallSearch\.searchLocalCandidates/);
   assert.match(js, /DeerRecallSearch\.buildAiRerankPayload/);
   assert.match(js, /DeerRecallSearch\.applyAiRerankResult/);
@@ -205,7 +212,7 @@ test("talent state change does not trigger duplicate enter animations", () => {
   const js = read("app.js");
   const setTalentFilterBody = js.match(/function setTalentFilter\(filter\) \{[\s\S]*?\n\}/)?.[0] || "";
   const showTalentStateBody = js.match(/function showTalentState\(filter = currentTalentFilter\) \{[\s\S]*?\n\}/)?.[0] || "";
-  const staticStartupBody = js.match(/else \{\n  setTaskFilter\("all"\);[\s\S]*?\n\}/)?.[0] || "";
+  const staticStartupBody = js.match(/else \{\n  applyLocalTalentLibrary\(defaultTalentLibrary\);[\s\S]*?\n\}/)?.[0] || "";
 
   assert.match(setTalentFilterBody, /DeerRecallMotion\?\.enterTalentView\?\.?\(talentState\)/);
   assert.doesNotMatch(showTalentStateBody, /DeerRecallMotion\?\.enterTalentView/);
@@ -425,11 +432,13 @@ test("desktop renderer exposes local-library mode hooks without demo folder fall
   assert.match(html, /data-local-task-list/);
 
   assert.match(js, /const isDesktopLocalLibrary/);
+  assert.match(js, /const defaultTalentLibrary/);
   assert.match(js, /let localTalentLibrary/);
   assert.match(js, /async function loadLocalTalentLibrary/);
   assert.match(js, /function applyLocalTalentLibrary/);
   assert.match(js, /function renderLocalCandidates/);
   assert.match(js, /function renderLocalImportTasks/);
+  assert.match(js, /applyLocalTalentLibrary\(defaultTalentLibrary\)/);
   assert.match(js, /window\.deerRecallDesktop\?\.getTalentLibrary/);
   assert.match(js, /window\.deerRecallDesktop\?\.selectImportFolder/);
   assert.match(js, /window\.deerRecallDesktop\?\.selectImportFiles/);
@@ -604,6 +613,7 @@ test("search results desktop cards avoid vertical compression", () => {
   assert.match(css, /\.candidate-grid\s*{[^}]*overflow-y:\s*auto/s);
   assert.match(css, /\.candidate-card\s*{[^}]*min-height:\s*292px/s);
   assert.match(css, /\.candidate-card\s*{[^}]*overflow:\s*hidden/s);
+  assert.match(css, /\.filter-spacer\s*{[^}]*background:\s*transparent/s);
 });
 
 test("talent library module exposes overview, recent, saved, pending, and duplicate views", () => {
@@ -997,14 +1007,48 @@ test("candidate resume detail stays usable on narrow viewports", () => {
   assert.match(css, /\.resume-project-grid,\s*\.resume-source-grid\s*{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/s);
 });
 
+test("candidate resume actions stay scoped to local desktop library", () => {
+  const js = read("app.js");
+  const getCandidateRecordBody = js.match(/function getCandidateRecord\(candidateId = selectedCandidateId\) \{[\s\S]*?\n\}/)?.[0] || "";
+  const openTalentCandidateActionsBody = js.match(/function openTalentCandidateActions\(\) \{[\s\S]*?\n\}/)?.[0] || "";
+  const resumeOpenDelegates = js.split('const resumeButton = event.target.closest(".candidate-resume-open")').length - 1;
+
+  assert.match(getCandidateRecordBody, /const localCandidates = getLocalCandidates\(\)/);
+  assert.match(getCandidateRecordBody, /localCandidates\.find\(\(candidate\) => candidate\.id === candidateId\)/);
+  assert.doesNotMatch(getCandidateRecordBody, /candidateRecords\[candidateId\] \|\| getLocalCandidates\(\)\[0\]/);
+  assert.doesNotMatch(openTalentCandidateActionsBody, /selectedCandidateId = selectedCandidateId \|\| "candidate_chenyu_001"/);
+  assert.equal(resumeOpenDelegates, 1);
+});
+
+test("desktop shell does not force horizontal overflow below wide desktop widths", () => {
+  const css = read("styles.css");
+  const desktopMedia = css.match(/@media \(max-width:\s*1500px\)\s*{([\s\S]*?)\n}\n\n@media \(max-width:\s*760px\)/)?.[1] || "";
+
+  assert.match(desktopMedia, /\.app-window\s*{[^}]*min-width:\s*0/s);
+  assert.match(desktopMedia, /\.app-window\s*{[^}]*width:\s*100%/s);
+  assert.match(desktopMedia, /\.app-window\s*{[^}]*grid-template-columns:\s*248px minmax\(0,\s*1fr\) 360px/s);
+  assert.match(desktopMedia, /\.talent-kpis\s*{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
+  assert.match(desktopMedia, /\.talent-kpi span\s*{[^}]*white-space:\s*nowrap/s);
+  assert.match(desktopMedia, /\.talent-tabs-row\s*{[^}]*flex-wrap:\s*wrap/s);
+  assert.match(desktopMedia, /\.talent-sort\s*{[^}]*flex:\s*0 0 auto/s);
+  assert.match(desktopMedia, /\.talent-row\s*{[^}]*grid-template-columns:\s*58px minmax\(0,\s*1fr\)/s);
+  assert.match(desktopMedia, /\.talent-source,\s*\.talent-actions\s*{[^}]*grid-column:\s*2/s);
+  assert.match(desktopMedia, /\.candidate-resume-workspace \.resume-detail-grid\s*{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/s);
+  assert.match(desktopMedia, /\.candidate-resume-workspace \.resume-tabs button\s*{[^}]*flex:\s*1 1 0/s);
+  assert.match(desktopMedia, /\.resume-summary-panel\s*{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/s);
+  assert.match(desktopMedia, /\.resume-summary-panel \.resume-summary-card\s*{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/s);
+  assert.match(desktopMedia, /\.market-insight-head\s*{[^}]*flex-direction:\s*column/s);
+  assert.match(desktopMedia, /\.side-state\s*{[^}]*overflow-x:\s*hidden/s);
+});
+
 test("project exposes npm scripts for Harness-compatible static delivery", () => {
   const pkg = JSON.parse(read("package.json"));
 
-  assert.equal(pkg.scripts.check, "node --check app.js && node --check motion.js && node --check server/llm-gateway.mjs && node --check server/server.mjs && node --check desktop/ai-gateway.cjs && npm test");
-  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/desktop-ai-gateway.test.cjs tests/deersearch-engine.test.cjs");
+  assert.equal(pkg.scripts.check, "node --check app-runtime.js && node --check motion.js && node --check server/llm-gateway.mjs && node --check server/server.mjs && node --check desktop/ai-gateway.cjs && npm test");
+  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/desktop-ai-gateway.test.cjs tests/deersearch-engine-runtime.test.cjs");
   assert.equal(pkg.scripts.clean, "rm -rf dist");
-  assert.equal(pkg.scripts.build, "node scripts/build-static.mjs");
-  assert.equal(pkg.scripts["verify:dist"], "node scripts/verify-dist.mjs");
+  assert.equal(pkg.scripts.build, "node scripts/build-static-runtime.mjs");
+  assert.equal(pkg.scripts["verify:dist"], "node scripts/verify-dist-runtime.mjs");
   assert.equal(pkg.scripts.serve, "npm run build && node server/server.mjs");
   assert.equal(pkg.scripts.start, "node server/server.mjs");
 });
@@ -1073,13 +1117,13 @@ test("tauri desktop wrapper is available for a later small-runtime build", () =>
 });
 
 test("static build script copies runtime assets and excludes development-only folders", () => {
-  const script = read("scripts/build-static.mjs");
+  const script = read("scripts/build-static-runtime.mjs");
 
   assert.match(script, /const root = path\.resolve/);
   assert.match(script, /const dist = path\.join\(root, "dist"\)/);
   assert.match(script, /"index\.html"/);
-  assert.match(script, /"app\.js"/);
-  assert.match(script, /"deersearch-engine\.js"/);
+  assert.match(script, /"app-runtime\.js"/);
+  assert.match(script, /"deersearch-engine-runtime\.js"/);
   assert.match(script, /"styles\.css"/);
   assert.match(script, /path\.basename\(src\) !== "\.DS_Store"/);
   assert.doesNotMatch(script, /"demos"/);
@@ -1095,8 +1139,8 @@ test("main page loads local motion runtime before application scripts", () => {
   const gsapIndex = html.indexOf('<script src="vendor/gsap.min.js"></script>');
   const flipIndex = html.indexOf('<script src="vendor/Flip.min.js"></script>');
   const motionIndex = html.indexOf('<script src="motion.js"></script>');
-  const searchIndex = html.indexOf('<script src="deersearch-engine.js"></script>');
-  const appIndex = html.indexOf('<script src="app.js"></script>');
+  const searchIndex = html.indexOf('<script src="deersearch-engine-runtime.js"></script>');
+  const appIndex = html.indexOf('<script src="app-runtime.js"></script>');
 
   assert.ok(gsapIndex > -1);
   assert.ok(flipIndex > gsapIndex);
@@ -1257,10 +1301,47 @@ test("motion scan layer is scoped to the search results surface", () => {
   assert.match(css, /\.results-main > :not\(\.motion-scan-layer\)\s*{[^}]*z-index:\s*1/s);
 });
 
+test("Neon Talent OS visual delivery is explicit in the UI layer", () => {
+  const css = read("styles.css");
+
+  assert.match(css, /--signal-cyan:\s*#3ff6e8/);
+  assert.match(css, /--signal-magenta:\s*#ff4fd8/);
+  assert.match(css, /\.app-window::after\s*{/);
+  assert.match(css, /@keyframes signalDrift/);
+  assert.match(css, /\.candidate-card::before\s*{/);
+  assert.match(css, /\.candidate-card:hover\s*{/);
+  assert.match(css, /\.talent-row::before\s*{/);
+  assert.match(css, /\.candidate-resume-workspace \.resume-profile-hero::after\s*{/);
+  assert.match(css, /@media \(prefers-reduced-motion:\s*reduce\)[\s\S]*animation:\s*none/s);
+});
+
+test("front-end design delivery document records Chinese acceptance surfaces", () => {
+  const doc = read("docs/superpowers/design-delivery/2026-07-01-neon-talent-os-visual-delivery.md");
+  const screenshotPaths = [
+    "docs/superpowers/design-delivery/screenshots/neon-talent-os-search.png",
+    "docs/superpowers/design-delivery/screenshots/neon-talent-os-library.png",
+    "docs/superpowers/design-delivery/screenshots/neon-talent-os-detail.png",
+  ];
+
+  assert.match(doc, /视觉命题/);
+  assert.match(doc, /DeerSearch/);
+  assert.match(doc, /人才库/);
+  assert.match(doc, /候选人详情/);
+  assert.match(doc, /Electron/);
+  assert.match(doc, /screenshots\/neon-talent-os-search\.png/);
+  assert.match(doc, /screenshots\/neon-talent-os-library\.png/);
+  assert.match(doc, /screenshots\/neon-talent-os-detail\.png/);
+  screenshotPaths.forEach((file) => {
+    const screenshot = fs.statSync(path.join(root, file));
+    assert.ok(screenshot.isFile());
+    assert.ok(screenshot.size > 1000);
+  });
+});
+
 test("project exposes local motion runtime assets for static delivery", () => {
   const pkg = JSON.parse(read("package.json"));
-  const build = read("scripts/build-static.mjs");
-  const verify = read("scripts/verify-dist.mjs");
+  const build = read("scripts/build-static-runtime.mjs");
+  const verify = read("scripts/verify-dist-runtime.mjs");
   const harness = read(".harness/deerrecall-ci-cd.yaml");
   const readme = read("README.md");
 
@@ -1278,12 +1359,12 @@ test("project exposes local motion runtime assets for static delivery", () => {
 });
 
 test("static dist verification rejects missing or extra runtime assets", () => {
-  const script = read("scripts/verify-dist.mjs");
+  const script = read("scripts/verify-dist-runtime.mjs");
 
   assert.match(script, /const expectedRuntimeAssets = new Set/);
   assert.match(script, /"index\.html"/);
-  assert.match(script, /"app\.js"/);
-  assert.match(script, /"deersearch-engine\.js"/);
+  assert.match(script, /"app-runtime\.js"/);
+  assert.match(script, /"deersearch-engine-runtime\.js"/);
   assert.match(script, /"motion\.js"/);
   assert.match(script, /"styles\.css"/);
   assert.match(script, /"vendor\/gsap\.min\.js"/);
@@ -1359,7 +1440,7 @@ test("harness pipeline runs test, build, image, deploy, and verify stages", () =
   assert.match(pipeline, /motion\.js/);
   assert.match(pipeline, /vendor\/gsap\.min\.js/);
   assert.match(pipeline, /vendor\/Flip\.min\.js/);
-  assert.match(pipeline, /deersearch-engine\.js/);
+  assert.match(pipeline, /deersearch-engine-runtime\.js/);
   assert.match(pipeline, /grep -qi "cache-control: no-cache, must-revalidate"/);
 });
 
@@ -1409,7 +1490,7 @@ test("readme documents local, compose, and Harness workflows", () => {
   assert.match(readme, /docker compose logs --tail=100 deerrecall/);
   assert.match(readme, /生产发布护栏/);
   assert.match(readme, /构建产物不包含设计参考资料/);
-  assert.match(readme, /deersearch-engine\.js/);
+  assert.match(readme, /deersearch-engine-runtime\.js/);
   assert.match(readme, /创建 release tag/);
   assert.match(readme, /JS、CSS 和搜索引擎脚本使用 `no-cache, must-revalidate`/);
   assert.match(readme, /AI 市场画像 MVP/);
@@ -1474,7 +1555,7 @@ test("project exposes Node AI gateway runtime scripts", () => {
   const pkg = JSON.parse(read("package.json"));
 
   assert.equal(pkg.scripts.start, "node server/server.mjs");
-  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/desktop-ai-gateway.test.cjs tests/deersearch-engine.test.cjs");
+  assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/desktop-ai-gateway.test.cjs tests/deersearch-engine-runtime.test.cjs");
   assert.match(pkg.scripts.check, /node --check server\/server\.mjs/);
   assert.match(pkg.scripts.check, /node --check server\/llm-gateway\.mjs/);
   assert.match(pkg.scripts.check, /node --check desktop\/ai-gateway\.cjs/);
@@ -1513,7 +1594,7 @@ test("Harness verifies Node health, static shell, cache headers, and AI status",
   assert.match(pipeline, /wget -qO- http:\/\/127\.0\.0\.1:8080\/health/);
   assert.match(pipeline, /wget -qO- http:\/\/127\.0\.0\.1:8080\/api\/ai\/status/);
   assert.match(pipeline, /configured/);
-  assert.match(pipeline, /wget -qS --spider http:\/\/127\.0\.0\.1:8080\/deersearch-engine\.js/);
+  assert.match(pipeline, /wget -qS --spider http:\/\/127\.0\.0\.1:8080\/deersearch-engine-runtime\.js/);
   assert.match(pipeline, /wget -qS --spider http:\/\/127\.0\.0\.1:8080\/motion\.js/);
   assert.match(pipeline, /wget -qS --spider http:\/\/127\.0\.0\.1:8080\/vendor\/gsap\.min\.js/);
   assert.match(pipeline, /wget -qS --spider http:\/\/127\.0\.0\.1:8080\/vendor\/Flip\.min\.js/);

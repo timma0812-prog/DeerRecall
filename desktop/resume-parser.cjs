@@ -3,8 +3,6 @@ const path = require("node:path");
 const { execFile } = require("node:child_process");
 const crypto = require("node:crypto");
 const { promisify } = require("node:util");
-const mammoth = require("mammoth");
-const { PDFParse } = require("pdf-parse");
 
 const execFileAsync = promisify(execFile);
 
@@ -82,6 +80,7 @@ function getExtension(filePath) {
 }
 
 async function parsePdf(filePath) {
+  const { PDFParse } = require("pdf-parse");
   const data = await fs.readFile(filePath);
   const parser = new PDFParse({ data });
   try {
@@ -93,6 +92,7 @@ async function parsePdf(filePath) {
 }
 
 async function parseDocx(filePath) {
+  const mammoth = require("mammoth");
   const result = await mammoth.extractRawText({ path: filePath });
   return normalizeWhitespace(result.value || "");
 }

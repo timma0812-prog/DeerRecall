@@ -17,6 +17,10 @@
   --violet: #7d31f5;
   --violet-2: #5a24b7;
   --green: #64ef9b;
+  --signal-cyan: #3ff6e8;
+  --signal-magenta: #ff4fd8;
+  --signal-lime: #8bf451;
+  --signal-blue: #5fa8ff;
   --chip: rgba(112, 62, 184, 0.38);
   --radius-window: 31px;
   --radius-panel: 23px;
@@ -327,6 +331,17 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+
+  .app-window::after,
+  .candidate-resume-workspace .resume-profile-hero::after {
+    animation: none;
+  }
+
+  .candidate-card:hover,
+  .talent-row:hover,
+  .talent-row.is-selected {
+    transform: none;
+  }
 }
 
 * {
@@ -435,6 +450,27 @@ svg {
     radial-gradient(circle at 37% 22%, rgba(255, 255, 255, 0.055), transparent 26%),
     linear-gradient(90deg, rgba(255, 255, 255, 0.04), transparent 20%, transparent 80%, rgba(255, 255, 255, 0.035));
   mix-blend-mode: screen;
+}
+
+.app-window::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  background:
+    linear-gradient(90deg, transparent 0 48%, rgba(63, 246, 232, 0.18) 49%, transparent 52%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 72px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 72px);
+  background-size: 420px 100%, 72px 72px, 72px 72px;
+  animation: signalDrift 11s linear infinite;
+  mask-image: linear-gradient(90deg, transparent, #000 15%, #000 88%, transparent);
+}
+
+@keyframes signalDrift {
+  from { background-position: -420px 0, 0 0, 0 0; }
+  to { background-position: 420px 0, 72px 0, 0 72px; }
 }
 
 .traffic {
@@ -1243,7 +1279,7 @@ svg {
   min-width: 1px;
   height: 38px;
   margin-left: 0;
-  background: rgba(255, 255, 255, 0.13);
+  background: transparent;
 }
 
 .filter-action {
@@ -1279,6 +1315,8 @@ svg {
 }
 
 .candidate-card {
+  position: relative;
+  isolation: isolate;
   min-height: 292px;
   display: grid;
   grid-template-rows: auto auto auto 1fr;
@@ -1287,8 +1325,43 @@ svg {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 10px;
   background:
+    linear-gradient(118deg, rgba(63, 246, 232, 0.07), transparent 28%),
     radial-gradient(circle at 20% 0%, rgba(132, 75, 216, 0.16), transparent 38%),
     rgba(255, 255, 255, 0.055);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.11),
+    0 16px 36px rgba(3, 1, 24, 0.16);
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease,
+    background 0.22s ease;
+}
+
+.candidate-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 3px;
+  border-radius: 0 999px 999px 0;
+  background: linear-gradient(180deg, var(--signal-cyan), var(--signal-magenta));
+  box-shadow: 0 0 20px rgba(63, 246, 232, 0.46);
+  pointer-events: none;
+}
+
+.candidate-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(63, 246, 232, 0.42);
+  background:
+    linear-gradient(118deg, rgba(63, 246, 232, 0.11), transparent 30%),
+    radial-gradient(circle at 20% 0%, rgba(255, 79, 216, 0.18), transparent 38%),
+    rgba(255, 255, 255, 0.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 20px 46px rgba(3, 1, 24, 0.24),
+    0 0 30px rgba(63, 246, 232, 0.12);
 }
 
 .candidate-top {
@@ -1312,9 +1385,10 @@ svg {
 }
 
 .score {
-  color: var(--pink-2);
+  color: var(--signal-cyan);
   text-align: right;
   font-weight: 800;
+  text-shadow: 0 0 18px rgba(63, 246, 232, 0.28);
 }
 
 .score strong {
@@ -1377,8 +1451,11 @@ svg {
   display: inline-flex;
   align-items: center;
   padding: 0 12px;
+  border: 1px solid rgba(63, 246, 232, 0.14);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(90deg, rgba(63, 246, 232, 0.08), rgba(255, 79, 216, 0.07)),
+    rgba(255, 255, 255, 0.08);
   color: rgba(255, 250, 255, 0.88);
   font-size: 13px;
   line-height: 1;
@@ -2655,6 +2732,12 @@ svg {
   min-width: 130px;
 }
 
+.talent-sort {
+  min-width: 168px;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+
 .talent-export svg,
 .talent-filter-button svg,
 .talent-sort svg {
@@ -2828,15 +2911,35 @@ svg {
 .pending-row,
 .saved-row,
 .import-source-row {
+  position: relative;
   min-height: 105px;
   display: grid;
   align-items: center;
   gap: 18px;
+  overflow: hidden;
   padding: 16px 18px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease;
 }
 
 .talent-row {
   grid-template-columns: 66px minmax(0, 1.45fr) minmax(240px, 0.85fr) 172px;
+}
+
+.talent-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 0 999px 999px 0;
+  background: linear-gradient(180deg, transparent, rgba(63, 246, 232, 0.72), transparent);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .pending-row {
@@ -2866,6 +2969,19 @@ svg {
   box-shadow:
     0 0 0 1px rgba(172, 74, 255, 0.2),
     0 0 27px rgba(151, 52, 255, 0.16);
+}
+
+.talent-row.is-selected,
+.talent-row:hover {
+  transform: translateX(3px);
+  background:
+    linear-gradient(90deg, rgba(63, 246, 232, 0.09), transparent 34%),
+    rgba(255, 255, 255, 0.065);
+}
+
+.talent-row.is-selected::before,
+.talent-row:hover::before {
+  opacity: 1;
 }
 
 .talent-avatar,
@@ -5112,7 +5228,26 @@ svg {
 .candidate-resume-workspace .resume-profile-hero {
   min-height: 188px;
   grid-template-columns: 82px minmax(0, 1fr) 108px;
+  overflow: hidden;
   border-radius: 24px;
+  background:
+    linear-gradient(126deg, rgba(63, 246, 232, 0.08), transparent 32%),
+    radial-gradient(circle at 2% 0%, rgba(143, 54, 227, 0.18), transparent 34%),
+    rgba(20, 12, 60, 0.82);
+}
+
+.candidate-resume-workspace .resume-profile-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.38;
+  background:
+    linear-gradient(90deg, transparent, rgba(63, 246, 232, 0.16), transparent),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.055) 0 1px, transparent 1px 42px);
+  background-size: 360px 100%, 42px 42px;
+  animation: signalDrift 12s linear infinite;
+  mask-image: linear-gradient(90deg, transparent, #000 20%, #000 88%, transparent);
 }
 
 .candidate-resume-workspace .resume-avatar {
@@ -5145,18 +5280,22 @@ svg {
   display: grid;
   place-items: center;
   align-content: center;
-  border: 1px solid rgba(211, 92, 255, 0.36);
+  border: 1px solid rgba(63, 246, 232, 0.28);
   border-radius: 22px;
   background:
-    linear-gradient(180deg, rgba(151, 56, 222, 0.46), rgba(61, 24, 112, 0.72)),
+    linear-gradient(160deg, rgba(63, 246, 232, 0.14), rgba(255, 79, 216, 0.12)),
+    linear-gradient(180deg, rgba(151, 56, 222, 0.42), rgba(61, 24, 112, 0.72)),
     rgba(255, 255, 255, 0.04);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 0 34px rgba(63, 246, 232, 0.13);
 }
 
 .resume-score-badge strong {
-  color: #ff85dc;
+  color: var(--signal-cyan);
   font-size: 34px;
   line-height: 1;
+  text-shadow: 0 0 18px rgba(63, 246, 232, 0.28);
 }
 
 .resume-score-badge span {
@@ -6879,7 +7018,110 @@ svg {
   }
 
   .app-window {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: 248px minmax(0, 1fr) 360px;
     transform-origin: top center;
+  }
+
+  .talent-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 22px;
+  }
+
+  .talent-kpi {
+    min-height: 88px;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 6px 12px;
+    padding: 16px;
+  }
+
+  .talent-kpi svg {
+    width: 48px;
+    height: 48px;
+    padding: 12px;
+  }
+
+  .talent-kpi span {
+    white-space: nowrap;
+  }
+
+  .talent-tabs-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .talent-tabs {
+    min-width: 0;
+    flex: 1 1 420px;
+  }
+
+  .talent-sort {
+    flex: 0 0 auto;
+  }
+
+  .talent-row {
+    grid-template-columns: 58px minmax(0, 1fr);
+    align-items: flex-start;
+    gap: 12px 14px;
+  }
+
+  .talent-source,
+  .talent-actions {
+    grid-column: 2;
+  }
+
+  .talent-source {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .talent-source small {
+    grid-column: 1 / -1;
+  }
+
+  .talent-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .candidate-resume-workspace .resume-tabs {
+    gap: 8px;
+    overflow-x: hidden;
+    flex-wrap: nowrap;
+  }
+
+  .candidate-resume-workspace .resume-tabs button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 10px;
+    white-space: nowrap;
+  }
+
+  .candidate-resume-workspace .resume-detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .resume-summary-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .resume-summary-panel .resume-summary-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .market-insight-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .market-insight-head .compact-action {
+    width: 100%;
+  }
+
+  .side-state {
+    overflow-x: hidden;
   }
 }
 

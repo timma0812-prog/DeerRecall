@@ -1,0 +1,10 @@
+.git
+.worktrees
+node_modules
+docs
+demos
+finalized
+homepage-demo.html
+homepage-full-demo.html
+tests
+output

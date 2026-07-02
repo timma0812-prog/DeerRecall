@@ -1,0 +1,68 @@
+version: 1
+kind: pipeline
+spec:
+  stages:
+    - name: test
+      spec:
+        steps:
+          - name: npm_check
+            spec:
+              command: npm run check
+    - name: build_static
+      spec:
+        steps:
+          - name: build
+            spec:
+              command: |
+                npm run build
+                npm run verify:dist
+    - name: build_image
+      spec:
+        steps:
+          - name: docker_build
+            spec:
+              mount:
+                - type: host
+                  path: /var/run/docker.sock
+              command: docker build -t ${DEERRECALL_IMAGE:-deerrecall:local} .
+    - name: deploy_compose
+      spec:
+        steps:
+          - name: docker_compose
+            spec:
+              mount:
+                - type: host
+                  path: /var/run/docker.sock
+              command: docker compose up -d
+    - name: verify_deploy
+      spec:
+        steps:
+          - name: smoke
+            spec:
+              command: |
+                set -eu
+                APP_CONTAINER="${DEERRECALL_CONTAINER:-deerrecall}"
+                READY=0
+                for attempt in $(seq 1 20); do
+                  if docker exec "${APP_CONTAINER}" wget -qO- http://127.0.0.1:8080/health | grep -q '"ok":true'; then
+                    READY=1
+                    break
+                  fi
+                  sleep 1
+                done
+                test "${READY}" = "1"
+                docker exec "${APP_CONTAINER}" wget -qO- http://127.0.0.1:8080/health
+                docker exec "${APP_CONTAINER}" wget -qO- http://127.0.0.1:8080/api/ai/status | grep -q configured
+                docker exec "${APP_CONTAINER}" wget -qO- http://127.0.0.1:8080/ > /tmp/deerrecall-index.html
+                grep -q "id=\"resultsState\"" /tmp/deerrecall-index.html
+                grep -q "id=\"candidateResumeState\"" /tmp/deerrecall-index.html
+                grep -q "data-market-insight-run" /tmp/deerrecall-index.html
+                grep -q "motion.js" /tmp/deerrecall-index.html
+                grep -q "vendor/gsap.min.js" /tmp/deerrecall-index.html
+                grep -q "vendor/Flip.min.js" /tmp/deerrecall-index.html
+                grep -q "deersearch-engine-runtime.js" /tmp/deerrecall-index.html
+                docker exec "${APP_CONTAINER}" wget -qS --spider http://127.0.0.1:8080/deersearch-engine-runtime.js 2>&1 | grep -qi "cache-control: no-cache, must-revalidate"
+                docker exec "${APP_CONTAINER}" wget -qS --spider http://127.0.0.1:8080/motion.js 2>&1 | grep -qi "cache-control: no-cache, must-revalidate"
+                docker exec "${APP_CONTAINER}" wget -qS --spider http://127.0.0.1:8080/vendor/gsap.min.js 2>&1 | grep -qi "cache-control: no-cache, must-revalidate"
+                docker exec "${APP_CONTAINER}" wget -qS --spider http://127.0.0.1:8080/vendor/Flip.min.js 2>&1 | grep -qi "cache-control: no-cache, must-revalidate"
+                docker exec "${APP_CONTAINER}" wget -qS --spider http://127.0.0.1:8080/ 2>&1 | grep -qi "cache-control: no-store"
