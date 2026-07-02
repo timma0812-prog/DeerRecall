@@ -1044,7 +1044,7 @@ test("desktop shell does not force horizontal overflow below wide desktop widths
 test("project exposes npm scripts for Harness-compatible static delivery", () => {
   const pkg = JSON.parse(read("package.json"));
 
-  assert.equal(pkg.scripts.check, "node --check app-runtime.js && node --check motion.js && node --check server/llm-gateway.mjs && node --check server/server.mjs && node --check desktop/ai-gateway.cjs && npm test");
+  assert.equal(pkg.scripts.check, "node --check app-runtime.js && node --check motion.js && node --check scripts/prepare-electron-app.mjs && node --check server/llm-gateway.mjs && node --check server/server.mjs && node --check desktop/ai-gateway.cjs && npm test");
   assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/desktop-ai-gateway.test.cjs tests/deersearch-engine-runtime.test.cjs");
   assert.equal(pkg.scripts.clean, "rm -rf dist");
   assert.equal(pkg.scripts.build, "node scripts/build-static-runtime.mjs");
@@ -1058,8 +1058,8 @@ test("project exposes desktop packaging scripts for local macOS builds", () => {
 
   assert.equal(pkg.main, "desktop/main.cjs");
   assert.equal(pkg.scripts["desktop:dev"], "npm run build && electron desktop/main.cjs");
-  assert.equal(pkg.scripts["desktop:build"], "npm run build && electron-builder --config electron-builder.json --mac dir");
-  assert.equal(pkg.scripts["desktop:build:trial"], "npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.json --mac dmg");
+  assert.equal(pkg.scripts["desktop:build"], "npm run build && node scripts/prepare-electron-app.mjs && electron-builder --config electron-builder.json --mac dir");
+  assert.equal(pkg.scripts["desktop:build:trial"], "npm run build && node scripts/prepare-electron-app.mjs && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.json --mac dmg");
   assert.equal(pkg.scripts["desktop:build:tauri"], "tauri build");
   assert.equal(pkg.devDependencies["@tauri-apps/cli"], "^2.11.3");
   assert.equal(pkg.devDependencies.electron, "^42.5.0");
@@ -1091,12 +1091,21 @@ test("electron desktop wrapper reuses the static dist artifact", () => {
   assert.match(preload, /ipcRenderer\.invoke\("import:select-folder"\)/);
   assert.equal(builder.appId, "com.deerrecall.app");
   assert.equal(builder.productName, "DeerRecall");
+  assert.equal(builder.directories.app, "release/electron-app");
+  assert.equal(builder.npmRebuild, false);
   assert.equal(builder.mac.identity, null);
-  assert.deepEqual(builder.mac.target, ["dir", "dmg"]);
-  assert.match(builder.files.join(","), /desktop\/\*\*\/\*\.cjs/);
-  assert.match(builder.files.join(","), /server\/llm-gateway\.mjs/);
-  assert.match(builder.files.join(","), /node_modules\/\*\*\//);
-  assert.match(builder.files.join(","), /dist\/\*\*\//);
+  assert.deepEqual(builder.mac.target, ["dir"]);
+  assert.deepEqual(builder.files, ["**/*"]);
+  assert.match(builder.asarUnpack.join(","), /@napi-rs\/canvas\*/);
+  const prepareScript = read("scripts/prepare-electron-app.mjs");
+  assert.match(prepareScript, /release", "electron-app"/);
+  assert.match(prepareScript, /runtimeDependencyNames = \["mammoth", "pdf-parse"\]/);
+  assert.match(prepareScript, /copyPath\("desktop", "desktop"\)/);
+  assert.match(prepareScript, /copyPath\("server\/llm-gateway\.mjs", "server\/llm-gateway\.mjs"\)/);
+  assert.match(prepareScript, /copyPath\("dist", "dist"\)/);
+  assert.match(prepareScript, /npm/);
+  assert.match(prepareScript, /--omit=dev/);
+  assert.match(prepareScript, /--prefer-offline/);
 });
 
 test("tauri desktop wrapper is available for a later small-runtime build", () => {

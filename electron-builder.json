@@ -2,17 +2,19 @@
   "appId": "com.deerrecall.app",
   "productName": "DeerRecall",
   "directories": {
+    "app": "release/electron-app",
     "output": "release/electron"
   },
+  "npmRebuild": false,
   "files": [
-    "desktop/**/*.cjs",
-    "server/llm-gateway.mjs",
-    "dist/**/*",
-    "node_modules/**/*"
+    "**/*"
+  ],
+  "asarUnpack": [
+    "node_modules/@napi-rs/canvas*/**/*"
   ],
   "mac": {
     "category": "public.app-category.business",
     "identity": null,
-    "target": ["dir", "dmg"]
+    "target": ["dir"]
   }
 }

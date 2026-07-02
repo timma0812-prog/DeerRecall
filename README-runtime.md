@@ -17,6 +17,8 @@ Electron 本地 app 输出位置：
 - `release/electron/mac-arm64/DeerRecall.app`
 - `release/electron/DeerRecall-0.1.0-arm64.dmg`
 
+Electron 打包会先执行 `scripts/prepare-electron-app.mjs`，生成 `release/electron-app` 最小运行目录，只包含桌面壳、静态 `dist`、AI 网关和 PDF / DOCX 解析所需依赖，避免扫描完整开发依赖树。
+
 当前桌面包是未签名的本地 macOS app，用户不需要安装 Electron。第一版试用包启动时人才库为空，数据保存在 `Library/Application Support/deerrecall/talent-library.json`。
 
 支持导入格式：PDF / DOCX / TXT / Markdown。配置模型 Key 后，Electron 桌面端可以直接启用 DeerSearch AI 回答和候选人市场画像。桌面端环境变量文件位置：`Library/Application Support/deerrecall/.env`。
