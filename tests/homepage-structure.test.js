@@ -1044,11 +1044,12 @@ test("desktop shell does not force horizontal overflow below wide desktop widths
 test("project exposes npm scripts for Harness-compatible static delivery", () => {
   const pkg = JSON.parse(read("package.json"));
 
-  assert.equal(pkg.scripts.check, "node --check app-runtime.js && node --check motion.js && node --check scripts/prepare-electron-app.mjs && node --check server/llm-gateway.mjs && node --check server/server.mjs && node --check desktop/ai-gateway.cjs && npm test");
+  assert.equal(pkg.scripts.check, "node --check app-runtime.js && node --check motion.js && node --check scripts/prepare-electron-app.mjs && node --check scripts/verify-electron-package.mjs && node --check server/llm-gateway.mjs && node --check server/server.mjs && node --check desktop/ai-gateway.cjs && npm test");
   assert.equal(pkg.scripts.test, "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/desktop-ai-gateway.test.cjs tests/deersearch-engine-runtime.test.cjs");
   assert.equal(pkg.scripts.clean, "rm -rf dist");
   assert.equal(pkg.scripts.build, "node scripts/build-static-runtime.mjs");
   assert.equal(pkg.scripts["verify:dist"], "node scripts/verify-dist-runtime.mjs");
+  assert.equal(pkg.scripts["verify:electron"], "node scripts/verify-electron-package.mjs");
   assert.equal(pkg.scripts.serve, "npm run build && node server/server.mjs");
   assert.equal(pkg.scripts.start, "node server/server.mjs");
 });
@@ -1058,8 +1059,8 @@ test("project exposes desktop packaging scripts for local macOS builds", () => {
 
   assert.equal(pkg.main, "desktop/main.cjs");
   assert.equal(pkg.scripts["desktop:dev"], "npm run build && electron desktop/main.cjs");
-  assert.equal(pkg.scripts["desktop:build"], "npm run build && node scripts/prepare-electron-app.mjs && electron-builder --config electron-builder.json --mac dir");
-  assert.equal(pkg.scripts["desktop:build:trial"], "npm run build && node scripts/prepare-electron-app.mjs && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.json --mac dmg");
+  assert.equal(pkg.scripts["desktop:build"], "npm run build && node scripts/prepare-electron-app.mjs && electron-builder --config electron-builder.json --mac dir && npm run verify:electron");
+  assert.equal(pkg.scripts["desktop:build:trial"], "npm run build && node scripts/prepare-electron-app.mjs && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.json --mac dmg && npm run verify:electron");
   assert.equal(pkg.scripts["desktop:build:tauri"], "tauri build");
   assert.equal(pkg.devDependencies["@tauri-apps/cli"], "^2.11.3");
   assert.equal(pkg.devDependencies.electron, "^42.5.0");
@@ -1103,9 +1104,22 @@ test("electron desktop wrapper reuses the static dist artifact", () => {
   assert.match(prepareScript, /copyPath\("desktop", "desktop"\)/);
   assert.match(prepareScript, /copyPath\("server\/llm-gateway\.mjs", "server\/llm-gateway\.mjs"\)/);
   assert.match(prepareScript, /copyPath\("dist", "dist"\)/);
-  assert.match(prepareScript, /npm/);
+  assert.match(prepareScript, /copyPath\("package-lock\.json", "package-lock\.json"\)/);
+  assert.match(prepareScript, /npmExecutable/);
+  assert.match(prepareScript, /"ci"/);
   assert.match(prepareScript, /--omit=dev/);
   assert.match(prepareScript, /--prefer-offline/);
+  assert.doesNotMatch(prepareScript, /execFileSync\("rsync"/);
+  assert.doesNotMatch(prepareScript, /execFileSync\("cp"/);
+  assert.doesNotMatch(prepareScript, /execFileSync\("rm"/);
+  const verifyScript = read("scripts/verify-electron-package.mjs");
+  assert.match(verifyScript, /app\.asar/);
+  assert.match(verifyScript, /dist\/app-runtime\.js/);
+  assert.match(verifyScript, /dist\/vendor\/gsap\.min\.js/);
+  assert.match(verifyScript, /node_modules\/mammoth\/package\.json/);
+  assert.match(verifyScript, /node_modules\/pdf-parse\/package\.json/);
+  assert.match(verifyScript, /canvas-darwin-arm64/);
+  assert.match(verifyScript, /macOS arm64/);
 });
 
 test("tauri desktop wrapper is available for a later small-runtime build", () => {
@@ -1481,9 +1495,13 @@ test("readme documents local, compose, and Harness workflows", () => {
   assert.match(readme, /npm test/);
   assert.match(readme, /npm run build/);
   assert.match(readme, /npm run desktop:build/);
+  assert.match(readme, /npm run verify:electron/);
   assert.match(readme, /npm run desktop:build:trial/);
   assert.match(readme, /release\/electron\/mac-arm64\/DeerRecall\.app/);
   assert.match(readme, /release\/electron\/DeerRecall-0\.1\.0-arm64\.dmg/);
+  assert.match(readme, /package-lock\.json/);
+  assert.match(readme, /npm ci --omit=dev/);
+  assert.match(readme, /macOS arm64/);
   assert.match(readme, /未签名的本地 macOS app/);
   assert.match(readme, /用户不需要安装 Electron/);
   assert.match(readme, /第一版试用包启动时人才库为空/);

@@ -9,6 +9,7 @@ npm test
 npm run build
 npm run verify:dist
 npm run desktop:build
+npm run verify:electron
 npm run desktop:build:trial
 ```
 
@@ -17,7 +18,9 @@ Electron 本地 app 输出位置：
 - `release/electron/mac-arm64/DeerRecall.app`
 - `release/electron/DeerRecall-0.1.0-arm64.dmg`
 
-Electron 打包会先执行 `scripts/prepare-electron-app.mjs`，生成 `release/electron-app` 最小运行目录，只包含桌面壳、静态 `dist`、AI 网关和 PDF / DOCX 解析所需依赖，避免扫描完整开发依赖树。
+Electron 打包会先执行 `scripts/prepare-electron-app.mjs`，生成 `release/electron-app` 最小运行目录，只包含桌面壳、静态 `dist`、AI 网关和 PDF / DOCX 解析所需依赖，避免扫描完整开发依赖树。运行依赖通过根目录 `package-lock.json` 执行 `npm ci --omit=dev` 安装，打包完成后会执行 `npm run verify:electron` 校验 `app.asar`、GSAP/Flip runtime、PDF/DOCX 依赖和当前 macOS arm64 native 依赖。
+
+当前 Electron 发布脚本面向本机 macOS arm64 未签名 app；跨架构或通用包需要单独执行对应目标构建与验证。
 
 当前桌面包是未签名的本地 macOS app，用户不需要安装 Electron。第一版试用包启动时人才库为空，数据保存在 `Library/Application Support/deerrecall/talent-library.json`。
 

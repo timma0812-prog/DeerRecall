@@ -5,16 +5,17 @@
   "main": "desktop/main.cjs",
   "description": "Static DeerRecall MVP prototype with Harness-compatible Docker Compose delivery.",
   "scripts": {
-    "check": "node --check app-runtime.js && node --check motion.js && node --check scripts/prepare-electron-app.mjs && node --check server/llm-gateway.mjs && node --check server/server.mjs && node --check desktop/ai-gateway.cjs && npm test",
+    "check": "node --check app-runtime.js && node --check motion.js && node --check scripts/prepare-electron-app.mjs && node --check scripts/verify-electron-package.mjs && node --check server/llm-gateway.mjs && node --check server/server.mjs && node --check desktop/ai-gateway.cjs && npm test",
     "test": "node --test tests/homepage-structure.test.js tests/ai-market-insight.test.mjs tests/local-resume-library.test.cjs tests/desktop-ai-gateway.test.cjs tests/deersearch-engine-runtime.test.cjs",
     "clean": "rm -rf dist",
     "build": "node scripts/build-static-runtime.mjs",
     "verify:dist": "node scripts/verify-dist-runtime.mjs",
+    "verify:electron": "node scripts/verify-electron-package.mjs",
     "serve": "npm run build && node server/server.mjs",
     "start": "node server/server.mjs",
     "desktop:dev": "npm run build && electron desktop/main.cjs",
-    "desktop:build": "npm run build && node scripts/prepare-electron-app.mjs && electron-builder --config electron-builder.json --mac dir",
-    "desktop:build:trial": "npm run build && node scripts/prepare-electron-app.mjs && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.json --mac dmg",
+    "desktop:build": "npm run build && node scripts/prepare-electron-app.mjs && electron-builder --config electron-builder.json --mac dir && npm run verify:electron",
+    "desktop:build:trial": "npm run build && node scripts/prepare-electron-app.mjs && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --config electron-builder.json --mac dmg && npm run verify:electron",
     "desktop:build:tauri": "tauri build"
   },
   "engines": {
